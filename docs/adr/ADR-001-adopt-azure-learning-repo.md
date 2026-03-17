@@ -8,7 +8,8 @@ I am building a structured path toward becoming an Azure Cloud AI Architect.
 To keep notes, diagrams, labs, case studies, and decisions organized, I need a dedicated learning repository.
 
 ## Decision
-I will use a single GitHub repository named `azure-architect-journey` as the central place for my architecture learning artifacts.
+I will use a single GitHub repository named `
+cloud-architecture-lab` as the central place for my architecture learning artifacts.
 
 ## Consequences
 - My notes will stay organized.

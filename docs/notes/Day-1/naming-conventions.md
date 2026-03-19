@@ -6,6 +6,16 @@ rg-<project>-<env>-<region>
 Example:
 rg-ai-lab-dev-eastus
 
+Purpose: identify the workload  
+Environment: dev/test/prod  
+Region: Azure region identifier
+
+Benefits:
+
+• easier resource identification  
+• consistent resource organization  
+• better operational clarity
+
 ## App Services
 app-<project>-<env>
 

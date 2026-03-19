@@ -1,17 +1,58 @@
-# ADR-001: Adopt Azure Learning Repository
+# ADR-001: Adopt Azure as the Cloud Platform for the Learning Lab
 
 ## Status
 Accepted
 
+## Date
+2026-03-15
+
 ## Context
-I am building a structured path toward becoming an Azure Cloud AI Architect.
-To keep notes, diagrams, labs, case studies, and decisions organized, I need a dedicated learning repository.
+
+To build hands-on experience in cloud architecture, a structured learning environment is required.
+
+The environment must allow:
+
+• experimentation with Azure services  
+• documentation of architecture decisions  
+• deployment of small cloud workloads  
+• cost control during learning  
 
 ## Decision
-I will use a single GitHub repository named `cloud-architecture-lab` as the central place for my architecture learning artifacts.
+
+Adopt Microsoft Azure as the primary cloud platform for this architecture learning lab.
+
+Use a dedicated Azure subscription and a controlled resource group to host experimental workloads.
+
+## Environment
+
+Subscription: gio-architecture-lab
+
+Resource Group: rg-ai-lab-dev-eastus
+
+Budget Control: lab-monthly-limit
+
+Region: East US
+
+## Rationale
+
+Azure is widely used for enterprise cloud platforms and provides strong support for:
+
+• AI services  
+• data platforms  
+• enterprise architecture patterns  
+• governance and security controls  
+
+Learning Azure architecture principles will support future work as a Cloud AI Architect.
 
 ## Consequences
-- My notes will stay organized.
-- My diagrams and architecture decisions will be easy to find.
-- My work will become a visible portfolio over time.
-- I will build a consistent habit of documenting architectural thinking.
+
+### Positive
+
+• Real cloud environment for experimentation  
+• Hands-on experience with Azure services  
+• Cost monitoring through budget controls  
+
+### Negative
+
+• Requires discipline to manage costs  
+• Requires learning Azure platform concepts

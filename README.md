@@ -1,22 +1,46 @@
-# Azure Architect Journey
+# Cloud Architecture Lab
 
-Journey to becoming an Azure Cloud AI Architect.
+This repository documents my journey toward becoming an Azure Cloud AI Architect.
 
-## Purpose
-This repository tracks my learning, architecture notes, diagrams, ADRs, labs, and case studies as I transition from backend development into Azure and AI architecture.
+The purpose of this lab is to:
 
-## Structure
-- `docs/notes/` → learning notes
-- `docs/diagrams/` → architecture diagrams
-- `docs/adr/` → architecture decision records
-- `docs/case-studies/` → architecture case studies
-- `labs/` → weekly hands-on labs
-- `src/` → source code projects
+• build real cloud architecture experience  
+• document architecture decisions  
+• maintain structured notes and designs  
+• create portfolio artifacts demonstrating architect-level thinking  
 
-## Focus Areas
-- Azure architecture
-- Cloud Adoption Framework
-- Well-Architected Framework
-- AI / LLM systems
-- RAG architecture
-- Enterprise AI platforms
+This repository includes:
+
+• Architecture Decision Records (ADRs)  
+• Azure architecture documentation  
+• daily learning notes  
+• system architecture designs  
+
+---
+
+## Azure Lab Environment
+
+Subscription: gio-architecture-lab  
+Resource Group: rg-ai-lab-dev-eastus  
+Budget: lab-monthly-limit  
+
+Region: East US
+
+---
+
+## Repository Structure
+
+docs/adr  
+Architecture decision records
+
+docs/architecture  
+System architecture documentation
+
+docs/notes  
+Daily learning notes and research
+
+---
+
+## Goal
+
+Become a **Cloud AI Architect specializing in Azure and LLM systems** by building real architecture artifacts and cloud deployments.

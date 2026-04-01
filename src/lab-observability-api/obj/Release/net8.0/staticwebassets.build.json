@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "upJ8YdUB1ZBsdDoy2HiMzec2g9/1NEQAo7dYFLa8ARU=",
+  "Source": "lab-observability-api",
+  "BasePath": "_content/lab-observability-api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

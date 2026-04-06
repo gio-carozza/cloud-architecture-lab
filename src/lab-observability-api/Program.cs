@@ -1,6 +1,13 @@
 using Microsoft.ApplicationInsights.Extensibility;
+using Lab.Observability.Api.Options;
+using Lab.Observability.Api.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<AnthropicOptions>(
+    builder.Configuration.GetSection(AnthropicOptions.SectionName));
+
+builder.Services.AddHttpClient<IChatModelProvider, ClaudeChatModelProvider>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

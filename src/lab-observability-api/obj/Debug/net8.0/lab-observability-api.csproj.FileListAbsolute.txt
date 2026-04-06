@@ -52,3 +52,8 @@ C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\runtime
 C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
 C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\publish\web.config
+C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\publish\appsettings.Development.json
+C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\publish\appsettings.json
+C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\publish\lab-observability-api.deps.json
+C:\dev\cloud-architecture-lab\src\lab-observability-api\bin\Debug\net8.0\publish\lab-observability-api.runtimeconfig.json

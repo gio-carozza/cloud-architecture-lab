@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0a6ef00b0244751b9ffbb94dfa406af92c3f4060")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+505ec53d601f37347a25c7b8b8343480ee3a96ad")]
 [assembly: System.Reflection.AssemblyProductAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

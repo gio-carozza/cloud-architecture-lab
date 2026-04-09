@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("16ea9a23-c450-4c6e-8956-27f75cfc0b86")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0a6ef00b0244751b9ffbb94dfa406af92c3f4060")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b09422048a6d34314edb1cad1740192641873e4")]
 [assembly: System.Reflection.AssemblyProductAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

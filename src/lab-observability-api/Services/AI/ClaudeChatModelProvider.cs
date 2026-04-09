@@ -37,12 +37,19 @@ public class ClaudeChatModelProvider : IChatModelProvider
         {
             model = _options.Model,
             max_tokens = _options.MaxTokens,
-            messages = new[]
+            messages = new object[]
             {
                 new
                 {
                     role = "user",
-                    content = request.Prompt
+                    content = new object[]
+                    {
+                        new
+                        {
+                            type = "text",
+                            text = request.Prompt
+                        }
+                    }
                 }
             }
         };
@@ -60,7 +67,8 @@ public class ClaudeChatModelProvider : IChatModelProvider
             _logger.LogError("Claude call failed. Status: {StatusCode}. Body: {Body}",
                 response.StatusCode, responseBody);
 
-            throw new ApplicationException($"Claude API call failed with status {(int)response.StatusCode}");
+            throw new ApplicationException(
+                $"Claude API call failed with status {(int)response.StatusCode}. Response body: {responseBody}");
         }
 
         using var document = JsonDocument.Parse(responseBody);

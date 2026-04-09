@@ -44,3 +44,9 @@ Daily learning notes and research
 ## Goal
 
 Become a **Cloud AI Architect specializing in Azure and LLM systems** by building real architecture artifacts and cloud deployments.
+
+## Request New Prompts for LLM Roadmap Each Day
+
+Example:
+
+Give me the prompt for LLM Roadmap Day 6 that I can put in another chat to continue. Take into consideration everything that has been done in LLM RoadMap Days 1 to 5.

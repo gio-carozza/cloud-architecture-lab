@@ -1,5 +1,7 @@
 # Cloud Architecture Lab
 
+For the architect posture behind this lab, see [docs/standards/_principles.md](docs/standards/_principles.md).
+
 This repository documents my journey toward becoming an Azure Cloud AI Architect.
 
 The purpose of this lab is to:
@@ -30,23 +32,35 @@ Region: East US
 
 ## Repository Structure
 
-docs/adr  
-Architecture decision records
+   docs/adr
+   Architecture decision records
 
-docs/architecture  
-System architecture documentation
+   docs/architecture
+   System architecture documentation (current and historical)
 
-docs/notes  
-Daily learning notes and research
+   docs/standards
+   Living standards: principles, naming conventions, environment, KQL cookbook
+
+   docs/notes
+   Daily learning notes and research
+
+   docs/certifications
+   Cert prep: AZ-900, AZ-104, AZ-305, AI-102
+
+   .claude/skills
+   Reusable skill packs auto-invoked by Claude Code
+
+   .claude/commands
+   Slash commands for repetitive workflows
+
+   src/lab-observability-api
+   The .NET 8 AI Gateway (anchor workload)
+
+   Infra/Day-NNN
+   Day-scoped IaC and configuration templates
 
 ---
 
 ## Goal
 
 Become a **Cloud AI Architect specializing in Azure and LLM systems** by building real architecture artifacts and cloud deployments.
-
-## Request New Prompts for LLM Roadmap Each Day
-
-Example:
-
-Give me the prompt for LLM Roadmap Day 6 that I can put in another chat to continue. Take into consideration everything that has been done in LLM RoadMap Days 1 to 5.

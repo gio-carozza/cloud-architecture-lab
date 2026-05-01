@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using Lab.Observability.Api.Models.AI;
 using Lab.Observability.Api.Options;
 using Lab.Observability.Api.Services.Claude;
+using Lab.Observability.Api.Telemetry;
 using Microsoft.Extensions.Options;
 
 namespace Lab.Observability.Api.Services.AI;
@@ -33,37 +35,45 @@ public sealed class ClaudeChatModelProvider : IChatModelProvider
             throw new ArgumentException("Prompt is required.", nameof(request));
         }
 
+        using var activity = GatewayTelemetry.ActivitySource.StartActivity("ai.chat.complete");
+        activity?.SetTag("llm.provider", "anthropic");
+        activity?.SetTag("llm.model", _options.Model);
+
         _logger.LogInformation(
             "Sending Claude chat request. Model={Model} PromptLength={PromptLength}",
             _options.Model,
             request.Prompt.Length);
 
-        var payload = new
+        try
         {
-            model = _options.Model,
-            max_tokens = _options.MaxTokens,
-            messages = new object[]
+            var payload = new
             {
-                new
+                model = _options.Model,
+                max_tokens = _options.MaxTokens,
+                messages = new object[]
                 {
-                    role = "user",
-                    content = request.Prompt
+                    new { role = "user", content = request.Prompt }
                 }
-            }
-        };
+            };
 
-        var responseText = await _claudeApiClient.SendChatAsync(payload, cancellationToken);
+            var responseText = await _claudeApiClient.SendChatAsync(payload, cancellationToken);
 
-        _logger.LogInformation(
-            "Claude chat request completed. Model={Model} ResponseLength={ResponseLength}",
-            _options.Model,
-            responseText.Length);
+            _logger.LogInformation(
+                "Claude chat request completed. Model={Model} ResponseLength={ResponseLength}",
+                _options.Model,
+                responseText.Length);
 
-        return new ChatResponse
+            return new ChatResponse
+            {
+                Provider = "anthropic",
+                Model = _options.Model,
+                Response = responseText
+            };
+        }
+        catch (Exception ex)
         {
-            Provider = "anthropic",
-            Model = _options.Model,
-            Response = responseText
-        };
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw;
+        }
     }
 }

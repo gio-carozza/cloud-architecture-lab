@@ -9,7 +9,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - Backend developer (.NET, APIs, SQL), MIS master's
 - Pivoting to Azure Cloud AI / LLM Architect role
 - Build-first learner; wants architect-level reasoning, not tutorials
-- Days 1–5 complete. Currently working on Day 6 (observability & resilience).
+- Days 1–6 complete. Day 7 next.
 
 ## Stack
 - .NET 8 Web API (namespace: Lab.Observability.Api)
@@ -86,7 +86,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 ## What I'm Building Toward (north star)
 A multi-provider, observable, governed enterprise AI gateway:
 1. Provider abstraction (done — Day 5)
-2. Observability & resilience (Day 6 — in progress)
+2. Observability & resilience (done — Day 6)
 3. Cost controls (prompt caching, batch API)
 4. Multi-model routing & evaluation
 5. RAG with Azure AI Search
@@ -130,6 +130,22 @@ This is RAG-by-discipline. Treat token cost as a first-class architectural const
 - **Chat (claude.ai):** architecture reasoning, ADR drafting, daily roadmap planning,
   posture reflection, cert prep. Conversational work where the reasoning is the artifact.
 
+### Work modes (signal which I'm in)
+
+**Build mode** — implementing, deploying, debugging.
+Primary tool: Claude Code in terminal. Chat used only for pre-build reasoning.
+Output style: short, direct, copy-paste-ready.
+
+**Study mode** — preparing for AZ-900, AZ-104, AZ-305, AI-102.
+Primary tool: chat. Cert prep notes pasted in per session.
+Output style: explanations at 10-year-old AND doctorate level.
+Include exam-domain mappings.
+
+**Perform mode** — architecture reasoning, ADR drafting, posture checks,
+roadmap planning, tradeoff analysis.
+Primary tool: chat. This is where Opus 4.7 escalation most often applies.
+Output style: structured, architect-level. Surface tradeoffs explicitly.
+
 ### When to use Sonnet 4.6 vs Opus 4.7
 Default to **Sonnet 4.6**. It handles ~80% of roadmap work at a fraction of the quota cost.
 
@@ -143,13 +159,36 @@ If unsure, start with Sonnet. Escalate to Opus only when Sonnet's answer doesn't
 the weight the question deserves. This mirrors the model-routing decision you'll make
 in production AI gateways: cheapest model that solves the problem, escalate on need.
 
-### Lifecycle: pruning the project as days complete
-When a roadmap day completes:
-1. Move that day's summary.md, completion-checklist.md, posture-check.md OUT of project knowledge
-2. Files remain in the repo at docs/notes/Day-NNN/
-3. Claude Code reads them on demand if a future day references them
-4. Project knowledge stays lean as the roadmap grows
+### Quick reference: modes × models × tools
 
-When a new ADR is accepted:
-- Keep the most recent 2 ADRs in project knowledge
-- Older ADRs move out (still in docs/adr/, readable by Claude Code)
+| Work mode  | Default model | Primary tool   | Escalate to Opus when |
+|------------|---------------|----------------|------------------------|
+| Build      | Sonnet 4.6    | Claude Code    | Architectural detour mid-build |
+| Study      | Sonnet 4.6    | Chat           | Concept genuinely doesn't click |
+| Perform    | Sonnet 4.6    | Chat           | ADR / tradeoff / pushback / depth |
+
+If unsure: start Sonnet, escalate on need. Mirrors production AI gateway
+routing: cheapest model that solves the problem, escalate when warranted.
+
+### Lifecycle: pruning the project as days complete
+
+**When a roadmap day completes:**
+1. Move that day's `summary.md`, `completion-checklist.md`, `posture-check.md`
+   OUT of project knowledge
+2. Files remain in the repo at `docs/notes/Day-NNN/` (Claude Code reads on demand)
+3. Bring next day's working files IN to project knowledge
+4. Project knowledge stays bounded forever, regardless of roadmap length
+
+**When a new ADR is accepted:**
+- Keep the most recent 2-4 ADRs in project knowledge
+- Older ADRs move out (still in `docs/adr/`, readable by Claude Code)
+
+**When a day-folder file is referenced from later days:**
+- That file has graduated from "log" to "standard"
+- Promote it to `docs/standards/` (rename if needed)
+- Update references in `CLAUDE.md` and any consuming docs
+- Day-005's `kql.md` → `docs/standards/kql-cookbook.md` is the canonical example
+
+**When `docs/standards/` grows beyond 6-8 files:**
+- That's the signal to consider sub-foldering
+- Don't pre-optimize; let it accrete first

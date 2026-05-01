@@ -120,6 +120,40 @@ separates senior architects from juniors. Token cost is a first-class architectu
 constraint in any real AI workload. Internalize it now on my own dime; apply it
 later on the company's dime.
 
+## Working in Three Modes
+
+A senior architect doesn't have one mode. Three modes rotate, each with
+its own discipline, its own tool, its own output style. Mixing them
+produces sloppy work in all three.
+
+### Build mode — make it run
+Posture: pragmatic, fast, copy-paste-ready.
+Discipline: don't over-architect. Don't draft an ADR mid-deploy.
+The bias is *progress*. Reasoning happens before and after, not during.
+Tool: Claude Code in terminal. Chat only when blocked.
+
+### Study mode — own the concept
+Posture: curious, patient, repeatable.
+Discipline: explain at two levels (10-year-old AND doctorate). If only
+one register works, the concept isn't owned yet — schedule a teach-back.
+Always map to a cert domain (AZ-900 / AZ-104 / AZ-305 / AI-102) so
+study time produces dual leverage.
+Tool: chat. Cert prep notes paste-in per session.
+
+### Perform mode — reason at architect level
+Posture: structured, honest, slow.
+Discipline: surface tradeoffs explicitly. Name the alternative being
+rejected. Write the ADR before the code, not after — writing exposes
+weak reasoning. Posture-check at end of day BEFORE marking complete.
+Tool: chat. Opus 4.7 escalation most often warranted here.
+
+### The integration test
+At the end of each roadmap day, ask: did I move between modes
+deliberately, or did I drift? If I built without reasoning, I shipped
+under-thought work. If I reasoned without building, I shipped vapor.
+The discipline is rotating consciously, not staying in whichever mode
+feels easiest today.
+
 ## The Graveyard
 
 A running list of experiments, dead-ends, and "this didn't work but I
@@ -137,3 +171,6 @@ pretend they don't are the ones you can't trust.
 | Day 6 | Migrated classic AI to workspace-based on a live deployed app | Nothing — but only because there was no historical telemetry, alerts, or dashboards yet | Migrations on live resources are cheap when you do them early. Every day you wait, the cost compounds. Architect-level practice: do the disruptive thing while it's still cheap. |
 | Day 6 | OpenTelemetry.Extensions.Hosting 1.10.0 from memory | Azure.Monitor.OpenTelemetry.AspNetCore 1.4.0 already requires >= 1.14.0 transitively | Always check the existing dependency graph before pinning a version. dotnet list package --include-transitive is the source of truth, not memory. |
 | Day 6 | Ran heavy roadmap project on Opus 4.7 with everything in project knowledge | Hit usage limits within days | Model selection is a budget decision, not a quality decision; project knowledge is hot context and must be pruned aggressively. This pattern applies directly to ClaudeChatModelProvider — future enhancement: add a model-tier selector so callers can route between Sonnet and Opus by task class. |
+| Day 6 | Built day-folder docs without lifecycle discipline | Project knowledge ballooned past sustainable token budget; duplicate ADR numbers; stale standards in day folders | Folder location should reflect lifecycle, not authoring date. Standards live in standards/. Logs live in notes/Day-NNN/. Architecture descriptions live in architecture/. ADRs are point-in-time decisions, never edited once Accepted. The minute a Day-NNN file is referenced from a later day, it has graduated to a standard and should be promoted. Caught and fixed on Day 6 — cost: 30 minutes. Cost on Day 60 would be a half-day. Cost on Day 200 is a portfolio repo that quietly screams junior. |
+| Day 6 | Configured resilience with SamplingDuration = 30s, AttemptTimeout = 45s | App startup failed via ValidateOnStart — sampling must be >= 2x attempt timeout per AddStandardResilienceHandler invariant | Build-time validation is necessary but not sufficient. Startup validators catch a class of semantic errors no compiler sees. Always wire ValidateOnStart for options bound to libraries with mathematical or semantic invariants. |
+| Day 6 | Expressed "no retries on chat POST" as MaxRetryAttempts = 0 per ADR-006 intent | Microsoft.Extensions.Http.Resilience v10 rejects 0 as invalid | Replaced with MaxRetryAttempts = 1 + Retry.ShouldHandle = _ => false. Architectural intent (no retries) is unchanged; only the encoding shifted to satisfy the validator. ADRs document intent; code expresses it within current library constraints. Both must stay in sync, but they evolve at different rates. |

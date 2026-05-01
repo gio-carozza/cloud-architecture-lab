@@ -39,3 +39,29 @@ Future iterations may include more advanced architecture patterns.
 - Notifications:
   - Email alerts
   - SMS alerts
+
+## App Service Application Settings
+
+The deployed App Service `app-ai-lab-api-dev-eastus-gio` uses the following
+environment variables (set as App Service configuration, NOT in appsettings.json):
+
+### Anthropic provider configuration
+- `Anthropic__ApiKey`
+- `Anthropic__Model` (e.g., `claude-opus-4-6`)
+- `Anthropic__BaseUrl` (`https://api.anthropic.com/v1`)
+- `Anthropic__MaxTokens`
+
+### Observability (Day 6+)
+- `APPLICATIONINSIGHTS_CONNECTION_STRING`
+
+### Deployment
+- `WEBSITE_RUN_FROM_PACKAGE=1`
+
+## Monitoring resources
+
+Application Insights:
+- Resource: `appi-ai-lab-api-dev-eastus-gio` (workspace-based)
+- Workspace: `law-ai-lab-dev-eastus-gio`
+
+Validate telemetry in: Application Insights → Transaction Search,
+Failures, Live Metrics, Logs.  

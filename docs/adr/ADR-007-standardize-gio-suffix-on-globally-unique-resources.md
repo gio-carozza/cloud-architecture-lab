@@ -34,7 +34,7 @@ types in this lab. Apply it consistently to RG-scoped resources where it
 adds value (cross-resource queryability, future-proofing). Exempt resources
 in namespaces the lab fully controls (subscription, resource group).
 
-Update `docs/notes/Day-001/naming-conventions.md` to encode the rule, and
+Update `docs/standards/naming-conventions.md` to encode the rule, and
 update all prior-day documentation where resource names drifted.
 
 ## Alternatives Considered
@@ -96,3 +96,8 @@ most types). Existing resources already conform to the new convention.
 - ADR-001 (Azure subscription adoption)
 - `docs/standards/naming-conventions.md` (the convention itself)
 - Azure naming rules: https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+
+## Errata
+- 2026-04-30: `naming-conventions.md` and `azure-environment.md` relocated
+  from `docs/notes/Day-001/` to `docs/standards/` for lifecycle clarity.
+  No content change.

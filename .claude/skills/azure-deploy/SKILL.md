@@ -58,9 +58,13 @@ Invoke-RestMethod `
 ```
 
 ## Verification (must all pass)
-- `GET /health` returns 200
-- `GET /swagger` loads UI
-- `POST /api/ai/chat` returns a Claude completion within ~3s
+   - `GET /health` returns 200
+   - `GET /health/live` returns 200 (Day 6+)
+   - `GET /health/ready` returns 200 with config-presence check (Day 6+)
+   - `GET /swagger` loads UI
+   - `POST /api/ai/chat` returns a Claude completion within ~3s
+   - Response includes `X-Correlation-Id` header (Day 6+)
+   - Application Insights begins receiving requests/dependencies/traces (Day 6+)
 
 ## Rollback
 - `az webapp deployment list-publishing-profiles` to inspect history

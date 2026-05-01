@@ -103,15 +103,16 @@ try
         // Total request timeout including retries — must be >= AttemptTimeout
         options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
 
-        // Circuit breaker — open when 20% of requests in 30s window fail
-        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+        // Circuit breaker — open when 20% of requests in 120s window fail
+        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(120);
         options.CircuitBreaker.FailureRatio = 0.20;
         options.CircuitBreaker.MinimumThroughput = 5;
         options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 
-        // No retries — Anthropic auth/billing errors must not be retried.
-        // Day 7 will introduce smarter retry logic with classification.
-        options.Retry.MaxRetryAttempts = 0;
+        // Retry stage present but disabled — see ADR-006 (no retries on chat POST).
+        // Day 7 will replace this with a classification-based predicate.
+        options.Retry.MaxRetryAttempts = 1;
+        options.Retry.ShouldHandle = _ => ValueTask.FromResult(false);
     });
 
     builder.Services.AddScoped<IChatModelProvider, ClaudeChatModelProvider>();

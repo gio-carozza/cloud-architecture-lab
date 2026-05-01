@@ -29,9 +29,10 @@ public sealed class ClaudeApiClient
 
     public async Task<string> SendChatAsync(object payload, CancellationToken cancellationToken)
     {
-        using var activity = GatewayTelemetry.ActivitySource.StartActivity("anthropic.messages.create");
-        activity?.SetTag("ai.provider", "anthropic");
-        activity?.SetTag("ai.model", _options.Model);
+        using var activity = GatewayTelemetry.ActivitySource.StartActivity("claude.chat.api");
+        activity?.SetTag("llm.provider", "anthropic");
+        activity?.SetTag("llm.model", _options.Model);
+        activity?.SetTag("llm.endpoint", _options.BaseUrl.TrimEnd('/') + "/messages");
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -75,6 +76,10 @@ public sealed class ClaudeApiClient
                     providerErrorCode,
                     isTransient);
 
+                activity?.SetStatus(ActivityStatusCode.Error,
+                    providerErrorMessage ?? "Provider returned non-success status");
+                activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
+
                 throw new ClaudeProviderException(
                     message: string.IsNullOrWhiteSpace(providerErrorMessage)
                         ? $"Claude provider returned {(int)response.StatusCode}."
@@ -85,6 +90,11 @@ public sealed class ClaudeApiClient
             }
 
             var responseText = TryExtractText(responseBody);
+
+            var (inputTokens, outputTokens) = TryExtractUsage(responseBody);
+            if (inputTokens.HasValue) activity?.SetTag("llm.tokens.input", inputTokens.Value);
+            if (outputTokens.HasValue) activity?.SetTag("llm.tokens.output", outputTokens.Value);
+            activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
 
             GatewayTelemetry.ProviderLatencyMs.Record(
                 stopwatch.Elapsed.TotalMilliseconds,
@@ -108,6 +118,9 @@ public sealed class ClaudeApiClient
                 new KeyValuePair<string, object?>("ai.provider", "anthropic"),
                 new KeyValuePair<string, object?>("ai.model", _options.Model));
 
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
+
             throw new ClaudeProviderException(
                 message: "Claude provider circuit is open due to recent transient failures.",
                 providerStatusCode: HttpStatusCode.ServiceUnavailable,
@@ -121,6 +134,9 @@ public sealed class ClaudeApiClient
                 1,
                 new KeyValuePair<string, object?>("ai.provider", "anthropic"),
                 new KeyValuePair<string, object?>("ai.model", _options.Model));
+
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
 
             throw new ClaudeProviderException(
                 message: "Claude provider request exceeded the configured timeout.",
@@ -136,6 +152,9 @@ public sealed class ClaudeApiClient
                 new KeyValuePair<string, object?>("ai.provider", "anthropic"),
                 new KeyValuePair<string, object?>("ai.model", _options.Model));
 
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
+
             throw new ClaudeProviderException(
                 message: "Claude provider request timed out.",
                 providerStatusCode: HttpStatusCode.RequestTimeout,
@@ -149,6 +168,9 @@ public sealed class ClaudeApiClient
                 1,
                 new KeyValuePair<string, object?>("ai.provider", "anthropic"),
                 new KeyValuePair<string, object?>("ai.model", _options.Model));
+
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
 
             throw new ClaudeProviderException(
                 message: "Claude provider request failed at the network level.",
@@ -249,6 +271,41 @@ public sealed class ClaudeApiClient
         catch
         {
             return null;
+        }
+    }
+
+    private static (int? InputTokens, int? OutputTokens) TryExtractUsage(string responseBody)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(responseBody);
+
+            if (!document.RootElement.TryGetProperty("usage", out var usageElement) ||
+                usageElement.ValueKind != JsonValueKind.Object)
+            {
+                return (null, null);
+            }
+
+            int? inputTokens = null;
+            int? outputTokens = null;
+
+            if (usageElement.TryGetProperty("input_tokens", out var inputEl) &&
+                inputEl.TryGetInt32(out var inputVal))
+            {
+                inputTokens = inputVal;
+            }
+
+            if (usageElement.TryGetProperty("output_tokens", out var outputEl) &&
+                outputEl.TryGetInt32(out var outputVal))
+            {
+                outputTokens = outputVal;
+            }
+
+            return (inputTokens, outputTokens);
+        }
+        catch
+        {
+            return (null, null);
         }
     }
 }

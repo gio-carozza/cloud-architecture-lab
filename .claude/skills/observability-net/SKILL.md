@@ -33,7 +33,7 @@ used only as a logging library (NOT as a telemetry export sink).
 
 ```xml
 <PackageReference Include="Serilog.AspNetCore" Version="8.0.*" />
-<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.*" />
+<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.*" />
 ```
 ## DO NOT INSTALL these packages
 Per ADR-006, these would create a parallel telemetry pipeline and
@@ -135,21 +135,17 @@ Pass it through to provider calls so Anthropic logs can be correlated to your ga
 
 ## LLM-Specific Telemetry
 
-In `ClaudeChatModelProvider.SendAsync`:
+Use two nested spans — tag where the data naturally lives:
 
+**Outer span** (`ai.chat.complete`) in `ClaudeChatModelProvider` — orchestration data only:
 ```csharp
-using var activity = ActivitySource.StartActivity("claude.chat");
+using var activity = GatewayTelemetry.ActivitySource.StartActivity("ai.chat.complete");
 activity?.SetTag("llm.provider", "anthropic");
 activity?.SetTag("llm.model", _options.Model);
-
-var sw = Stopwatch.StartNew();
 try
 {
-    var response = await _httpClient.PostAsync(...);
-    activity?.SetTag("llm.tokens.input", response.Usage.InputTokens);
-    activity?.SetTag("llm.tokens.output", response.Usage.OutputTokens);
-    activity?.SetTag("llm.latency_ms", sw.ElapsedMilliseconds);
-    return Map(response);
+    var result = await _claudeApiClient.SendChatAsync(payload, ct);
+    return result;
 }
 catch (Exception ex)
 {
@@ -158,25 +154,67 @@ catch (Exception ex)
 }
 ```
 
-## Resilience (Polly via Microsoft.Extensions.Http.Resilience)
+**Inner span** (`claude.chat.api`) in `ClaudeApiClient` — transport data (token counts, latency, endpoint):
+```csharp
+using var activity = GatewayTelemetry.ActivitySource.StartActivity("claude.chat.api");
+activity?.SetTag("llm.provider", "anthropic");
+activity?.SetTag("llm.model", _options.Model);
+activity?.SetTag("llm.endpoint", _options.BaseUrl.TrimEnd('/') + "/messages");
+var sw = Stopwatch.StartNew();
+try
+{
+    // ... HTTP call, parse response ...
+    var (inputTokens, outputTokens) = TryExtractUsage(responseBody);
+    if (inputTokens.HasValue) activity?.SetTag("llm.tokens.input", inputTokens.Value);
+    if (outputTokens.HasValue) activity?.SetTag("llm.tokens.output", outputTokens.Value);
+    activity?.SetTag("llm.latency_ms", sw.Elapsed.TotalMilliseconds);
+}
+catch (Exception ex)
+{
+    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+    activity?.SetTag("llm.latency_ms", sw.Elapsed.TotalMilliseconds);
+    throw;
+}
+```
+
+**Why two spans:** token counts come from the Anthropic response payload, which only `ClaudeApiClient` sees. Surfacing them on the outer span would require coupling layers. Tag where the data lives; nested spans give the full operational story.
+
+**Where spans land in App Insights:** both appear in the `dependencies` table, NOT `requests` or `traces`. The outer span is the parent; the inner span is a child dependency within it.
+
+## Resilience (Polly via Microsoft.Extensions.Http.Resilience v10)
 
 ```csharp
-builder.Services.AddHttpClient<ClaudeChatModelProvider>()
+builder.Services.AddHttpClient<ClaudeApiClient>()
     .AddStandardResilienceHandler(opts =>
     {
-        opts.Retry.MaxRetryAttempts = 3;
-        opts.Retry.UseJitter = true;
-        opts.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
-        opts.CircuitBreaker.FailureRatio = 0.5;
-        opts.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+        // Per-attempt timeout — single HTTP call cannot exceed this
+        opts.AttemptTimeout.Timeout = TimeSpan.FromSeconds(45);
+
+        // Total request timeout — must be >= AttemptTimeout
+        opts.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+
+        // Circuit breaker — SamplingDuration MUST be >= 2x AttemptTimeout (v10 invariant)
+        opts.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(120);
+        opts.CircuitBreaker.FailureRatio = 0.20;
+        opts.CircuitBreaker.MinimumThroughput = 5;
+        opts.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
+
+        // No retries on chat POST — non-idempotent, paid, confusing UX if silently retried.
+        // v10 rejects MaxRetryAttempts=0; express intent as ShouldHandle=false instead.
+        // Day 7: replace with classification-based predicate (retry 429/503/504, not 401/403).
+        opts.Retry.MaxRetryAttempts = 1;
+        opts.Retry.ShouldHandle = _ => ValueTask.FromResult(false);
     });
 ```
 
-**Rules:**
-- Retry only on transient (5xx, 408, 429 with backoff)
-- Never retry on 4xx auth errors (401, 403) — wastes budget
-- Circuit breaker prevents cascade failures
-- Jitter prevents thundering herd
+**v10 validator rules (startup will throw if violated):**
+- `SamplingDuration >= 2 × AttemptTimeout` — mathematical invariant enforced at startup
+- `MaxRetryAttempts >= 1` — use `ShouldHandle = _ => false` to express "no retries"
+
+**Design rules:**
+- Never retry on chat POST — non-idempotent, paid call; caller may have already shown an error
+- Never retry 401/403 — auth failures are not transient; retrying burns quota
+- Timeout + circuit breaker are the right resilience shape for LLM calls without retry classification
 
 ## KQL Starter Queries (App Insights → Logs)
 
@@ -190,12 +228,16 @@ requests
 ```
 
 ```kql
-// Token usage per hour
-traces
+// Token usage per hour — Activity spans land in dependencies, NOT traces
+dependencies
 | where timestamp > ago(24h)
-| where customDimensions.["llm.tokens.output"] != ""
-| extend tokens = toint(customDimensions.["llm.tokens.output"])
-| summarize total_tokens = sum(tokens) by bin(timestamp, 1h)
+| where name == "claude.chat.api"
+| extend inputTokens  = toint(customDimensions["llm.tokens.input"])
+| extend outputTokens = toint(customDimensions["llm.tokens.output"])
+| summarize
+    total_input  = sum(inputTokens),
+    total_output = sum(outputTokens)
+  by bin(timestamp, 1h)
 | render timechart
 ```
 ## Logging Field Conventions

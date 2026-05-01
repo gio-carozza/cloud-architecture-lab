@@ -72,6 +72,15 @@ Invoke-RestMethod `
 - Or: toggle `WEBSITE_RUN_FROM_PACKAGE` off and use slot swap (future enhancement)
 
 ## Gotchas
+- **Step 3 SSL reset (`az webapp config appsettings set`):** `management.azure.com`
+  hits TLS reset on this network. Fix before running step 3:
+  ```powershell
+  az config set core.disable_ssl_certificate_verification=true
+  # ... run step 3 ...
+  az config set core.disable_ssl_certificate_verification=false
+  ```
+  If it still resets, use `Invoke-RestMethod` with an ARM bearer token instead
+  (see CLAUDE.md Gotchas for the full pattern).
 - **502 Bad Gateway after deploy:** check log stream
   (`az webapp log tail -g rg-ai-lab-dev-eastus -n app-ai-lab-api-dev-eastus-gio`) —
   usually a startup binding issue or missing env var.

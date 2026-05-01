@@ -14,7 +14,7 @@ Given a day number and a kebab-case slug, create:
    - `completion-checklist.md` (concrete done criteria)
    - `architect-thinking.md` (tradeoffs & enterprise reasoning)
    - `posture-check.md` (the daily honesty audit)
-   - `kql.md` (if observability-related)
+   - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)
 

@@ -5,7 +5,7 @@
 - Application Insights (workspace-based) wired to App Service
 - Correlation ID middleware (W3C trace context)
 - LLM-specific telemetry: tokens-in, tokens-out, latency, model, provider
-- Resilience pipeline: retry with jitter, attempt timeout, circuit breaker
+- Resilience pipeline: attempt timeout, circuit breaker; no retries on chat POST (non-idempotent, paid call — see ADR-006)
 - Production error contract (no stack traces leaked)
 - ADR-006 documenting the observability decision
 
@@ -46,4 +46,4 @@
 ## Action items
 - [ ] Read MS Learn module: "Monitor Azure OpenAI" (15 min)
 - [ ] Read MS Learn module: "Manage Azure OpenAI Service costs" (15 min)
-- [ ] Run KQL queries from `Day-006/kql.md` and screenshot results into portfolio
+- [x] Run KQL queries — verified in App Insights post-deploy; token spans confirmed in `dependencies` table (see `docs/standards/kql-cookbook.md` for the queries)

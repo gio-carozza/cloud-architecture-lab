@@ -47,7 +47,7 @@ environment variables (set as App Service configuration, NOT in appsettings.json
 
 ### Anthropic provider configuration
 - `Anthropic__ApiKey`
-- `Anthropic__Model` (e.g., `claude-opus-4-6`)
+- `Anthropic__Model` (`claude-opus-4-7` — updated Day 6)
 - `Anthropic__BaseUrl` (`https://api.anthropic.com/v1`)
 - `Anthropic__MaxTokens`
 
@@ -63,5 +63,17 @@ Application Insights:
 - Resource: `appi-ai-lab-api-dev-eastus-gio` (workspace-based)
 - Workspace: `law-ai-lab-dev-eastus-gio`
 
+Action Group (AI gateway alerts):
+- Name: `ag-ai-lab-dev-eastus-gio`
+- Receivers: `gio.carozza@outlook.com`
+- Note: separate from `ag-cost-alerts` (budget alerts)
+
+Alert Rule:
+- Name: `alert-ai-gateway-5xx-rate-dev-eastus-gio`
+- Condition: `avg(failureRate) > 5%` over any 5-min window
+- KQL: `requests` table — `failures / total * 100`; zero-traffic safe
+- Severity: 2 (Warning)
+- Bicep: `Infra/Day-006/appinsights.bicep`
+
 Validate telemetry in: Application Insights → Transaction Search,
-Failures, Live Metrics, Logs.  
+Failures, Live Metrics, Logs (KQL cookbook: `docs/standards/kql-cookbook.md`).

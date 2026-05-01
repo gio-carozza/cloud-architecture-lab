@@ -25,6 +25,8 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - App Service: app-ai-lab-api-dev-eastus-gio
 - Application Insights: appi-ai-lab-api-dev-eastus-gio (workspace-based)
 - Log Analytics Workspace: law-ai-lab-dev-eastus-gio
+- Action Group: ag-ai-lab-dev-eastus-gio (AI gateway alerts → gio.carozza@outlook.com)
+- Alert Rule: alert-ai-gateway-5xx-rate-dev-eastus-gio (5xx > 5% / 5 min, severity 2)
 - Region: East US
 
 ## Naming Convention (summary)

@@ -78,6 +78,15 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
   See `.claude/skills/azure-deploy/SKILL.md`.
 - **WEBSITE_RUN_FROM_PACKAGE=1** must be set BEFORE zip deploy.
 - **Zip structure:** files at root, not nested in a `/publish` folder.
+- **Azure CLI SSL reset on `management.azure.com`:** TLS inspection on this network
+  resets connections during the handshake. Two workarounds:
+  1. `az config set core.disable_ssl_certificate_verification=true` — works for most
+     read/list commands; restore with `=false` after.
+  2. `Invoke-RestMethod` with `az account get-access-token` bearer token — uses
+     Windows' native TLS stack; required for PUT/POST writes that the CLI still resets
+     even with SSL verification disabled. Preferred for creating Azure resources.
+  - `api.applicationinsights.io` (used by `az monitor app-insights query`) is NOT
+    affected — KQL queries work without workarounds.
 - **IOptions<T>:** requires `using Microsoft.Extensions.Options;` explicitly.
 - **Anthropic 401:** check user-secrets binding key — must be `Anthropic:ApiKey`
   locally, `Anthropic__ApiKey` in App Service env vars.

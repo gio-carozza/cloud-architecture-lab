@@ -15,12 +15,6 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
 ---
 
 ## 1. Latency p50/p95/p99 for /api/ai/chat (last hour)
-
-# Day 6 — KQL Starter Pack
-
-App Insights → Logs. Save each as a Query Pack entry once the workspace is wired.
-
-## 1. Latency p50/p95/p99 for /api/ai/chat (last hour)
 ```kql
 requests
 | where timestamp > ago(1h)
@@ -61,13 +55,18 @@ requests
 | render timechart
 ```
 
-## 4. Token usage per hour (tokens-out)
+## 4. Token usage per hour (input + output)
 ```kql
-traces
+// Activity spans land in dependencies, NOT traces
+dependencies
 | where timestamp > ago(24h)
-| where customDimensions has "llm.tokens.output"
-| extend tokens = toint(customDimensions["llm.tokens.output"])
-| summarize total_tokens_out = sum(tokens) by bin(timestamp, 1h)
+| where name == "claude.chat.api"
+| extend inputTokens  = toint(customDimensions["llm.tokens.input"])
+| extend outputTokens = toint(customDimensions["llm.tokens.output"])
+| summarize
+    total_input  = sum(inputTokens),
+    total_output = sum(outputTokens)
+  by bin(timestamp, 1h)
 | render timechart
 ```
 

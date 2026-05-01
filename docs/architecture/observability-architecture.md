@@ -42,12 +42,14 @@ ASP.NET Core pipeline
     │  Serilog request logging emits structured access log line
     ▼
 AiController → IChatModelProvider
-    │  Activity started for request scope
+    │
     ▼
-ClaudeChatModelProvider → ClaudeApiClient
-    │  Activity for "claude.chat" with tags:
-    │    llm.provider, llm.model, llm.tokens.input,
-    │    llm.tokens.output, llm.latency_ms
+ClaudeChatModelProvider        [outer span: ai.chat.complete]
+    │  Tags: llm.provider, llm.model
+    ▼
+ClaudeApiClient                [inner span: claude.chat.api]
+    │  Tags: llm.provider, llm.model, llm.endpoint,
+    │        llm.tokens.input, llm.tokens.output, llm.latency_ms
     │  Resilience pipeline (timeout, circuit breaker) wraps the call
     ▼
 Anthropic API
@@ -122,11 +124,13 @@ gateway-specific business metrics that need explicit emission.
 **Configured in:** `Program.cs` via `AddStandardResilienceHandler` on
 the `ClaudeApiClient` HttpClient.
 **Behaviors:**
-- Per-attempt timeout: 30 seconds
-- Circuit breaker: 50% failure ratio over 30s sampling window
+- Per-attempt timeout: 45 seconds
+- Total request timeout: 60 seconds
+- Circuit breaker: 20% failure ratio over 120s sampling window; minimum 5 requests; breaks for 15s
 - **No retries on chat generation** — see ADR-006 alternatives section
   for why (POST operations to a paid external provider; retries duplicate
-  cost and create confusing user-facing behavior)
+  cost and create confusing user-facing behavior). Expressed as
+  `MaxRetryAttempts=1` + `ShouldHandle=false` to satisfy v10 validator.
 
 **Failure mode:** When the circuit is open, requests fail fast with
 `BrokenCircuitException`. The global exception middleware translates this
@@ -156,9 +160,9 @@ Console logging still works via Serilog.
 
 **Latency spike on `/api/ai/chat`:**
 Application Insights → Performance → filter by `cloud_RoleName == "lab-observability-api"`.
-Sort by p95. Drill into a slow request, follow the trace to the `claude.chat`
-span, check `llm.latency_ms` tag — distinguishes gateway latency from
-provider latency.
+Sort by p95. Drill into a slow request, follow the trace to the `claude.chat.api`
+span (inner transport span), check `llm.latency_ms` tag — distinguishes provider
+latency from gateway overhead captured on the outer `ai.chat.complete` span.
 
 **Error rate climbing:**
 Application Insights → Failures → group by `customDimensions.failureType`.
@@ -183,11 +187,14 @@ requests
 
 **Token usage per hour:**
 ```kql
-traces
+// Activity spans land in dependencies, NOT traces
+dependencies
 | where timestamp > ago(24h)
-| where customDimensions.["llm.tokens.output"] != ""
-| extend tokens = toint(customDimensions.["llm.tokens.output"])
-| summarize total_tokens = sum(tokens) by bin(timestamp, 1h)
+| where name == "claude.chat.api"
+| extend inputTokens  = toint(customDimensions["llm.tokens.input"])
+| extend outputTokens = toint(customDimensions["llm.tokens.output"])
+| summarize total_input = sum(inputTokens), total_output = sum(outputTokens)
+  by bin(timestamp, 1h)
 | render timechart
 ```
 
@@ -203,11 +210,13 @@ union requests, dependencies, traces, exceptions
 - Provider health: claude.chat span latency, failure rate, circuit state
 - Cost: tokens in/out per hour, projected monthly burn
 
-### Alerts (planned, not yet built)
-- p95 latency > 5s for 10 min
-- Error rate > 5% for 5 min
-- Circuit breaker opens (any provider)
-- Daily token spend > $X
+### Alerts
+- **[LIVE]** Error rate > 5% for 5 min — `alert-ai-gateway-5xx-rate-dev-eastus-gio`;
+  KQL on `requests` table; severity 2; routes to `ag-ai-lab-dev-eastus-gio` → email.
+  Bicep: `Infra/Day-006/appinsights.bicep`
+- **[planned]** p95 latency > 5s for 10 min
+- **[planned]** Circuit breaker opens (any provider)
+- **[planned]** Daily token spend > $X
 
 ## Known Gaps and Future Work
 

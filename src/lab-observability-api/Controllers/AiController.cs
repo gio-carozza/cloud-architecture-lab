@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+using Lab.Observability.Api.Contracts;
+using Lab.Observability.Api.Extensions;
 using Lab.Observability.Api.Models.AI;
 using Lab.Observability.Api.Services.AI;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Lab.Observability.Api.Controllers;
 
@@ -18,37 +20,24 @@ public class AiController : ControllerBase
     }
 
     [HttpPost("chat")]
-    public async Task<ActionResult> Chat(
+    public async Task<ActionResult<ChatResponse>> Chat(
         [FromBody] ChatRequest request,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Prompt))
+        if (request is null || string.IsNullOrWhiteSpace(request.Prompt))
         {
-            return BadRequest(new { error = "Prompt is required." });
+            return BadRequest(new ApiError(
+                Code: "invalid_request",
+                Message: "Prompt is required.",
+                CorrelationId: HttpContext.GetCorrelationId()));
         }
 
-        try
-        {
-            _logger.LogInformation("AI chat endpoint invoked.");
-            var response = await _provider.SendAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (ApplicationException ex)
-        {
-            _logger.LogError(ex, "AI provider call failed.");
-            return StatusCode(502, new
-            {
-                error = "AI provider call failed.",
-                detail = ex.Message
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unexpected AI gateway error.");
-            return StatusCode(500, new
-            {
-                error = "Unexpected server error."
-            });
-        }
+        _logger.LogInformation(
+            "AI chat endpoint invoked. CorrelationId={CorrelationId} PromptLength={PromptLength}",
+            HttpContext.GetCorrelationId(),
+            request.Prompt.Length);
+
+        var response = await _provider.SendAsync(request, cancellationToken);
+        return Ok(response);
     }
 }

@@ -1,37 +1,42 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Lab.Observability.Api.Models.AI;
 using Lab.Observability.Api.Options;
+using Lab.Observability.Api.Services.Claude;
+using Microsoft.Extensions.Options;
 
 namespace Lab.Observability.Api.Services.AI;
 
-public class ClaudeChatModelProvider : IChatModelProvider
+public sealed class ClaudeChatModelProvider : IChatModelProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly AnthropicOptions _options;
+    private readonly ClaudeApiClient _claudeApiClient;
     private readonly ILogger<ClaudeChatModelProvider> _logger;
+    private readonly AnthropicOptions _options;
 
     public ClaudeChatModelProvider(
-        HttpClient httpClient,
+        ClaudeApiClient claudeApiClient,
         IOptions<AnthropicOptions> options,
         ILogger<ClaudeChatModelProvider> logger)
     {
-        _httpClient = httpClient;
-        _options = options.Value;
+        _claudeApiClient = claudeApiClient;
         _logger = logger;
+        _options = options.Value;
     }
 
     public async Task<ChatResponse> SendAsync(ChatRequest request, CancellationToken cancellationToken = default)
     {
-        var endpoint = $"{_options.BaseUrl.TrimEnd('/')}/v1/messages";
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
 
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        if (string.IsNullOrWhiteSpace(request.Prompt))
+        {
+            throw new ArgumentException("Prompt is required.", nameof(request));
+        }
 
-        httpRequest.Headers.Add("x-api-key", _options.ApiKey);
-        httpRequest.Headers.Add("anthropic-version", "2023-06-01");
-        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _logger.LogInformation(
+            "Sending Claude chat request. Model={Model} PromptLength={PromptLength}",
+            _options.Model,
+            request.Prompt.Length);
 
         var payload = new
         {
@@ -42,47 +47,23 @@ public class ClaudeChatModelProvider : IChatModelProvider
                 new
                 {
                     role = "user",
-                    content = new object[]
-                    {
-                        new
-                        {
-                            type = "text",
-                            text = request.Prompt
-                        }
-                    }
+                    content = request.Prompt
                 }
             }
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        var responseText = await _claudeApiClient.SendChatAsync(payload, cancellationToken);
 
-        _logger.LogInformation("Sending prompt to Claude model {Model}", _options.Model);
-
-        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("Claude call failed. Status: {StatusCode}. Body: {Body}",
-                response.StatusCode, responseBody);
-
-            throw new ApplicationException(
-                $"Claude API call failed with status {(int)response.StatusCode}. Response body: {responseBody}");
-        }
-
-        using var document = JsonDocument.Parse(responseBody);
-
-        var outputText = document.RootElement
-            .GetProperty("content")[0]
-            .GetProperty("text")
-            .GetString() ?? string.Empty;
+        _logger.LogInformation(
+            "Claude chat request completed. Model={Model} ResponseLength={ResponseLength}",
+            _options.Model,
+            responseText.Length);
 
         return new ChatResponse
         {
-            Provider = "Anthropic",
+            Provider = "anthropic",
             Model = _options.Model,
-            Output = outputText
+            Response = responseText
         };
     }
 }

@@ -1,0 +1,6 @@
+
+# Build artifacts
+*.zip
+publish/
+bin/
+obj/

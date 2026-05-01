@@ -1,0 +1,114 @@
+# KQL Cookbook
+
+Reusable Kusto Query Language queries for the Lab.Observability.Api gateway.
+Run against the Application Insights workspace `appi-ai-lab-api-dev-eastus-gio`
+or its underlying Log Analytics workspace `law-ai-lab-dev-eastus-gio`.
+
+Save each query as a Query Pack entry in the workspace for one-click reuse.
+
+## Conventions
+- Replace `0HN...` placeholders with real correlation IDs from response headers
+- All queries assume W3C Trace Context propagation (active since Day 6)
+- Custom dimensions used: `CorrelationId`, `llm.tokens.input`, `llm.tokens.output`,
+  `llm.provider`, `llm.model`, `llm.latency_ms`
+
+---
+
+## 1. Latency p50/p95/p99 for /api/ai/chat (last hour)
+
+# Day 6 — KQL Starter Pack
+
+App Insights → Logs. Save each as a Query Pack entry once the workspace is wired.
+
+## 1. Latency p50/p95/p99 for /api/ai/chat (last hour)
+```kql
+requests
+| where timestamp > ago(1h)
+| where url contains "/api/ai/chat"
+| summarize
+    p50 = percentile(duration, 50),
+    p95 = percentile(duration, 95),
+    p99 = percentile(duration, 99),
+    count = count()
+  by bin(timestamp, 5m)
+| render timechart
+```
+
+## 2. Top 10 slowest chat requests (last 24h) with correlation IDs
+```kql
+requests
+| where timestamp > ago(24h)
+| where url contains "/api/ai/chat"
+| top 10 by duration desc
+| project
+    timestamp,
+    duration_ms = duration,
+    resultCode,
+    correlationId = tostring(customDimensions.CorrelationId),
+    operation_Id
+```
+
+## 3. Error rate by hour (5xx + dependency failures)
+```kql
+requests
+| where timestamp > ago(24h)
+| extend bucket = bin(timestamp, 1h)
+| summarize
+    total = count(),
+    errors = countif(success == false)
+  by bucket
+| extend error_rate_pct = round(100.0 * errors / total, 2)
+| render timechart
+```
+
+## 4. Token usage per hour (tokens-out)
+```kql
+traces
+| where timestamp > ago(24h)
+| where customDimensions has "llm.tokens.output"
+| extend tokens = toint(customDimensions["llm.tokens.output"])
+| summarize total_tokens_out = sum(tokens) by bin(timestamp, 1h)
+| render timechart
+```
+
+## 5. Provider latency vs gateway latency
+```kql
+let gateway =
+    requests
+    | where url contains "/api/ai/chat"
+    | project op = operation_Id, gateway_ms = duration;
+let provider =
+    dependencies
+    | where target contains "anthropic"
+    | project op = operation_Id, provider_ms = duration;
+gateway
+| join kind=inner provider on op
+| extend overhead_ms = gateway_ms - provider_ms
+| summarize
+    avg_gateway = avg(gateway_ms),
+    avg_provider = avg(provider_ms),
+    avg_overhead = avg(overhead_ms)
+  by bin(now(), 1m)
+```
+
+## 6. Failures classified by category
+```kql
+exceptions
+| where timestamp > ago(24h)
+| extend category = case(
+    type contains "Timeout", "timeout",
+    type contains "HttpRequestException", "transport",
+    type contains "Unauthorized", "auth",
+    "other")
+| summarize count = count() by category
+| render piechart
+```
+
+## 7. Trace a single correlation ID end-to-end
+```kql
+union requests, dependencies, traces, exceptions
+| where customDimensions.CorrelationId == "0HN..."
+       or operation_Id == "0HN..."
+| project timestamp, itemType, name, message, resultCode, duration
+| order by timestamp asc
+```

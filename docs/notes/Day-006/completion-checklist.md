@@ -32,7 +32,7 @@
 - [x] `X-Correlation-Id` request header is honored (echoed in response header) — `x-correlation-id: 4eadbbf97771415ab30949e67d17be43` confirmed
 - [x] Forced bad API key returns safe error JSON (no stack trace) — `502` with `{"code":"claude_provider_error","message":"The AI provider request failed.","correlationId":"..."}`, no stack trace, no internal message
 - [x] Forced bad API key logs full exception server-side with correlation ID — `ClaudeProviderException: invalid x-api-key` with full stack trace, `ProviderErrorCode=authentication_error`, `IsTransient=False`, `CorrelationId` on every log line; retry correctly did not fire (`Handled: 'False', Attempt: '0'`)
-- [ ] Token counts visible in logs (`llm.tokens.input`, `llm.tokens.output`) — ⚠ BLOCKED: tags are set on the `claude.chat.api` Activity span (correct per architect-thinking §4 — metrics, not log lines); verify in Azure Portal → App Insights → Logs after deploy
+- [x] Token counts visible in App Insights (`llm.tokens.input`, `llm.tokens.output`) — confirmed in `dependencies` table post-deploy: `claude.chat.api` span at 07:06:03Z shows `llm.tokens.input=19`, `llm.tokens.output=8`, `llm.latency_ms=897ms` from live Azure traffic (`app-ai-lab-api-dev-eastus-gio`); `ai.chat.complete` span carries `llm.provider` + `llm.model`; old pre-deploy span (`anthropic.messages.create`, 06:50Z) has no token tags — clean before/after contrast confirms instrumentation is live
 
 ## Behavior — Deployed
 
@@ -50,7 +50,7 @@
 - [x] `docs/notes/Day-006/architect-thinking.md` written
 - [x] `Infra/Day-006/appsettings-template.md` includes APPLICATIONINSIGHTS_CONNECTION_STRING
 - [x] Root `CLAUDE.md` "What I'm Building Toward" section reflects Day 6 completion — updated: "Days 1–6 complete. Day 7 next." and "Observability & resilience (done — Day 6)"
-- [ ] Git commit: `feat(day-006): observability and resilience for AI gateway`
+- [x] Git commit: `feat(day-006): observability and resilience for AI gateway` — `04f4931` on `feature/day-006-gateway-hardening`
 
 ## Certification
 - [ ] Read AI-102 "Monitor and optimize AI solutions" objective list (15 min)
@@ -59,6 +59,6 @@
 - [x] File notes in `docs/certifications/ai-102/study-notes/day-006-mapping.md` — AI-102 mapping confirmed
 
 ## Stretch (optional, only if base is complete)
-- [ ] Add Bicep template for App Insights in `Infra/Day-006/appinsights.bicep`
-- [ ] Define an Azure Monitor alert rule for 5xx rate > 5% over 5 min
+- [x] Add Bicep template for App Insights in `Infra/Day-006/appinsights.bicep` — created; codifies Log Analytics workspace, App Insights component (workspace-based), Action Group, and 5xx Scheduled Query Alert Rule; outputs `ConnectionString`, `InstrumentationKey`, `workspaceId`, `appInsightsId` for downstream consumption
+- [x] Define an Azure Monitor alert rule for 5xx rate > 5% over 5 min — `alert-ai-gateway-5xx-rate-dev-eastus-gio` created via ARM REST (Invoke-RestMethod); KQL computes `failureRate = failures/total*100`; avg > 5 fires severity-2 alert to Action Group `ag-ai-lab-dev-eastus-gio` → `gio.carozza@outlook.com`; zero-traffic guard: `failureRate=0` when `total=0`, no false positives
 - [ ] Add a Workbook or pinned Dashboard with the starter KQL queries

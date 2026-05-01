@@ -161,3 +161,11 @@ Potential Day 7+ extensions:
 - multi-provider routing
 - cost-aware telemetry dimensions
 - Azure dashboard and alert rules as code
+
+## Errata
+
+ADR-008 (2026-04-29) refines the observability implementation decision in this ADR.
+Serilog is positioned as a logging library inside the OpenTelemetry export pipeline,
+not as a parallel sink to Application Insights. The OTel-first export architecture
+remains unchanged; ADR-008 makes the Serilog placement explicit.
+See: ADR-008-adopt-opentelemetry-first-observability-with-serilog-request-logging.md

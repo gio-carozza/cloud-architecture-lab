@@ -113,6 +113,7 @@ NOT installed (explicitly avoided to prevent pipeline duplication):
 
 ## References
 
+- ADR-006 (AI Gateway resilience and observability hardening — this ADR refines its implementation)
 - ADR-005 (Provider abstraction)
 - `docs/notes/Day-006/summary.md`
 - `.claude/skills/observability-net/SKILL.md` (must be updated to reflect

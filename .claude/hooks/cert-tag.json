@@ -1,0 +1,13 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit|Read",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "powershell -Command \"$f = $env:CLAUDE_TOOL_INPUT_PATH; if ($f -match '\\.(cs|md|bicep|json|csproj)$') { $tag = switch -Regex ($f) { 'Telemetry|Metrics|Monitor|AppInsights|OpenTelemetry' { 'AI-102:monitor-optimize,AZ-104:monitor-backup' } 'Resilience|HttpClient|Polly|CircuitBreaker' { 'AZ-305:reliability,AI-102:optimize' } 'Options|Configuration|appsettings' { 'AZ-104:configure-manage' } 'Provider|IChatModel|Claude|OpenAI' { 'AI-102:implement-manage' } 'Bicep|Infra|arm' { 'AZ-104:deploy-manage,AZ-305:infrastructure' } 'Cache|cache' { 'AI-102:cost-optimize,AZ-305:cost' } default { '' } }; if ($tag) { Add-Content -Path '.claude/cert-tags-today.txt' -Value $tag } }\""
+        }
+      ]
+    }
+  ]
+}

@@ -203,3 +203,13 @@ routing: cheapest model that solves the problem, escalate when warranted.
 **When `docs/standards/` grows beyond 6-8 files:**
 - That's the signal to consider sub-foldering
 - Don't pre-optimize; let it accrete first
+
+## Certification Tooling
+- `/cert-scaffold <exam>` — run once per exam to build domain structure
+- `/cert-update <day>` — run at end of each day session to populate
+  domains touched that day (reads summary.md cert section automatically)
+- Hook: `.claude/hooks/cert-tag.json` auto-tags domains as you work
+- Coverage matrix: `docs/certifications/domain-coverage.md`
+- Content: 9yo + architect explanations, synthesized practice questions,
+  curated MS Learn + community resource links
+- Do NOT reproduce paid exam bank content

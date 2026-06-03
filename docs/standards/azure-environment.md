@@ -47,9 +47,11 @@ environment variables (set as App Service configuration, NOT in appsettings.json
 
 ### Anthropic provider configuration
 - `Anthropic__ApiKey`
-- `Anthropic__Model` (`claude-opus-4-7` — updated Day 6)
+- `Anthropic__Model` (`claude-sonnet-4-6` — updated Day 7; was `claude-opus-4-7`)
 - `Anthropic__BaseUrl` (`https://api.anthropic.com/v1`)
 - `Anthropic__MaxTokens`
+- `Anthropic__EnablePromptCaching` (`true` — added Day 7; pending portal apply)
+- `Anthropic__SystemPrompt` (≥1024-token operational prompt — added Day 7; pending portal apply)
 
 ### Observability (Day 6+)
 - `APPLICATIONINSIGHTS_CONNECTION_STRING`

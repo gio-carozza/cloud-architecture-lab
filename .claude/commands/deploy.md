@@ -10,17 +10,52 @@ Deploy `lab-observability-api` to Azure App Service using the proven Kudu zip pa
 Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 
 1. Verify pre-flight (subscription, RG, app exists)
+
+1b. Apply day app settings: check for `Infra/Day-NNN/appsettings-template.md`
+   (where NNN is the current day, or the most recent `Infra/Day-NNN/` folder if
+   the day is unspecified). If the file exists, read every setting it documents
+   under "New settings" and apply them to the App Service via
+   `az webapp config appsettings set`, using the SSL workaround from CLAUDE.md
+   Gotchas. For each setting, first check whether it is already set to the same
+   value — if so, skip it (idempotent). If the file does not exist, note that no
+   new settings were applied and continue. **If the file exists but any setting
+   fails to apply, halt immediately and report — do not proceed to publish.**
+
 2. Run `dotnet publish -c Release -o ./publish` from the API project
 3. Zip with `Compress-Archive -Path .\publish\*` (files at root)
 4. Ensure `WEBSITE_RUN_FROM_PACKAGE=1` is set
-5. Acquire ARM token
-6. POST to Kudu publish API
-7. Verify `/health`, `/swagger`, and `POST /api/ai/chat` post-deploy
+   - This calls `az webapp config appsettings set`, which hits
+     `management.azure.com` and WILL reset on this network's TLS inspection.
+   - BEFORE step 4, apply the SSL workaround:
+     ```powershell
+     az config set core.disable_ssl_certificate_verification=true
+     ```
+     Run step 4, then restore:
+     ```powershell
+     az config set core.disable_ssl_certificate_verification=false
+     ```
+   - If it STILL resets, use the ARM bearer-token path instead (see
+     CLAUDE.md Gotchas): acquire a token with
+     `az account get-access-token` and PUT the setting via
+     `Invoke-RestMethod` against the ARM REST endpoint.
+5. Acquire ARM token: `az account get-access-token --query accessToken -o tsv`
+6. POST to Kudu publish API (uses Windows native TLS — not affected by the reset)
+7. Verify post-deploy, using `Invoke-RestMethod` (NOT `curl` — the curl alias
+   triggers an IE-engine security prompt on this machine):
+   - `GET /health` returns 200
+   - `GET /swagger` loads
+   - `POST /api/ai/chat` returns a completion
+   - Response carries `X-Correlation-Id` header (Day 6+)
 
 ## DO NOT
 - Use `az webapp deploy` (known to fail on this network)
 - Zip the `publish` folder itself (must be `publish\*`)
 - Deploy without verifying app settings include `Anthropic__*` keys
+- Use `curl` for verification (use `Invoke-RestMethod`)
+- Deploy if `appsettings-template.md` lists a setting that failed to apply —
+  halt and report; never deploy code that expects a setting that isn't there
 
 ## Output
 Report each step's status. If any step fails, halt and surface the exact error.
+If the failure is a TLS reset on `management.azure.com`, state that explicitly
+and apply the SSL workaround before retrying.

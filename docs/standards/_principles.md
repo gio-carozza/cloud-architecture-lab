@@ -107,7 +107,7 @@ At the end of each roadmap day, answer these three questions in
 The cheapest model that solves the problem is the right model. This is true for
 my learning roadmap and it will be true for every production AI gateway I design.
 
-Default to Sonnet 4.6. Escalate to Opus 4.7 only when:
+Default to Sonnet 4.6. Escalate to the latest Opus (currently 4.8) only when:
 - The reasoning IS the deliverable (ADRs, tradeoff analysis)
 - Sonnet's answer is thin and the depth matters
 - I'm doing adversarial reasoning against my own conclusions
@@ -145,7 +145,7 @@ Posture: structured, honest, slow.
 Discipline: surface tradeoffs explicitly. Name the alternative being
 rejected. Write the ADR before the code, not after — writing exposes
 weak reasoning. Posture-check at end of day BEFORE marking complete.
-Tool: chat. Opus 4.7 escalation most often warranted here.
+Tool: chat. the latest Opus (currently 4.8) escalation most often warranted here.
 
 ### The integration test
 At the end of each roadmap day, ask: did I move between modes
@@ -175,3 +175,5 @@ pretend they don't are the ones you can't trust.
 | Day 6 | Configured resilience with SamplingDuration = 30s, AttemptTimeout = 45s | App startup failed via ValidateOnStart — sampling must be >= 2x attempt timeout per AddStandardResilienceHandler invariant | Build-time validation is necessary but not sufficient. Startup validators catch a class of semantic errors no compiler sees. Always wire ValidateOnStart for options bound to libraries with mathematical or semantic invariants. |
 | Day 6 | Expressed "no retries on chat POST" as MaxRetryAttempts = 0 per ADR-006 intent | Microsoft.Extensions.Http.Resilience v10 rejects 0 as invalid | Replaced with MaxRetryAttempts = 1 + Retry.ShouldHandle = _ => false. Architectural intent (no retries) is unchanged; only the encoding shifted to satisfy the validator. ADRs document intent; code expresses it within current library constraints. Both must stay in sync, but they evolve at different rates. |
 | Tooling (2026-04-30) | Installed Claude Code via `npm install -g`; commands appeared to do nothing | PowerShell `Restricted` execution policy silently blocked `npm.ps1` from running | Diagnosed by running `npm --version` directly, which surfaced the underlying `UnauthorizedAccess` error. Fixed with `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`. Lesson: when a CLI tool seems to do nothing, run its own version command directly to surface the real error. Wrappers hide failures; primitives reveal them. (Same lesson as `az webapp deploy` vs Kudu API on Day 5.) |
+| Day 7 | Used `claude-opus-4-6` as model ID in user-secrets | API returned HTTP 200 with valid content on every request but `cache_creation_input_tokens: 0` always — prompt caching silently inoperative | `claude-opus-4-6` is not a recognized current Anthropic model ID. Valid IDs: `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`. A wrong model ID can fail silently in dimensions unrelated to HTTP status codes. When caching produces zero tokens despite a correct request format, check the model ID before debugging code. |
+| Day 7 | Sent `cache_control: {"type":"ephemeral"}` without a TTL to Claude 4 models | Caching silently inactive — API accepts the request, returns `cache_creation_input_tokens: 0`, bills at full rate, no error, no warning | Claude 4 models require an explicit TTL: `{"type":"ephemeral","ttl":"1h"}` or `"ttl":"5m"`. The bare format worked for Claude 3. This is a silent behavioral regression when migrating model generations. Always verify `cache_creation_input_tokens > 0` on the first request after any model or API format change. |

@@ -8,4 +8,6 @@ public class AnthropicOptions
     public string Model { get; set; } = "claude-opus-4-7";
     public string BaseUrl { get; set; } = "https://api.anthropic.com/v1";
     public int MaxTokens { get; set; } = 512;
+    public bool EnablePromptCaching { get; init; } = true;
+    public string SystemPrompt { get; init; } = "";
 }

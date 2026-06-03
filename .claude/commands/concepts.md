@@ -1,6 +1,6 @@
 ## What is Azure Monitor?
 
-### If you're 9 years old
+### If you're 10 years old
 Imagine your app is a fish tank. Azure Monitor is the person who checks
 the tank every few seconds — is the water warm enough? Are the fish
 swimming normally? Did anything spill? If something looks wrong, they

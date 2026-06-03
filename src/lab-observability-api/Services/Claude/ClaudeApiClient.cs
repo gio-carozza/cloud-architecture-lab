@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Lab.Observability.Api.Options;
 using Lab.Observability.Api.Telemetry;
 using Microsoft.Extensions.Options;
@@ -43,9 +44,10 @@ public sealed class ClaudeApiClient
 
         try
         {
+            var anthropicRequest = BuildAnthropicRequest(payload);
             using var response = await _httpClient.PostAsJsonAsync(
                 "messages",
-                payload,
+                anthropicRequest,
                 cancellationToken);
 
             var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -91,9 +93,36 @@ public sealed class ClaudeApiClient
 
             var responseText = TryExtractText(responseBody);
 
-            var (inputTokens, outputTokens) = TryExtractUsage(responseBody);
+            var (inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens) = TryExtractUsage(responseBody);
             if (inputTokens.HasValue) activity?.SetTag("llm.tokens.input", inputTokens.Value);
             if (outputTokens.HasValue) activity?.SetTag("llm.tokens.output", outputTokens.Value);
+
+            if (cacheReadTokens.HasValue && cacheReadTokens.Value > 0)
+            {
+                activity?.SetTag("llm.cache.read_tokens", cacheReadTokens.Value);
+                GatewayTelemetry.CacheHits.Add(
+                    1,
+                    new KeyValuePair<string, object?>("ai.provider", "anthropic"),
+                    new KeyValuePair<string, object?>("ai.model", _options.Model));
+            }
+
+            if (cacheCreationTokens.HasValue && cacheCreationTokens.Value > 0)
+            {
+                activity?.SetTag("llm.cache.creation_tokens", cacheCreationTokens.Value);
+                GatewayTelemetry.CacheMisses.Add(
+                    1,
+                    new KeyValuePair<string, object?>("ai.provider", "anthropic"),
+                    new KeyValuePair<string, object?>("ai.model", _options.Model));
+            }
+
+            if ((cacheReadTokens ?? 0) > 0 || (cacheCreationTokens ?? 0) > 0)
+            {
+                _logger.LogInformation(
+                    "Prompt cache activity. CacheReadTokens={CacheReadTokens} CacheCreationTokens={CacheCreationTokens}",
+                    cacheReadTokens ?? 0,
+                    cacheCreationTokens ?? 0);
+            }
+
             activity?.SetTag("llm.latency_ms", stopwatch.Elapsed.TotalMilliseconds);
 
             GatewayTelemetry.ProviderLatencyMs.Record(
@@ -274,7 +303,7 @@ public sealed class ClaudeApiClient
         }
     }
 
-    private static (int? InputTokens, int? OutputTokens) TryExtractUsage(string responseBody)
+    private static (int? InputTokens, int? OutputTokens, int? CacheReadTokens, int? CacheCreationTokens) TryExtractUsage(string responseBody)
     {
         try
         {
@@ -283,11 +312,13 @@ public sealed class ClaudeApiClient
             if (!document.RootElement.TryGetProperty("usage", out var usageElement) ||
                 usageElement.ValueKind != JsonValueKind.Object)
             {
-                return (null, null);
+                return (null, null, null, null);
             }
 
             int? inputTokens = null;
             int? outputTokens = null;
+            int? cacheReadTokens = null;
+            int? cacheCreationTokens = null;
 
             if (usageElement.TryGetProperty("input_tokens", out var inputEl) &&
                 inputEl.TryGetInt32(out var inputVal))
@@ -301,11 +332,71 @@ public sealed class ClaudeApiClient
                 outputTokens = outputVal;
             }
 
-            return (inputTokens, outputTokens);
+            if (usageElement.TryGetProperty("cache_read_input_tokens", out var cacheReadEl) &&
+                cacheReadEl.TryGetInt32(out var cacheReadVal))
+            {
+                cacheReadTokens = cacheReadVal;
+            }
+
+            if (usageElement.TryGetProperty("cache_creation_input_tokens", out var cacheCreationEl) &&
+                cacheCreationEl.TryGetInt32(out var cacheCreationVal) &&
+                cacheCreationVal > 0)
+            {
+                cacheCreationTokens = cacheCreationVal;
+            }
+
+            // Newer API format: cache_creation.ephemeral_1h_input_tokens / ephemeral_5m_input_tokens
+            if (cacheCreationTokens is null or 0 &&
+                usageElement.TryGetProperty("cache_creation", out var cacheCreationObj) &&
+                cacheCreationObj.ValueKind == JsonValueKind.Object)
+            {
+                int sum = 0;
+                if (cacheCreationObj.TryGetProperty("ephemeral_1h_input_tokens", out var h1El) &&
+                    h1El.TryGetInt32(out var h1Val)) sum += h1Val;
+                if (cacheCreationObj.TryGetProperty("ephemeral_5m_input_tokens", out var m5El) &&
+                    m5El.TryGetInt32(out var m5Val)) sum += m5Val;
+                if (sum > 0) cacheCreationTokens = sum;
+            }
+
+            return (inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens);
         }
         catch
         {
-            return (null, null);
+            return (null, null, null, null);
         }
+    }
+
+    private JsonNode BuildAnthropicRequest(object basePayload)
+    {
+        var node = JsonNode.Parse(JsonSerializer.Serialize(basePayload))!.AsObject();
+
+        if (string.IsNullOrEmpty(_options.SystemPrompt))
+        {
+            _logger.LogDebug("BuildAnthropicRequest: SystemPrompt empty — no system field added");
+            return node;
+        }
+
+        if (!_options.EnablePromptCaching)
+        {
+            node["system"] = _options.SystemPrompt;
+            _logger.LogDebug("BuildAnthropicRequest: system added as plain string (caching disabled)");
+        }
+        else
+        {
+            node["system"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["type"] = "text",
+                    ["text"] = _options.SystemPrompt,
+                    ["cache_control"] = new JsonObject { ["type"] = "ephemeral", ["ttl"] = "1h" }
+                }
+            };
+            _logger.LogDebug(
+                "BuildAnthropicRequest: system added as content array with cache_control (SystemPromptLength={SystemPromptLength})",
+                _options.SystemPrompt.Length);
+        }
+
+        return node;
     }
 }

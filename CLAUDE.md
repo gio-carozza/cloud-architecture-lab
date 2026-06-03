@@ -1,3 +1,5 @@
+Before starting ANY work, follow `.claude/instructions/daily-workflow.md`
+
 # cloud-architecture-lab
 
 12-month roadmap to Azure Cloud AI / LLM Architect ($200k–$250k tier).
@@ -9,7 +11,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - Backend developer (.NET, APIs, SQL), MIS master's
 - Pivoting to Azure Cloud AI / LLM Architect role
 - Build-first learner; wants architect-level reasoning, not tutorials
-- Days 1–6 complete. Day 7 next.
+- Days 1–7 complete. Day 8 next.
 
 ## Stack
 - .NET 8 Web API (namespace: Lab.Observability.Api)
@@ -40,8 +42,12 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - Run:      `dotnet run --project src/lab-observability-api`
 - Publish:  `dotnet publish src/lab-observability-api/lab-observability-api.csproj -c Release -o ./publish`
 - Test:     `dotnet test`
-- Deploy:   See `.claude/skills/azure-deploy/SKILL.md` (use the Kudu zip path)
-- New day:  Use `/new-day` slash command
+- Deploy:   `/deploy` slash command (wraps the Kudu zip path)
+- New day:  `/new-day <N> <slug>` slash command
+- New ADR:  `/adr <kebab-title>` slash command
+- Cert scaffold: `/cert-scaffold <EXAM>` (one-time per exam)
+- Cert update:   `/cert-update <N>` (end of each day)
+- Full daily loop: `.claude/instructions/daily-workflow.md`
 
 ## Architecture (top-level map)
 - `src/lab-observability-api/`  → .NET 8 Web API (the AI Gateway)
@@ -63,6 +69,24 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
   - Local: `dotnet user-secrets`
   - Azure: App Service environment variables (double underscore: `Anthropic__ApiKey`)
   - NEVER commit secrets, NEVER put them in `appsettings.json`
+- **`files-changed.md` — per-day file change audit log:**
+  Every day folder contains `docs/notes/Day-NNN/files-changed.md`. Whenever docs are
+  updated in response to any step completion ("update all necessary docs", "update docs",
+  "update the checklist", or equivalent), upsert rows in this file. **Dedup key is the
+  file path** — if the file already has a row for that path, update it in place; never
+  add a duplicate row. Format is a single flat markdown table:
+
+  ```markdown
+  # Day NNN — Files Changed
+
+  | File | Step | Change |
+  |---|---|---|
+  | `path/to/file.ext` | verification | what changed and why |
+  ```
+
+  The `Step` column names which workflow step triggered the change
+  (`scaffold`, `build`, `verification`, `deploy`, `docs pass`, etc.).
+  Update this file as the last action of every doc-update pass.
 
 ## Provider Abstraction Contract (do not break)
 - `IChatModelProvider` — the seam. All LLM calls go through this.
@@ -85,20 +109,33 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
   2. `Invoke-RestMethod` with `az account get-access-token` bearer token — uses
      Windows' native TLS stack; required for PUT/POST writes that the CLI still resets
      even with SSL verification disabled. Preferred for creating Azure resources.
+  - **Exception — App Service appsettings PUT:** `/config/appsettings` PUT fails via
+    BOTH paths on this network (Day 7). Reads (POST `/list`) succeed. Use the Azure
+    portal for appsettings changes: `portal.azure.com` → App Service → Configuration.
   - `api.applicationinsights.io` (used by `az monitor app-insights query`) is NOT
     affected — KQL queries work without workarounds.
 - **IOptions<T>:** requires `using Microsoft.Extensions.Options;` explicitly.
 - **Anthropic 401:** check user-secrets binding key — must be `Anthropic:ApiKey`
   locally, `Anthropic__ApiKey` in App Service env vars.
 - **Anthropic 400 with vague error:** check account credits FIRST before debugging code.
+- **Anthropic prompt caching — TTL required for Claude 4 models:** `{"type":"ephemeral"}`
+  without a TTL is silently ignored on Claude 4 models (0 cache tokens, full billing, no error).
+  Always use `{"type":"ephemeral","ttl":"1h"}` or `"ttl":"5m"`. Claude 3 models worked without TTL.
+- **Anthropic prompt caching — wrong model ID = silent zero:** `claude-opus-4-6` is not a
+  valid current model (valid: `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`).
+  The API returns 200 with content but `cache_creation_input_tokens: 0` always. Check the model ID
+  before debugging cache logic.
+- **Anthropic usage response format (Claude 4):** cache creation tokens appear in BOTH the flat
+  `cache_creation_input_tokens` field AND a new nested `cache_creation.ephemeral_*_input_tokens`
+  object. `TryExtractUsage` handles both via fallback logic (see `ClaudeApiClient.cs`).
 - **Stack traces:** never return them in API responses. Production-grade error
   contracts only (correlationId + safe message).
 
 ## What I'm Building Toward (north star)
 A multi-provider, observable, governed enterprise AI gateway:
-1. Provider abstraction (done — Day 5)
-2. Observability & resilience (done — Day 6)
-3. Cost controls (prompt caching, batch API)
+1. Provider abstraction (done — Day 5, ADR-005)
+2. Observability & resilience (done — Day 6, ADR-006, ADR-008)
+3. Cost controls — prompt caching (done — Day 7, ADR-009); batch API (next)
 4. Multi-model routing & evaluation
 5. RAG with Azure AI Search
 6. Enterprise agent platform
@@ -128,9 +165,11 @@ The project knowledge holds ONLY:
 - This file (CLAUDE.md)
 - _principles.md (architect posture)
 - naming-conventions.md, azure-environment.md (live environment facts)
-- The four SKILL.md files
+- The four SKILL.md files (.claude/skills/*/SKILL.md)
 - The CURRENT day's working artifacts (summary.md, completion-checklist.md, posture-check.md)
 - The most recent 1-2 ADRs
+- NOT in hot context (read on demand): .claude/instructions/*,
+  .claude/commands/*, .claude/hooks/* — these are operational, not reasoning context
 
 Everything else lives in the repo and is read by Claude Code on demand.
 This is RAG-by-discipline. Treat token cost as a first-class architectural constraint.
@@ -154,13 +193,13 @@ Include exam-domain mappings.
 
 **Perform mode** — architecture reasoning, ADR drafting, posture checks,
 roadmap planning, tradeoff analysis.
-Primary tool: chat. This is where Opus 4.7 escalation most often applies.
+Primary tool: chat. This is where the latest Opus (currently 4.8) escalation most often applies.
 Output style: structured, architect-level. Surface tradeoffs explicitly.
 
-### When to use Sonnet 4.6 vs Opus 4.7
+### When to use Sonnet vs the latest Opus
 Default to **Sonnet 4.6**. It handles ~80% of roadmap work at a fraction of the quota cost.
 
-Use **Opus 4.7** only for:
+Use **the latest Opus (currently 4.8)** only for:
 - ADR drafting where the decision logic IS the deliverable
 - Architecture tradeoff analysis with non-obvious answers
 - Pushback on my own reasoning when I suspect I'm wrong
@@ -169,6 +208,10 @@ Use **Opus 4.7** only for:
 If unsure, start with Sonnet. Escalate to Opus only when Sonnet's answer doesn't carry
 the weight the question deserves. This mirrors the model-routing decision you'll make
 in production AI gateways: cheapest model that solves the problem, escalate on need.
+
+The canonical model-routing rule lives in `.claude/instructions/daily-workflow.md`:
+Sonnet everywhere except STEP 3 (ADR reasoning) and STEP 9 (posture check),
+which use Opus. If this file and the workflow ever disagree, the workflow wins.
 
 ### Quick reference: modes × models × tools
 
@@ -210,6 +253,6 @@ routing: cheapest model that solves the problem, escalate when warranted.
   domains touched that day (reads summary.md cert section automatically)
 - Hook: `.claude/hooks/cert-tag.json` auto-tags domains as you work
 - Coverage matrix: `docs/certifications/domain-coverage.md`
-- Content: 9yo + architect explanations, synthesized practice questions,
+- Content: 10yo + architect explanations, synthesized practice questions,
   curated MS Learn + community resource links
 - Do NOT reproduce paid exam bank content

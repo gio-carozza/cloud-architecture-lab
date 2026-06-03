@@ -92,6 +92,8 @@ try
         client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
         client.DefaultRequestHeaders.Add("x-api-key", options.ApiKey);
         client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+        if (options.EnablePromptCaching)
+            client.DefaultRequestHeaders.Add("anthropic-beta", "prompt-caching-2024-07-31");
         client.Timeout = Timeout.InfiniteTimeSpan;
     })
 

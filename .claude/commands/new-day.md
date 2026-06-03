@@ -14,11 +14,15 @@ Given a day number and a kebab-case slug, create:
    - `completion-checklist.md` (concrete done criteria)
    - `architect-thinking.md` (tradeoffs & enterprise reasoning)
    - `posture-check.md` (the daily honesty audit)
+   - `files-changed.md` (running audit log of every file modified during the day)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)
 
-3. `Infra/Day-NNN/` directory (empty, ready for IaC additions)
+3. `Infra/Day-NNN/` directory containing `appsettings-template.md` — a stub
+   documenting any new App Service settings this day introduces. If the day
+   adds no new settings, the stub says "No new app settings this day." This
+   file is the single source of truth `/deploy` reads before publishing.
 
 4. Append a "## Day NNN" entry to `docs/notes/_index.md`
 
@@ -90,8 +94,33 @@ See posture-check.md (filled at end of day, BEFORE marking complete)
 <if no, the work isn't owned yet — schedule a teach-back session>
 ```
 
+## Required initial content for appsettings-template.md
+
+Scaffold with the no-new-settings stub. Replace with real settings during STEP 4
+(populate) once the day's summary is written and it's clear what config changes
+the day introduces. `/deploy` reads this file at step 1b — it must exist.
+
+```markdown
+# Day NNN — App Service Settings Template
+
+No new app settings this day.
+```
+
+## Required initial content for files-changed.md
+
+Scaffold with the header and an empty table. Claude Code populates rows during
+every doc-update pass; dedup key is the file path.
+
+```markdown
+# Day NNN — Files Changed
+
+| File | Step | Change |
+|---|---|---|
+```
+
 ## Reminders
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
 - Inside the day folder, no day prefix on filenames
 - In shared folders (architecture/, etc.), KEEP the day prefix
 - Posture check is filled at the END of the day, before commit
+- `files-changed.md` is scaffolded empty and populated progressively — never pre-fill it

@@ -4,8 +4,9 @@ description: Populate or update certification study content for domains
   touched during today's roadmap work. Run at end of each day session.
   Reads the day's summary.md to determine which cert domains were touched,
   then generates/updates concepts.md, practice-q.md, and resources.md
-  for each affected domain only.
-  Usage: /cert-update 007
+  for the affected domains. Processes ONE domain per run for token control.
+  Usage: /cert-update 007        (process the next un-updated domain)
+         /cert-update 007 all    (process all touched domains, one at a time)
 allowed-tools: Bash, Read, Write
 ---
 
@@ -13,14 +14,27 @@ allowed-tools: Bash, Read, Write
 
 ## What this does
 1. Reads docs/notes/Day-NNN/summary.md for the given day number
-2. Extracts the Certification Reinforcement section to identify
-   which exams and domains were touched (Primary + Secondary)
-3. For each affected domain folder, generates or updates:
+2. Extracts the Certification Reinforcement section to identify which exams
+   and domains were touched (Primary + Secondary)
+3. Builds the list of touched domains, then processes them ONE AT A TIME:
+   - Default (`/cert-update NNN`): update the FIRST touched domain that has
+     not yet been updated for this day, then STOP and report which domains
+     remain. Re-run the command to do the next one.
+   - With `all` (`/cert-update NNN all`): loop through every touched domain,
+     but generate each domain's content in a separate pass and report progress
+     after each. Stop early if any single domain fails.
+4. For each domain processed, generate or update:
    - concepts.md  — explanations at two levels
-   - practice-q.md — 10 synthesized practice questions
+   - practice-q.md — 5 synthesized practice questions (see cap below)
    - resources.md  — curated links from MS Learn + reputable sources
    - day-mapping.md — append this day number
-4. Updates docs/certifications/domain-coverage.md to mark the domain
+5. Update docs/certifications/domain-coverage.md to mark the domain
+
+## Why one domain per run
+A single day can touch 3-4 domains across two exams. Generating concepts +
+questions + resources for all of them in one pass is a large, expensive
+generation. One domain per run keeps each invocation cheap and reviewable.
+The `all` flag exists for when you deliberately want the full sweep.
 
 ## Content generation rules
 
@@ -30,7 +44,7 @@ Each concept in the domain gets two explanations:
 ---
 ## <Concept Name>
 
-### If you're 9 years old
+### If you're 10 years old
 [Analogy-first. Real-world object the reader already knows.
 No jargon. One paragraph.]
 
@@ -42,8 +56,9 @@ in enterprise" and "common beginner mistake". Two to four paragraphs.]
 ---
 
 ### practice-q.md format
-10 questions per domain update. Scenario-based (not definition recall).
-Format:
+5 questions per domain update (lowered from 10 for token control —
+quality over quantity; re-run on a later day to add more). Scenario-based,
+not definition recall. Format:
 
 ---
 ## Q<N>: <Scenario headline>
@@ -88,15 +103,16 @@ Curated links only. No scraped content. Format:
 ## What NOT to do
 - Do not reproduce content from MeasureUp, Whizlabs, Udemy tests,
   or any paid exam bank — link to them at most
-- Do not generate more than 10 questions per domain per day run
-  (token discipline — quality over quantity)
+- Do not generate more than 5 questions per domain per run
 - Do not regenerate concepts.md if it already exists and the domain
   content hasn't changed — append a "Day NNN additions" section instead
+- Do not process more than one domain per run unless `all` is passed
 
 ## Token discipline
-- Read only the day's summary.md — not the full day folder
+- Read ONLY the day's summary.md — not the full day folder
 - Generate content only for domains marked Primary or Secondary
   in that day's cert reinforcement section
+- One domain per run by default; the `all` flag is the explicit opt-in
 - Fetch MS Learn resource links via web search; do not fetch and
   reproduce full page content
 - One pass per domain, not iterative refinement

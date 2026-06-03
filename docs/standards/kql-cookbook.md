@@ -10,7 +10,8 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
 - Replace `0HN...` placeholders with real correlation IDs from response headers
 - All queries assume W3C Trace Context propagation (active since Day 6)
 - Custom dimensions used: `CorrelationId`, `llm.tokens.input`, `llm.tokens.output`,
-  `llm.provider`, `llm.model`, `llm.latency_ms`
+  `llm.provider`, `llm.model`, `llm.latency_ms`,
+  `llm.cache.read_tokens` (Day 7+), `llm.cache.creation_tokens` (Day 7+)
 
 ---
 
@@ -110,4 +111,51 @@ union requests, dependencies, traces, exceptions
        or operation_Id == "0HN..."
 | project timestamp, itemType, name, message, resultCode, duration
 | order by timestamp asc
+```
+
+## 8. Cache hit rate (last 1 hour) — Day 7+
+```kql
+dependencies
+| where name == "claude.chat.api"
+| where timestamp > ago(1h)
+| extend
+    cacheReadTokens = toint(customDimensions["llm.cache.read_tokens"]),
+    cacheCreationTokens = toint(customDimensions["llm.cache.creation_tokens"])
+| summarize
+    totalRequests = count(),
+    cacheHits = countif(cacheReadTokens > 0),
+    cacheMisses = countif(cacheCreationTokens > 0 and (isnull(cacheReadTokens) or cacheReadTokens == 0))
+| extend hitRate = round(todouble(cacheHits) / todouble(totalRequests) * 100, 1)
+| project totalRequests, cacheHits, cacheMisses, hitRate
+```
+
+## 9. Estimated token cost savings (last 24 hours) — Day 7+
+```kql
+// claude-sonnet-4-6 pricing: $3/M input tokens, $0.30/M cached read tokens
+// Cached write billed at 125% of input rate ($3.75/M)
+// Update price constants when switching models
+let inputPricePerToken = 3.0 / 1000000;
+let cacheReadPricePerToken = 0.30 / 1000000;
+let cacheWritePricePerToken = 3.75 / 1000000;
+dependencies
+| where name == "claude.chat.api"
+| where timestamp > ago(24h)
+| extend
+    inputTokens = toint(customDimensions["llm.tokens.input"]),
+    cacheReadTokens = toint(customDimensions["llm.cache.read_tokens"]),
+    cacheCreationTokens = toint(customDimensions["llm.cache.creation_tokens"])
+| summarize
+    totalInputTokens = sum(inputTokens),
+    totalCacheReadTokens = sum(cacheReadTokens),
+    totalCacheCreationTokens = sum(cacheCreationTokens)
+| extend
+    actualCost = (todouble(totalInputTokens) * inputPricePerToken)
+               + (todouble(totalCacheReadTokens) * cacheReadPricePerToken)
+               + (todouble(totalCacheCreationTokens) * cacheWritePricePerToken),
+    uncachedCost = todouble(totalInputTokens + totalCacheReadTokens) * inputPricePerToken,
+    savingsUSD = uncachedCost - actualCost
+| project totalInputTokens, totalCacheReadTokens, totalCacheCreationTokens,
+          actualCost = round(actualCost, 4),
+          uncachedCost = round(uncachedCost, 4),
+          savingsUSD = round(savingsUSD, 4)
 ```

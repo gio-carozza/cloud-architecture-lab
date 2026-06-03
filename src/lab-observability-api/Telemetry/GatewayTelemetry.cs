@@ -18,4 +18,14 @@ public static class GatewayTelemetry
 
     public static readonly Counter<long> ProviderFailureCount =
         Meter.CreateCounter<long>("ai.provider.failures");
+
+    public static readonly Counter<long> CacheHits =
+        Meter.CreateCounter<long>(
+            "ai.provider.cache.hits",
+            description: "Number of requests that read from the prompt cache");
+
+    public static readonly Counter<long> CacheMisses =
+        Meter.CreateCounter<long>(
+            "ai.provider.cache.misses",
+            description: "Number of requests that populated the prompt cache");
 }

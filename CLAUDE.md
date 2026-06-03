@@ -109,9 +109,12 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
   2. `Invoke-RestMethod` with `az account get-access-token` bearer token — uses
      Windows' native TLS stack; required for PUT/POST writes that the CLI still resets
      even with SSL verification disabled. Preferred for creating Azure resources.
-  - **Exception — App Service appsettings PUT:** `/config/appsettings` PUT fails via
-    BOTH paths on this network (Day 7). Reads (POST `/list`) succeed. Use the Azure
-    portal for appsettings changes: `portal.azure.com` → App Service → Configuration.
+  - **Exception — App Service appsettings PUT/PUT:** `/config/appsettings` PUT fails via
+    both paths on this network (Day 7). **Workaround:** PATCH the parent site resource
+    instead — `Invoke-RestMethod -Method PATCH` to `.../sites/{name}?api-version=2022-03-01`
+    with body `{properties:{siteConfig:{appSettings:[{name,value},...]}}}`. PATCH goes
+    through where PUT does not. Include ALL settings in the array — siteConfig.appSettings
+    PATCH replaces the entire array, not merges. Portal is the fallback if PATCH also fails.
   - `api.applicationinsights.io` (used by `az monitor app-insights query`) is NOT
     affected — KQL queries work without workarounds.
 - **IOptions<T>:** requires `using Microsoft.Extensions.Options;` explicitly.

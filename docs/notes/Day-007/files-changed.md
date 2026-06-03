@@ -22,3 +22,5 @@
 | `docs/standards/kql-cookbook.md` | docs pass | Queries 8 (cache hit rate) and 9 (estimated token savings) added; pricing updated to claude-sonnet-4-6 rates |
 | `docs/standards/azure-environment.md` | docs pass | Anthropic__EnablePromptCaching and Anthropic__SystemPrompt added (pending portal apply); Anthropic__Model updated to claude-sonnet-4-6 |
 | `CLAUDE.md` | docs pass | North star items 1-3 annotated with ADR numbers and done status; SSL gotcha updated with appsettings PUT portal fallback |
+| `docs/notes/Day-007/completion-checklist.md` | deploy | All remaining items marked [x]: settings applied, deploy complete, Azure health/chat/App Insights/KQL Query 8 all verified |
+| `docs/notes/Day-007/files-changed.md` | deploy | Deploy pass rows added |

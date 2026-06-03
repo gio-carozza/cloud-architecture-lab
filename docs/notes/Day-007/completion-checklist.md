@@ -47,8 +47,8 @@
 ## Infra & Config
 
 - [x] `Infra/Day-007/appsettings-template.md` documents `Anthropic__EnablePromptCaching` and `Anthropic__SystemPrompt`
-- [ ] `Anthropic__EnablePromptCaching=true` set on App Service
-- [ ] `Anthropic__SystemPrompt` set on App Service (≥1100 tokens for cache to activate)
+- [x] `Anthropic__EnablePromptCaching=true` set on App Service — applied via ARM PATCH (PATCH path works; PUT blocked by network proxy)
+- [x] `Anthropic__SystemPrompt` set on App Service (6920 chars / ≈1490 tokens) — applied same pass
 
 ## KQL
 
@@ -57,12 +57,12 @@
 
 ## Deploy & Azure Verification
 
-- [ ] Deploy via `/deploy` slash command
-- [ ] `GET /health` returns 200 from Azure
-- [ ] `POST /api/ai/chat` returns 200 from Azure
-- [ ] App Insights `dependencies` table: `claude.chat.api` span shows `llm.cache.creation_tokens` on first post-deploy request
-- [ ] App Insights `dependencies` table: `llm.cache.read_tokens` visible on subsequent requests
-- [ ] KQL Query 8 returns a non-null cache hit rate after ≥2 live requests
+- [x] Deploy via `/deploy` slash command — Kudu zip deploy `d5e4982` to `app-ai-lab-api-dev-eastus-gio`
+- [x] `GET /health` returns 200 from Azure — `{"status":"healthy"}`
+- [x] `POST /api/ai/chat` returns 200 from Azure — model: `claude-sonnet-4-6`, `X-Correlation-Id` present
+- [x] App Insights `dependencies` table: `claude.chat.api` span shows `llm.cache.creation_tokens=1488` on first post-deploy request
+- [x] App Insights `dependencies` table: `llm.cache.read_tokens=1488` visible on second request
+- [x] KQL Query 8 returns a non-null cache hit rate after ≥2 live requests — **50% hit rate (1/2 requests)**
 
 ## Documentation
 
@@ -70,4 +70,4 @@
 - [x] `docs/architecture/day-007-prompt-caching-and-cost-observability.md` written
 - [x] `docs/notes/Day-007/architect-thinking.md` written
 - [x] `docs/notes/Day-007/posture-check.md` filled (end of day, before commit)
-- [ ] Git commit: `feat(day-007): prompt caching and cost observability`
+- [x] Git commit: `feat(day-007): prompt caching and cost observability` — `d5e4982`

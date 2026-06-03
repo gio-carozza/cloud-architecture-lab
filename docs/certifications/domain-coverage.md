@@ -31,7 +31,7 @@ Last updated: Day-007 (scaffold run 2026-06-03)
 |---|---|---|---|---|
 | 1 | Manage Azure identities and governance | 20–25% | ✅ | — |
 | 2 | Implement and manage storage | 15–20% | ✅ | — |
-| 3 | Deploy and manage Azure compute resources | 20–25% | ✅ | — |
+| 3 | Deploy and manage Azure compute resources | 20–25% | ✅ | Day 7 |
 | 4 | Implement and manage virtual networking | 15–20% | ✅ | — |
 | 5 | Monitor and maintain Azure resources | 10–15% | ✅ | Day 6, 7 |
 

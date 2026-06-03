@@ -38,7 +38,7 @@ Last updated: Day-007 (scaffold run 2026-06-03)
 ### AZ-305 (as of April 17, 2026)
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
-| 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | — |
+| 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | Day 7 |
 | 2 | Design data storage solutions | 20–25% | ✅ | — |
 | 3 | Design business continuity solutions | 15–20% | ✅ | — |
 | 4 | Design infrastructure solutions | 30–35% | ✅ | — |

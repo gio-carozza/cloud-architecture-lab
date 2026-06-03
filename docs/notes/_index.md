@@ -9,3 +9,4 @@
 | [Day 005](Day-005/) | provider-abstraction | Build | Complete |
 | [Day 006](Day-006/) | observability-and-resilience | Hybrid | Complete |
 | [Day 007](Day-007/) | prompt-caching-and-cost-observability | Hybrid | Complete |
+| [Day 008](Day-008/) | batch-api-cost-controls | Build | In Progress |

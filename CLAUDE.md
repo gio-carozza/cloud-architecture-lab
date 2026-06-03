@@ -213,7 +213,7 @@ the weight the question deserves. This mirrors the model-routing decision you'll
 in production AI gateways: cheapest model that solves the problem, escalate on need.
 
 The canonical model-routing rule lives in `.claude/instructions/daily-workflow.md`:
-Sonnet everywhere except STEP 3 (ADR reasoning) and STEP 9 (posture check),
+Sonnet everywhere except STEP 5 (ADR reasoning) and STEP 11 (posture check),
 which use Opus. If this file and the workflow ever disagree, the workflow wins.
 
 ### Quick reference: modes × models × tools

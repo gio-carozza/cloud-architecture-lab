@@ -96,7 +96,7 @@ See posture-check.md (filled at end of day, BEFORE marking complete)
 
 ## Required initial content for appsettings-template.md
 
-Scaffold with the no-new-settings stub. Replace with real settings during STEP 4
+Scaffold with the no-new-settings stub. Replace with real settings during STEP 6
 (populate) once the day's summary is written and it's clear what config changes
 the day introduces. `/deploy` reads this file at step 1b — it must exist.
 

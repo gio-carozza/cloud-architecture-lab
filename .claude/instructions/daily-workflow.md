@@ -9,27 +9,32 @@
 ## THE SHAPE OF EVERY DAY
 
 ```
-STEP 1  SCAFFOLD   Claude Code · Sonnet    /new-day  (build the empty skeleton FIRST)
-STEP 2  PLAN       chat (new) · Sonnet     get the day's summary
-STEP 3  ADR        chat (new) · latest Opus  reason out the decision (skip if none)
-STEP 4  POPULATE   Claude Code · Sonnet    fill summary + checklist + /adr
-STEP 5  BUILD      Claude Code · Sonnet    implement each phase
-STEP 6  TEST       Claude Code · Sonnet    run locally
-STEP 7  DEPLOY     Claude Code · Sonnet    /deploy + verify
-STEP 8  DOCUMENT   Claude Code · Sonnet    update docs + commit + /cert-update
-STEP 9  REFLECT    chat (new) · latest Opus  posture check
-STEP 10 CLOSE      Claude Code · Sonnet    save posture check + commit
+STEP 0  CLOSE (prev)   Claude Code · Sonnet    verify previous day frozen (audit, posture-check, files-changed)
+STEP 1  PRUNE          (manual)                move previous day's files out of hot context; rotate ADRs
+STEP 2  DECIDE         chat · Sonnet           lock the workload and slug for the new day
+STEP 3  SCAFFOLD       Claude Code · Sonnet    /new-day N <slug>  (build the empty skeleton)
+STEP 4  DRAFT          chat (new) · Sonnet     full Day N summary in 13-section format
+STEP 5  ADR            chat (new) · latest Opus  reason out the decision (skip if none)
+STEP 6  POPULATE       Claude Code · Sonnet    fill summary + checklist + /adr
+STEP 7  BUILD          Claude Code · Sonnet    implement each phase
+STEP 8  TEST           Claude Code · Sonnet    run locally
+STEP 9  DEPLOY         Claude Code · Sonnet    /deploy + verify
+STEP 10 DOCUMENT       Claude Code · Sonnet    update docs + commit + /cert-update
+STEP 11 REFLECT        chat (new) · latest Opus  posture check
+STEP 12 CLOSE          Claude Code · Sonnet    save posture check + commit
 ```
 
-Three rules:
-1. Chat for STEP 2, 3, 9 only. Claude Code for everything else.
-2. Model: Sonnet everywhere EXCEPT STEP 3 and STEP 9, which use the LATEST
+Four rules:
+1. Chat for STEP 2, 4, 5, 11 only. STEP 1 is manual. Claude Code for everything else.
+2. Model: Sonnet everywhere EXCEPT STEP 5 and STEP 11, which use the LATEST
    Opus (currently Claude Opus 4.8 — confirm the newest Opus in the model
    picker; don't pin a version number).
-3. New chat for each of STEP 2, 3, 9. Close it the moment that step ends.
+3. New chat for each of STEP 2, 4, 5, 11. Close it the moment that step ends.
+4. STEP 0 is not optional. Never start a new day without verifying the previous
+   day is fully frozen.
 
 Why scaffold first: the day folder and stub files must exist before anything
-can be written into them. Build the empty skeleton, then plan into it, then
+can be written into them. Build the empty skeleton, then draft into it, then
 fill it. No chicken-and-egg.
 
 Your slash commands (in .claude/commands/):
@@ -37,7 +42,56 @@ Your slash commands (in .claude/commands/):
 
 ---
 
-## STEP 1 — SCAFFOLD  (Claude Code — first thing every day)
+## STEP 0 — CLOSE PREVIOUS DAY  (Claude Code · Sonnet)
+
+Before starting any new day, verify the previous day is frozen. Paste:
+```
+Verify Day ___ is fully closed out:
+1. Check docs/notes/Day-___/completion-checklist.md — all items [x]?
+2. Check docs/notes/Day-___/posture-check.md — all four questions answered?
+3. Check docs/notes/Day-___/files-changed.md — no duplicate rows, no stale text?
+4. Check docs/standards/_principles.md — graveyard entries added?
+5. Check docs/notes/_index.md — Day ___ status = Complete?
+6. Run git status — working tree clean?
+Report any open items. Fix before proceeding.
+```
+→ STOP if any item is open. Complete it before moving to STEP 1.
+
+---
+
+## STEP 1 — PRUNE  (manual — not Claude Code)
+
+Before opening Claude Code for the new day, update your **project knowledge**
+(in claude.ai) manually:
+
+- Move `docs/notes/Day-___/` working files (summary, checklist, posture-check)
+  **OUT** of project knowledge — the day is frozen; Claude Code reads them on demand.
+- Keep only the current day's working files in hot context.
+- ADR rotation: keep the 2 most recent ADRs in project knowledge; move older ones out.
+- The standards files (CLAUDE.md, _principles.md, naming-conventions.md,
+  azure-environment.md, kql-cookbook.md) stay in project knowledge permanently.
+
+This step is manual and takes ~2 minutes. It is not done by Claude Code.
+
+---
+
+## STEP 2 — DECIDE  (chat · Sonnet)
+
+Short chat to lock the workload and slug. Paste:
+```
+Day ___ closes. I need to start Day ___.
+North star item next in line: ___
+Parking lot from Day ___: ___
+Constraints or blockers: ___
+
+Propose: (1) the Day ___ workload in one sentence, (2) a kebab-case slug
+for /new-day. One response. No summary yet.
+```
+Get the slug confirmed. → STOP. Close chat.
+
+---
+
+## STEP 3 — SCAFFOLD  (Claude Code · Sonnet)
 
 Open terminal → cd C:\dev\cloud-architecture-lab → open Claude Code.
 
@@ -54,39 +108,38 @@ Example: /new-day 8 batch-api-for-offline-workloads
 This creates docs/notes/Day-___/ (summary, completion-checklist,
 architect-thinking, posture-check, files-changed — all empty templates),
 docs/architecture/day-___-<slug>.md, and Infra/Day-___/appsettings-template.md
-(stub — populate during STEP 4 or 5 once settings are known).
+(stub — populate during STEP 6 or 7 once settings are known).
 
 If it DOES exist (resuming a day), skip /new-day — the skeleton is already there.
 
-Leave Claude Code open. → Go to STEP 2 in a new chat.
+Leave Claude Code open. → Go to STEP 4 in a new chat.
 
 ---
 
-## STEP 2 — PLAN  (new chat · Sonnet)
+## STEP 4 — DRAFT  (new chat · Sonnet)
 
 Paste:
 ```
 I'm starting Day ___ of my cloud-architecture-lab roadmap.
 PREVIOUS DAY: Day ___ completed ___.
-TODAY'S FOCUS: ___
+TODAY'S FOCUS: ___  (from STEP 2 DECIDE)
 CONSTRAINTS: ___
 
-Produce the Day summary.md using the daily roadmap format from CLAUDE.md.
-One response. No code.
+Produce the Day ___ summary.md using the 13-section daily roadmap format
+from CLAUDE.md. One response. No code.
 ```
-Blanks: previous day = what you shipped. Focus = yesterday's parking lot or
-CLAUDE.md north star. Constraints = anything broken/deferred. Don't know the
-focus? Replace CONSTRAINTS with: "Recommend today's focus from CLAUDE.md and
-yesterday's parking lot."
+Blanks: previous day = what you shipped. Focus = from STEP 2. Constraints =
+anything broken/deferred. Don't know the focus? Replace CONSTRAINTS with:
+"Recommend today's focus from CLAUDE.md and yesterday's parking lot."
 
 Copy the summary. → STOP. Close chat.
 
 ---
 
-## STEP 3 — ADR REASONING  (new chat · latest Opus) — skip if summary lists no ADR
+## STEP 5 — ADR REASONING  (new chat · latest Opus) — skip if summary lists no ADR
 
 This step produces the ADR *content* through reasoning. The file gets
-created in STEP 4 with the /adr command.
+created in STEP 6 with the /adr command.
 
 Paste:
 ```
@@ -106,14 +159,14 @@ Copy the ADR content. → STOP. Close chat.
 
 ---
 
-## STEP 4 — POPULATE  (back in Claude Code)
+## STEP 6 — POPULATE  (back in Claude Code)
 
-The skeleton from STEP 1 already exists. Now fill it.
+The skeleton from STEP 3 already exists. Now fill it.
 
 Paste the approved summary into the stub:
 ```
 Replace the template content in docs/notes/Day-___/summary.md with:
-<PASTE APPROVED SUMMARY FROM STEP 2>
+<PASTE APPROVED SUMMARY FROM STEP 4>
 Then extract the completion checklist into
 docs/notes/Day-___/completion-checklist.md.
 ```
@@ -126,13 +179,13 @@ Example: /adr implement-prompt-caching-inside-provider-boundary
 This finds the next ADR number and creates the file from the template. Then:
 ```
 Replace the template content in docs/adr/ADR-___-<title>.md with:
-<PASTE APPROVED ADR FROM STEP 3>
+<PASTE APPROVED ADR FROM STEP 5>
 Set Status: Accepted, Date: today.
 ```
 
 ---
 
-## STEP 5 — BUILD  (Claude Code, one prompt per phase)
+## STEP 7 — BUILD  (Claude Code, one prompt per phase)
 
 For each phase in the summary's Step-by-Step Execution, paste:
 ```
@@ -154,7 +207,7 @@ Build fails? Paste: `Build failed with: ___ . Fix it. Rebuild. Report.`
 
 ---
 
-## STEP 6 — TEST  (Claude Code)
+## STEP 8 — TEST  (Claude Code)
 
 Paste:
 ```
@@ -166,11 +219,11 @@ Report pass/fail for each. Fix failures and re-test.
 
 ---
 
-## STEP 7 — DEPLOY  (Claude Code)
+## STEP 9 — DEPLOY  (Claude Code)
 
 Settings are applied automatically: `/deploy` reads `Infra/Day-___/appsettings-template.md`
 and applies any settings there before publishing. You don't add them manually.
-Just confirm the template is populated (it's written during STEP 5 build) and run:
+Just confirm the template is populated (it's written during STEP 7 build) and run:
 ```
 /deploy
 ```
@@ -186,7 +239,7 @@ Report results.
 
 ---
 
-## STEP 8 — DOCUMENT  (Claude Code)
+## STEP 10 — DOCUMENT  (Claude Code)
 
 Paste:
 ```
@@ -210,7 +263,7 @@ Then update cert study materials for domains touched today:
 
 ---
 
-## STEP 9 — REFLECT  (new chat · latest Opus)
+## STEP 11 — REFLECT  (new chat · latest Opus)
 
 Paste:
 ```
@@ -228,7 +281,7 @@ Copy the result. → STOP. Close chat.
 
 ---
 
-## STEP 10 — CLOSE  (Claude Code)
+## STEP 12 — CLOSE  (Claude Code)
 
 Paste:
 ```
@@ -239,7 +292,7 @@ Add graveyard entries to docs/standards/_principles.md:
 git add -A && git commit -m "docs(day-___): posture check and graveyard"
 ```
 
-Done. Tomorrow → Step 1.
+Done. Tomorrow → STEP 0.
 
 ---
 
@@ -252,19 +305,19 @@ Run once, early — ideally end of Day 7 — to build the cert study structure:
 /cert-scaffold AZ-305
 /cert-scaffold AI-102
 ```
-After this, /cert-update in STEP 8 populates domains as you touch them.
+After this, /cert-update in STEP 10 populates domains as you touch them.
 
 ---
 
 ## IF YOU GET STUCK
 
-- Don't know a blank? It's in your summary.md from Step 2.
+- Don't know a blank? It's in your summary.md from STEP 4.
 - Build won't pass? Stay in Claude Code, paste the error, let it fix.
 - Need to reason mid-build? New short chat (Sonnet), ask, close it, return.
 - Chat feels long (>6 messages)? Close it, open a new one.
 - About to type "give me the code" in chat? Stop — that's Claude Code.
 - A slash command does nothing? Check it exists: "Show me .claude/commands/<name>.md"
-- summary.md missing when BUILD needs it? You skipped STEP 4 — populate it first.
+- summary.md missing when BUILD needs it? You skipped STEP 6 — populate it first.
 
 ---
 
@@ -272,17 +325,17 @@ After this, /cert-update in STEP 8 populates domains as you touch them.
 
 | Command | Step | What it does |
 |---|---|---|
-| /new-day N slug | 1 | Scaffolds the day folder + architecture file + Infra dir |
-| /adr title | 4 | Creates next-numbered ADR file from template |
-| /deploy | 7 | Kudu zip deploy + post-deploy verification |
-| /cert-update N | 8 | Populates cert domains touched that day |
+| /new-day N slug | 3 | Scaffolds the day folder + architecture file + Infra dir |
+| /adr title | 6 | Creates next-numbered ADR file from template |
+| /deploy | 9 | Kudu zip deploy + post-deploy verification |
+| /cert-update N | 10 | Populates cert domains touched that day |
 | /cert-scaffold EXAM | one-time | Builds cert domain structure from MS skills outline |
 
 ---
 
 ## TOKEN NOTE
 
-The latest Opus runs on STEP 3 and STEP 9 only — the two steps where
+The latest Opus runs on STEP 5 and STEP 11 only — the two steps where
 reasoning depth is the point. Everything else is Sonnet. If you ever catch
 yourself on Opus during a build, test, deploy, or doc step, you're
 overspending — switch back. This mirrors your own gateway's rule: cheapest

@@ -8,4 +8,4 @@
 | [Day 004](Day-004/) | — | Build | Complete |
 | [Day 005](Day-005/) | provider-abstraction | Build | Complete |
 | [Day 006](Day-006/) | observability-and-resilience | Hybrid | Complete |
-| [Day 007](Day-007/) | prompt-caching-and-cost-observability | Hybrid | In Progress |
+| [Day 007](Day-007/) | prompt-caching-and-cost-observability | Hybrid | Complete |

@@ -1,28 +1,18 @@
 # Azure Lab Environment
 
-Subscription
-gio-architecture-lab
+## Identity
 
-Resource Group
-rg-ai-lab-dev-eastus
-
-Budget
-lab-monthly-limit
-
-Region
-East US
+| Field | Value |
+|---|---|
+| Subscription | `gio-architecture-lab` |
+| Subscription ID | `6b7c3ded-aa98-43aa-8c19-fbf1b15a6920` |
+| Resource Group | `rg-ai-lab-dev-eastus` |
+| Region | East US |
+| Budget | `lab-monthly-limit` ($50/month) |
 
 ## Purpose
 
-This environment hosts experimental workloads used during the architecture learning roadmap.
-
-The goal is to maintain a controlled cloud environment where services can be deployed and tested while maintaining cost awareness.
-
-## Notes
-
-The environment is intentionally simple during early learning phases.
-
-Future iterations may include more advanced architecture patterns.
+Single-environment lab hosting the AI Gateway (`app-ai-lab-api-dev-eastus-gio`) and its supporting infrastructure. Intentionally simple — one resource group, one app, one Application Insights. Complexity scales with the roadmap, not ahead of it.
 
 ## Cost Governance
 
@@ -50,11 +40,12 @@ environment variables (set as App Service configuration, NOT in appsettings.json
 - `Anthropic__Model` (`claude-sonnet-4-6` — updated Day 7; was `claude-opus-4-7`)
 - `Anthropic__BaseUrl` (`https://api.anthropic.com/v1`)
 - `Anthropic__MaxTokens`
-- `Anthropic__EnablePromptCaching` (`true` — added Day 7; pending portal apply)
-- `Anthropic__SystemPrompt` (≥1024-token operational prompt — added Day 7; pending portal apply)
+- `Anthropic__EnablePromptCaching` (`true` — added Day 7)
+- `Anthropic__SystemPrompt` (6920-char / ≈1490-token operational system prompt — added Day 7)
 
 ### Observability (Day 6+)
-- `APPLICATIONINSIGHTS_CONNECTION_STRING`
+- `APPLICATIONINSIGHTS_CONNECTION_STRING` (SDK auto-discovery key)
+- `ApplicationInsights__ConnectionString` (IConfiguration-style key for OpenTelemetry exporter)
 
 ### Deployment
 - `WEBSITE_RUN_FROM_PACKAGE=1`

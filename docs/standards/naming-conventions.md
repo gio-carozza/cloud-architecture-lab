@@ -87,10 +87,12 @@ Notes:
 - Globally unique
 
 ## Action Groups
-`ag-<purpose>` or `ag-<purpose>-gio` for consistency
+`ag-<purpose>-<env>-<region>-gio` for workload-scoped groups (e.g., AI gateway alerts)
+`ag-<purpose>` for subscription-scoped groups (e.g., budget alerts)
 
-Example:
-`ag-cost-alerts`
+Examples:
+- `ag-ai-lab-dev-eastus-gio` — AI gateway alert receiver (workload-scoped, Day 6)
+- `ag-cost-alerts` — budget threshold notifications (subscription-scoped)
 
 ## Budgets
 `<purpose>-monthly-limit` (or similar)

@@ -89,7 +89,7 @@ the better.
 
 ## Daily Posture Check
 
-At the end of each roadmap day, answer these three questions in
+At the end of each roadmap day, answer these four questions in
 `Day-NNN/posture-check.md`:
 
 1. **Whose problem did I actually solve today?**
@@ -101,6 +101,9 @@ At the end of each roadmap day, answer these three questions in
 3. **What did I try, fail at, and learn?**
    (Add it to the graveyard. The graveyard is the portfolio nobody sees
    but every senior interviewer detects.)
+
+4. **Could I explain today's work to a 10-year-old AND defend it at a doctorate level?**
+   (If only one register works, the concept isn't owned yet — schedule a teach-back.)
 
 ## Token Discipline as Architecture Practice
 

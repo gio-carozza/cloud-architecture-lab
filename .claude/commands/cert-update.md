@@ -39,7 +39,7 @@ The `all` flag exists for when you deliberately want the full sweep.
 ## Content generation rules
 
 ### concepts.md format
-Each concept in the domain gets two explanations:
+Each concept gets four explanations — one per audience level:
 
 ---
 ## <Concept Name>
@@ -48,10 +48,21 @@ Each concept in the domain gets two explanations:
 [Analogy-first. Real-world object the reader already knows.
 No jargon. One paragraph.]
 
-### If you're an architect
-[Precise technical definition. Name the tradeoffs. Reference the
-Azure service or .NET API by exact name. Include "why this matters
-in enterprise" and "common beginner mistake". Two to four paragraphs.]
+### If you're a CEO
+[Business value, ROI, or risk framing. What does this cost or save?
+What breaks if ignored? What does a competitor gain by doing this well?
+Two sentences maximum.]
+
+### If you're an Engineer
+[How to actually implement it. Exact API names, SDK methods, config keys,
+code patterns. What are the common errors and how do you fix them?
+Two to three paragraphs.]
+
+### If you're an Architect
+[System design, tradeoffs, enterprise patterns. Why this matters at scale.
+What does the wrong choice cost in 18 months? Reference exact service names.
+Include "why this matters in enterprise" and "common beginner mistake".
+Two to four paragraphs.]
 
 ---
 

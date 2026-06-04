@@ -10,7 +10,13 @@
 ### If you're 10 years old
 The Azure Well-Architected Framework is like a building inspection checklist for cloud systems. One section of the checklist is about money — "are you spending as little as possible while still doing what you need to do?" On Day 7 we added prompt caching to the AI gateway, which cuts the cost of each request by about 90%. That's not just a nice-to-have — it's what the Cost Optimization checklist requires you to design for from the beginning.
 
-### If you're an architect
+### If you're a CEO
+The Well-Architected Framework's Cost Optimization pillar says: build the cheapest system that meets all your other requirements. This is not about cutting corners — it's about not paying for what you don't need. For AI workloads, the decisions that matter most are made at the whiteboard, not in the Azure portal. Choosing batch over synchronous for deferrable workloads, choosing Sonnet over Opus for simple tasks, choosing caching for repeat patterns — these architectural choices reduce AI costs by 50–90% before a single line of code is written. The architect's job is to make those choices visible.
+
+### If you're an Engineer
+The five WAF pillars are Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency. For AZ-305 exam scenarios, you must satisfy multiple pillars simultaneously — the right answer is the design that meets all pillars at the lowest cost. Cost-specific decisions for AI gateways: (1) use `IOptions<T>` binding for model selection so it's configurable without redeployment; (2) implement `IBatchProvider` for deferrable workloads at 50% token cost; (3) add prompt caching for stable system prompts at ~10% of base input cost; (4) use `MaxBatchSize` enforcement to prevent cost blowouts. Each of these is a WAF Cost Optimization pattern.
+
+### If you're an Architect
 The Azure Well-Architected Framework (WAF) Cost Optimization pillar defines cost efficiency as a first-class design requirement, not a post-deployment tuning exercise. The five WAF pillars are Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency. For AZ-305, you must be able to recommend designs that satisfy multiple pillars simultaneously — not trade one off against another.
 
 For AI gateways, cost optimization manifests at the architecture level in three ways:
@@ -32,7 +38,13 @@ Each of these is a design decision, not a configuration choice. They must appear
 ### If you're 10 years old
 Imagine you're trying to save electricity at home. You could check your monthly bill (logs — you only see the total after it's over). Or you could install a meter on each outlet that shows how much power each appliance uses right now (metrics — you see it happening). Metrics let you catch a problem while it's still small. The electricity bill tells you after you've already paid.
 
-### If you're an architect
+### If you're a CEO
+Logs tell you what happened. Metrics tell you what's happening now. For AI cost governance, you need both: logs to investigate why a cost anomaly occurred (which requests, which users, which paths), and metrics to detect the anomaly in real time before it becomes a budget crisis. A company with only logs finds out about cost overruns after they happen. A company with metrics finds out while they're happening and can act immediately.
+
+### If you're an Engineer
+In Azure Monitor: metrics are near-real-time (seconds latency), pre-aggregated (you can't drill into individual records), and retained 93 days free. Logs are in Log Analytics, have minutes-to-hours latency, store individual records with full context, and are billed by ingestion volume. For AI gateways: publish `ai.provider.cache.hits` and `ai.provider.cache.misses` as OpenTelemetry counters (appear as custom metrics in App Insights, queryable in Metrics Explorer and alert rules). Log individual token counts as Activity tags in the `dependencies` table (queryable via KQL for per-request analysis). The alert rule goes on the metric; the forensic query goes on the log.
+
+### If you're an Architect
 In Azure Monitor, **metrics** and **logs** serve fundamentally different purposes in cost governance:
 
 | | Metrics | Logs |
@@ -60,7 +72,13 @@ The AZ-305 architect's obligation is to design both layers: metrics for alerting
 ### If you're 10 years old
 When your family decides how much to spend on electricity, you set a budget and watch the meter. If the meter starts running fast, someone turns off lights. AI workloads are the same — you set a budget for how many tokens you'll use, watch the meter (the telemetry), and turn down expensive features (like high-end models) if you're running hot.
 
-### If you're an architect
+### If you're a CEO
+AI cost governance is defense-in-depth: a budget ceiling that notifies before you overspend, operational levers your on-call team can pull without a deployment, and real-time telemetry that explains why costs are moving. Without all three layers, you're either flying blind, responding too slowly, or finding out too late. The companies that scale AI without budget surprises have all three. The ones that don't keep finding out about overruns on their Azure invoice.
+
+### If you're an Engineer
+Three implementation layers: (1) Azure Cost Management budget alert at 80% of monthly limit — `az consumption budget create` — this fires a notification but does NOT stop spending; (2) `IOptions<T>` operational toggles bound to App Service settings — `Anthropic__EnablePromptCaching`, model tier setting — these let on-call flip features without a deploy; (3) token usage Activity tags with `path`, `provider`, and `caller_id` dimensions — these enable KQL attribution queries. Wire all three before deploying to production. The most common gap: only the budget alert is implemented; the operational toggle and telemetry are deferred to "phase 2" and never ship.
+
+### If you're an Architect
 Cost governance for AI workloads in enterprise requires three layers:
 
 **1. Budget controls** — Azure Cost Management budgets with alert thresholds (50%, 75%, 90% of monthly limit). These are financial guardrails; they notify but do not stop spending.

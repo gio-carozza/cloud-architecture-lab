@@ -2,14 +2,17 @@ Before starting ANY work, follow `.claude/instructions/daily-workflow.md`
 
 # cloud-architecture-lab
 
-12-month roadmap to Azure Cloud AI / LLM Architect ($200k–$250k tier).
+Three-phase career progression: AI Engineer → Forward-Deployed Engineer → LLM Architect.
 Anchor workload is a .NET 8 AI Gateway deployed to Azure App Service,
 designed for multi-provider LLM routing. Currently Claude-backed;
 provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
+Full career path: `docs/standards/career-path.md`
 
 ## Owner & Context
 - Backend developer (.NET, APIs, SQL), MIS master's
-- Pivoting to Azure Cloud AI / LLM Architect role
+- **Current phase: AI Engineer** — building the gateway, learning the APIs, owning cost and observability
+- **Next phase: Forward-Deployed Engineer** (~Day 21) — applying AI to real business problems, rapid prototyping, CEO-level communication
+- **Target phase: LLM Architect** (~Day 51+) — enterprise governance, multi-provider, compliance, $200k–$250k tier
 - Build-first learner; wants architect-level reasoning, not tutorials
 - Days 1–8 complete. Day 9 next.
 
@@ -55,6 +58,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - `docs/architecture/`          → System diagrams & sequence flows
 - `docs/notes/Day-NNN/`         → Daily roadmap artifacts (per day)
 - `docs/certifications/`        → Cert prep: AZ-900, AZ-104, AZ-305, AI-102
+- `docs/standards/career-path.md` → Three-phase career progression detail
 - `Infra/Day-NNN/`              → IaC, app settings templates
 - `.claude/skills/`             → Reusable knowledge packs (auto-invoked)
 - `.claude/commands/`           → Slash commands for repetitive workflows
@@ -135,29 +139,54 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
   contracts only (correlationId + safe message).
 
 ## What I'm Building Toward (north star)
-A multi-provider, observable, governed enterprise AI gateway:
-1. Provider abstraction (done — Day 5, ADR-005)
-2. Observability & resilience (done — Day 6, ADR-006, ADR-008)
-3. Cost controls — prompt caching (done — Day 7, ADR-009); batch API (done — Day 8, ADR-010)
-4. Multi-model routing & evaluation
-5. RAG with Azure AI Search
-6. Enterprise agent platform
-7. Governance: cost, security, compliance
+
+Three-phase career progression — see `docs/standards/career-path.md` for full detail.
+
+### Phase 1: AI Engineer (Days 1–20) — IN PROGRESS
+Build the gateway. Learn the APIs. Own cost and observability.
+- Provider abstraction (done — Day 5, ADR-005)
+- Observability & resilience (done — Day 6, ADR-006, ADR-008)
+- Cost controls — prompt caching (done — Day 7, ADR-009); batch API (done — Day 8, ADR-010)
+- **Remaining:** streaming responses, multi-turn context management, eval framework basics
+
+### Phase 2: Forward-Deployed Engineer (Days 21–50)
+Apply AI to real business problems. Communicate at CEO level. Rapid prototyping.
+- RAG with Azure AI Search (connect AI to real data)
+- Agent patterns (multi-step, tool-using workflows)
+- Evaluation framework (automated quality measurement)
+- Business case framing for every technical decision
+- Responsible AI: content filtering, audit logging, PII handling
+
+### Phase 3: LLM Architect (Days 51+)
+Enterprise governance. Multi-provider. Compliance at scale.
+- Multi-model routing & evaluation pipeline
+- Governance: cost attribution, security, compliance
+- Multi-provider strategy (Azure OpenAI, Bedrock, Foundry)
+- Enterprise agent platform
+- Platform-scale RAG
 
 ## Certification Tracks (parallel to build work)
-- AZ-900: Foundations (foundational concepts surface throughout)
-- AZ-104: Administrator (parallel track starting ~Day 10–15)
-- AZ-305: Solutions Architect Expert (post AZ-104)
-- AI-102: AI Engineer Associate (paced with AI gateway work)
+
+| Exam | Phase | Status |
+|---|---|---|
+| AZ-900 (Foundations) | Phase 1 | In progress |
+| AI-102 (AI Engineer Associate) | Phase 1–2 | In progress — ⚠️ retires June 30, 2026 |
+| AZ-104 (Administrator) | Phase 2–3 | Starts ~Day 10–15 |
+| AZ-305 (Solutions Architect Expert) | Phase 2–3 | Post AZ-104 |
+
 Each daily roadmap day MUST include a Certification Reinforcement section
 mapping that day's activities to specific cert domains (Primary / Secondary).
+Full cert-to-phase mapping: `docs/standards/career-path.md` → Certification Mapping table.
 
 ## Working Style
-- Direct, structured, architect-level. No hand-holding on basics.
+- Direct, structured. No hand-holding on basics.
 - Exact file paths, exact commands, copy-paste-ready content.
 - Surface tradeoffs explicitly. Name the alternative being rejected.
-- Always include "why this matters in enterprise" + "what elite architects
-  do differently" + "common beginner mistakes."
+- **Always explain at all four levels: 10-year-old, CEO, Engineer, Architect.**
+  - 10yo: analogy-first, no jargon, one paragraph
+  - CEO: business value, ROI, risk — two sentences max
+  - Engineer: exact APIs, code patterns, common errors
+  - Architect: system design, tradeoffs, enterprise implications
 - Build-first; architecture reasoning layered on top.
 - Don't repeat completed days. Build on the live system.
 
@@ -166,13 +195,14 @@ mapping that day's activities to specific cert domains (Primary / Secondary).
 ### Project knowledge scope (hot context)
 The project knowledge holds ONLY:
 - This file (CLAUDE.md)
-- _principles.md (architect posture)
-- naming-conventions.md, azure-environment.md (live environment facts)
-- The four SKILL.md files (.claude/skills/*/SKILL.md)
+- `_principles.md` (architect posture)
+- `career-path.md` (three-phase career progression)
+- `naming-conventions.md`, `azure-environment.md` (live environment facts)
+- The SKILL.md files (`.claude/skills/*/SKILL.md`)
 - The CURRENT day's working artifacts (summary.md, completion-checklist.md, posture-check.md)
 - The most recent 1-2 ADRs
-- NOT in hot context (read on demand): .claude/instructions/*,
-  .claude/commands/*, .claude/hooks/* — these are operational, not reasoning context
+- NOT in hot context (read on demand): `.claude/instructions/*`,
+  `.claude/commands/*`, `.claude/hooks/*` — these are operational, not reasoning context
 
 Everything else lives in the repo and is read by Claude Code on demand.
 This is RAG-by-discipline. Treat token cost as a first-class architectural constraint.
@@ -191,13 +221,12 @@ Output style: short, direct, copy-paste-ready.
 
 **Study mode** — preparing for AZ-900, AZ-104, AZ-305, AI-102.
 Primary tool: chat. Cert prep notes pasted in per session.
-Output style: explanations at 10-year-old AND doctorate level.
-Include exam-domain mappings.
+Output style: all four explanation levels. Include exam-domain mappings.
 
 **Perform mode** — architecture reasoning, ADR drafting, posture checks,
 roadmap planning, tradeoff analysis.
 Primary tool: chat. This is where the latest Opus (currently 4.8) escalation most often applies.
-Output style: structured, architect-level. Surface tradeoffs explicitly.
+Output style: structured. Surface tradeoffs explicitly. Name the alternative rejected.
 
 ### When to use Sonnet vs the latest Opus
 Default to **Sonnet 4.6**. It handles ~80% of roadmap work at a fraction of the quota cost.
@@ -224,9 +253,6 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 | Study      | Sonnet 4.6    | Chat           | Concept genuinely doesn't click |
 | Perform    | Sonnet 4.6    | Chat           | ADR / tradeoff / pushback / depth |
 
-If unsure: start Sonnet, escalate on need. Mirrors production AI gateway
-routing: cheapest model that solves the problem, escalate when warranted.
-
 ### Lifecycle: pruning the project as days complete
 
 **When a roadmap day completes:**
@@ -244,7 +270,6 @@ routing: cheapest model that solves the problem, escalate when warranted.
 - That file has graduated from "log" to "standard"
 - Promote it to `docs/standards/` (rename if needed)
 - Update references in `CLAUDE.md` and any consuming docs
-- Day-005's `kql.md` → `docs/standards/kql-cookbook.md` is the canonical example
 
 **When `docs/standards/` grows beyond 6-8 files:**
 - That's the signal to consider sub-foldering
@@ -256,6 +281,6 @@ routing: cheapest model that solves the problem, escalate when warranted.
   domains touched that day (reads summary.md cert section automatically)
 - Hook: `.claude/hooks/cert-tag.json` auto-tags domains as you work
 - Coverage matrix: `docs/certifications/domain-coverage.md`
-- Content: 10yo + architect explanations, synthesized practice questions,
+- Content: 10yo + CEO + Engineer + Architect explanations, synthesized practice questions,
   curated MS Learn + community resource links
 - Do NOT reproduce paid exam bank content

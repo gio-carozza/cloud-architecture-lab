@@ -13,10 +13,14 @@ allowed-tools: Read, Write
 - Implementing correlation IDs
 - KQL query questions
 
-## The Three Pillars (architect note)
+## The Three Pillars
 1. **Logs** — discrete events, structured (Serilog → App Insights)
 2. **Metrics** — aggregated numbers (latency, throughput, error rate)
 3. **Traces** — causal chains across components (W3C Trace Context)
+
+**AI Engineer:** knows what to log (token counts, model ID, latency, errors) and how to wire the SDK
+**Forward-Deployed Engineer:** knows what to *show* the customer — dashboards that prove the AI is working and what it's costing
+**LLM Architect:** knows how to *govern* it — retention policies, cost attribution by workload class, alert rules that page before the bill arrives
 
 For an LLM gateway, you ALSO care about:
 - **Tokens in / out** per request (cost telemetry)

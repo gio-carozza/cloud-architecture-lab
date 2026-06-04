@@ -12,12 +12,24 @@ allowed-tools: Read, Write
 - Making a tradeoff that future-you will need to understand
 - Reversing or revisiting a prior decision (use "Supersedes" link)
 
-## Why ADRs (architect note)
-ADRs are the audit trail of architectural intent. Code shows *what*; ADRs
-show *why*. In an enterprise context, ADRs are how you defend decisions
-in design reviews, onboard senior engineers, and pass governance audits.
-Elite architects write ADRs BEFORE the implementation, not after — the act
-of writing exposes weak reasoning.
+## Why ADRs — by career phase
+
+**AI Engineer:** "This is how I prove I thought before I coded." An ADR
+written before implementation forces you to name the alternatives you
+rejected — which is the difference between a decision and a guess.
+
+**Forward-Deployed Engineer:** "This is how I show the customer we made a
+real decision, not a guess." Customers trust engineers who can explain not
+just what they built but why they didn't build the three other things they
+considered. The ADR is that explanation in writing.
+
+**LLM Architect:** "This is the audit trail for governance." At enterprise
+scale, decisions affect multiple teams and persist for years. ADRs are how
+you defend choices in design reviews, onboard senior engineers without
+re-explaining history, and pass compliance audits. They are not optional.
+
+ADRs are written BEFORE the implementation in all phases — the act of
+writing exposes weak reasoning that code alone never surfaces.
 
 ## Filename convention
 - Path: `docs/adr/ADR-NNN-kebab-case-title.md`

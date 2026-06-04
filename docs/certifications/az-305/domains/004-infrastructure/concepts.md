@@ -7,7 +7,13 @@
 ### If you're 10 years old
 Imagine a restaurant. Some orders go to the "fast lane" (burgers, ready in 3 minutes). Others go to the "slow lane" — a whole roast chicken that takes an hour. You don't make the customer stand at the counter for an hour; you give them a ticket number, seat them, and bring the food when it's ready. Async workloads work the same way: the system accepts the job, gives back a ticket (job ID), does the work in the background, and lets the caller collect the result when it's done.
 
-### If you're an architect
+### If you're a CEO
+Async architecture means your users don't wait. For expensive or long-running AI operations — summarizing 1,000 documents, processing a batch of invoices — the user submits the request, gets a confirmation immediately, and collects results when they're ready. No spinning wheel, no timeout, no frustrated user. The alternative (making users wait for a 5-minute AI job to complete) is a usability and reliability failure. Async design is what separates AI products that feel professional from ones that feel like prototypes.
+
+### If you're an Engineer
+HTTP contract for async: return `202 Accepted` immediately with a `Location` header pointing to a status endpoint and a job ID in the response body. Never return `200` for a job that isn't finished. The status endpoint returns `{"status":"in_progress"|"completed"|"failed", "resultUrl":"..."}`. Poll it; don't hold the connection open. In .NET with Azure OpenAI: submit via `client.GetBatchClient().CreateBatchAsync(...)`, poll via `client.GetBatchClient().GetBatchAsync(jobId)`, retrieve via the output file ID. Common mistake: returning `200` with a job ID — clients have no way to know they should poll rather than read the body.
+
+### If you're an Architect
 The async/job-shaped workload pattern decouples job submission from result retrieval via a durable queue or broker. The canonical shape is: **submit → acknowledge (202 Accepted + job ID) → poll status → retrieve result**. This maps directly to the Anthropic Batch API, Azure OpenAI Global Batch, and any durable task framework (Azure Durable Functions, Service Bus + worker pattern).
 
 The pattern is appropriate when: (a) processing time exceeds acceptable synchronous wait time (typically > 1–2 seconds for interactive, > 60 seconds for any user-facing), (b) the workload is resource-intensive and benefits from dedicated compute, or (c) bursts require queue-based load levelling rather than direct scaling. The tradeoff is operational complexity: you now have a queue, a worker, a status store, and a retrieval endpoint — four components instead of one.
@@ -23,7 +29,13 @@ The pattern is appropriate when: (a) processing time exceeds acceptable synchron
 ### If you're 10 years old
 If you need to move 10 boxes, you could carry them one at a time (slow, tiring), hire someone to carry them on a cart for you (a service that handles it), or rent a van and drive them all at once (batch). Picking the right option depends on how heavy the boxes are, how fast you need them moved, and how much money you want to spend. Architects make the same kind of decision for compute — they pick the right "vehicle" for the job.
 
-### If you're an architect
+### If you're a CEO
+For AI batch workloads, the provider-native batch API (Azure OpenAI Global Batch, Anthropic Batch API) is almost always the right choice: zero infrastructure to manage, zero compute cost, and 50% off token pricing built in. Choosing Kubernetes or Container Apps for a nightly batch job means paying for cluster management, image builds, and scaling configuration — all for a job that runs once a day and the managed batch API handles at half the price. Over-engineering batch workloads is one of the most common ways AI projects overspend.
+
+### If you're an Engineer
+Decision tree for batch compute: (1) LLM batch workload with no heavy pre/post-processing → use provider-native Batch API (zero infra, 50% cost). (2) Short jobs (< 10 min), event-triggered → Azure Functions Consumption (pay per execution, no idle cost). (3) Long jobs (> 10 min) with stateful orchestration → Azure Durable Functions. (4) Containerized worker, scale-to-zero → Azure Container Apps Jobs. (5) HPC-style large parallel compute → Azure Batch. For AZ-305 exam: when the scenario describes a nightly LLM job with no custom processing, the answer is provider-native batch API + zero additional compute. When custom processing is described (parsing, enrichment, storage), use Functions or Container Apps Jobs.
+
+### If you're an Architect
 The Azure Well-Architected Framework (Cost Optimization pillar) directs architects to **match compute size and billing model to workload shape**. For batch AI workloads the decision tree is:
 
 | Factor | Leaning |
@@ -34,7 +46,7 @@ The Azure Well-Architected Framework (Cost Optimization pillar) directs architec
 | Containerised worker, scale-to-zero | Azure Container Apps Jobs |
 | Provider-native batch (LLM) | Azure OpenAI Global Batch / Anthropic Batch API |
 
-For LLM-specific batch workloads, the provider-native batch API is the default recommendation: it requires no additional compute resource, no queue management, and delivers the 50% cost reduction as a built-in pricing tier. You pay only for tokens — not for the compute that processed them. Bring-your-own-compute (Functions, Container Apps) is appropriate when pre/post-processing logic is substantial enough to warrant a full application runtime.
+For LLM-specific batch workloads, the provider-native batch API is the default recommendation: it requires no additional compute resource, no queue management, and delivers the 50% cost reduction as a built-in pricing tier. You pay only for tokens — not for the compute that processed them.
 
 **Why this matters in enterprise:** The AZ-305 exam presents scenarios where you must choose among multiple valid compute options. The WAF cost lens eliminates options that are over-engineered or over-priced for the workload's actual requirements.
 
@@ -47,7 +59,13 @@ For LLM-specific batch workloads, the provider-native batch API is the default r
 ### If you're 10 years old
 Electricity costs less at night (off-peak hours) than during the day (peak hours). Smart home owners run their dishwasher at midnight to save money. The Cost Optimization pillar in Azure works the same way — run things that can wait during "off-peak" (batch mode) and save the expensive "right now" capacity for things that truly need it.
 
-### If you're an architect
+### If you're a CEO
+Every AI request in your system is either urgent or deferrable. Urgent requests — user-facing, real-time — need synchronous processing; pay full price. Deferrable requests — nightly reports, batch analysis, background enrichment — do not need instant results. Routing them to batch pricing cuts their token cost by 50%, automatically, with no quality tradeoff. If 40% of your AI workload is deferrable and you're running it all synchronously, you're overpaying for that 40% by 2x. Identifying and rerouting deferrable workloads is the highest-ROI architectural change available for most AI platforms.
+
+### If you're an Engineer
+Implement routing via an explicit `"mode": "sync" | "batch"` field in your API contract. Never infer the processing path from request characteristics — the caller knows their SLA, the gateway doesn't. In the gateway, route `sync` to `IChatModelProvider.CompleteChatAsync()` and `batch` to `IBatchProvider.SubmitAsync()`. Log the `path` dimension on every token-usage telemetry event. Add a `MaxBatchSize` guard before enqueuing to prevent cost blowouts. Document the routing decision in an ADR so it's not reversed during refactoring.
+
+### If you're an Architect
 The Azure Well-Architected Framework Cost Optimization pillar defines **deferrable workload routing** as one of the primary cost levers: workloads without a real-time latency requirement should be routed to a lower-cost compute or pricing tier. For AI workloads this translates directly to the batch vs. synchronous routing decision:
 
 - **Synchronous path** — tokens billed at standard rate, dedicated TPM quota consumed, response in seconds
@@ -66,7 +84,13 @@ The routing criterion is the **latency SLA**: if the business requirement can to
 ### If you're 10 years old
 Some things have to happen right now — like a fire alarm going off the second there's smoke. Other things can wait — like getting your school report card at the end of term instead of the minute each test is marked. Architects decide which things are "right now" versus "can wait" — and that decision changes how they build the whole system.
 
-### If you're an architect
+### If you're a CEO
+Not every AI request needs a sub-second response. A nightly report can take minutes. A background classification job can take hours. The mistake companies make is building everything for sub-second latency — because that's the easiest path — then discovering they've been overpaying for latency headroom they never needed. Defining latency SLAs per workload type before building lets you match the technology and pricing tier to the actual requirement. This is architecture doing its job.
+
+### If you're an Engineer
+Capture the latency SLA as an explicit field in your API contract, not a runtime inference. Decision tree by SLA: < 1s → synchronous streaming; 1–30s → synchronous with timeout or async short-poll; 30s–5min → `202 Accepted` + status endpoint + poll; > 5min → batch API with 24h SLA. In the gateway, validate that `mode=batch` is only accepted for requests where the caller's contract explicitly tolerates a delayed response — don't allow callers to route to batch by accident. Log the `sla_class` dimension alongside `path` for attribution queries.
+
+### If you're an Architect
 The latency SLA is the maximum acceptable time between a request being submitted and the result being available to the caller. It is a **first-class architectural constraint** that drives compute selection, processing path, and pricing tier. The decision tree:
 
 - **< 1 second** — synchronous API, premium compute tier, low-latency routing

@@ -5,35 +5,125 @@
 > the *why* behind the technical roadmap. Skills can be learned. The
 > posture below is what makes someone hireable at $250k+ and trusted at
 > $500k+.
+>
+> Full career progression detail: `docs/standards/career-path.md`
 
-## What an LLM Architect Actually Does
+---
 
-An LLM architect doesn't just train models. They design how AI fits into
-a real business. When a hospital wants AI to help doctors, or a bank
-wants one to help customers, the architect plans the whole system:
+## Your Three-Phase Career
 
-- Which model to use
-- How to keep it safe
-- How to plug it in
-- How to keep it from making things up
+### Phase 1: AI Engineer
 
-The job is not "knowing about transformers." The job is using that
-knowledge to build something real that helps real people.
+#### If you're 10 years old
+An AI Engineer is like a chef who learns to use a really powerful new kitchen tool —
+a robot that can write recipes, answer questions, and help cook meals. Your job is to
+plug that robot into the restaurant kitchen and make sure the food it helps create is
+actually good. You learn what the robot can do, where it makes mistakes, and how to give
+it the right instructions so it doesn't burn the soup.
 
-## The Technical Foundations Translated to Job Skills
+#### If you're a CEO
+An AI Engineer is the person who makes AI work inside your product. They call the right
+model, write prompts that produce reliable output, and wire everything into your existing
+application without breaking it. ROI of a strong AI Engineer: faster time-to-ship on
+AI features, lower hallucination rates, and a team that doesn't need a consultant for
+every integration. Risk of a weak one: AI features that work in demos and fail in production.
 
-| Foundation | Why an architect uses it |
-|---|---|
-| Transformers & attention | When the model misbehaves, you can diagnose *why* — not just swap parts randomly |
-| Hallucinations | You build safety nets: real databases, fact-checkers, "I don't know" responses |
-| Context window limits | You design RAG (Retrieval-Augmented Generation) and other patterns to feed the model the right info at the right time |
-| Training cost reality | You fine-tune existing models instead of training from scratch — cheaper, faster, equally effective |
-| AI safety | You build guardrails: tested for harm, leakage, bias. At enterprise scale, one mistake costs millions or hurts people |
+#### If you're an Engineer
+An AI Engineer integrates LLM APIs (Anthropic, OpenAI, Azure AI) into production systems.
+Core skills: prompt engineering (system prompts, few-shot examples, output structuring),
+API integration (streaming, tool use, function calling, batch APIs), context window
+management, token cost optimization, and debugging model behavior — distinguishing a
+hallucination from an API error, a prompt problem from a model limitation. You measure
+quality not just as "does it run" but "does it produce correct output at acceptable cost."
+
+#### If you're an Architect
+The AI Engineer phase builds the intuition that architecture later depends on. You cannot
+design an AI platform you haven't debugged at the API level. The critical milestone is a
+working provider abstraction seam — the boundary that lets you swap Claude for Azure
+OpenAI without changing application logic. Every subsequent phase assumes you've already
+crossed this threshold and understands why it matters.
+
+---
+
+### Phase 2: Forward-Deployed Engineer
+
+#### If you're 10 years old
+A Forward-Deployed Engineer is like a helper who travels to different businesses and
+builds them their own special AI assistant. One week you're at a hospital helping doctors,
+the next week you're at a bank helping customers. You have to be really good at listening
+— because every place has different problems and you can't build the same thing everywhere.
+You also explain what you built to the boss, the workers, and the customers — all in
+different ways that actually make sense to each of them.
+
+#### If you're a CEO
+A Forward-Deployed Engineer is your most valuable AI hire for enterprise sales. They sit
+with your customer, understand the real business problem (not the stated technical
+requirement), build a working prototype in days — not months — and iterate until the
+customer says "this is exactly what we needed." They're the people Palantir, Anthropic,
+and Scale AI send to close 7-figure deals. The skill is rare: most engineers can build;
+few can sell through building. ROI: shorter sales cycles, higher deal values, faster
+customer time-to-value.
+
+#### If you're an Engineer
+Forward-Deployed Engineering means scoping and shipping AI solutions in days, not sprints.
+Key skills: rapid prototyping (working demo in 48 hours), solution scoping (minimum AI
+that solves this specific problem), domain-specific prompt engineering (legal, medical,
+financial), RAG integration (connecting AI to the customer's existing data), and
+evaluation (proving the solution is actually correct before handing it over). You learn
+to ask "what decision does this AI help the user make?" before writing any code.
+
+#### If you're an Architect
+The Forward-Deployed phase teaches the skill the AI Engineer phase doesn't: connecting
+technical decisions to business outcomes. Every architectural choice becomes a story —
+"we chose provider abstraction because if Anthropic raises prices, you can switch to
+Azure OpenAI without rewriting your application." You learn to communicate at CEO, CFO,
+and CTO levels simultaneously, in the same meeting. Architecturally, this phase focuses
+on RAG patterns, agent frameworks, and evaluation — the three capabilities that turn
+a chat endpoint into a product that solves real problems.
+
+---
+
+### Phase 3: LLM Architect
+
+#### If you're 10 years old
+An LLM Architect is like the person who designs the whole AI factory, not just one
+machine. Instead of building one robot for one restaurant, you design the system that
+lets every restaurant in the country have their own — safe, affordable, and upgradeable.
+You think about what happens when a million people use the system at once, and you make
+sure nobody accidentally breaks it, spends too much money, or does something they
+shouldn't.
+
+#### If you're a CEO
+The LLM Architect is the person who turns AI experiments into enterprise infrastructure.
+They design the platform that lets your entire company — every team, every product —
+use AI safely and economically. They prevent the $2M surprise cloud bill, ensure GDPR
+and HIPAA compliance, and keep you from being locked into one vendor's pricing. The wrong
+design at this layer costs tens of millions. The right one makes AI a competitive moat.
+This is the $200k–$250k role.
+
+#### If you're an Engineer
+LLM Architecture means systems serving thousands of AI requests per minute across multiple
+providers, with full observability, cost governance, and resilience. Core skills:
+multi-provider abstraction (route between Anthropic, Azure OpenAI, Bedrock based on
+cost/latency/capability), distributed tracing across the full AI call chain, semantic
+caching, vector database design for RAG at scale, model evaluation pipelines, and
+enterprise security (tenant isolation, audit logging, PII redaction). Stack: API gateway
++ provider SDK abstraction + vector DB + observability platform + IaC.
+
+#### If you're an Architect
+The LLM Architect phase is where AI engineering meets enterprise software architecture.
+The problems shift from "does this work?" to "does this work for 10,000 users at 3am
+when Anthropic has a partial outage and the compliance team needs an audit trail?"
+Key design decisions: provider abstraction contract, cost attribution by team and workload
+class, governance policy (who deploys new models and with what approval workflow), and
+resilience (circuit breakers, retry budgets, fallback providers). The architect owns
+policy, not just code — model selection criteria, cost ceilings, incident response, and
+the vendor negotiation position that multi-provider portability creates.
+
+---
 
 ## The Five Traits of Legendary Architects
-
-Anyone can learn the tech. Books, courses, YouTube — it's all out there.
-What separates the best from the rest are five things:
+*(These apply across all three phases — they're not optional in Phase 3)*
 
 ### 1. Never stop being curious
 This field changes every month. New models, new tricks, new problems.
@@ -56,106 +146,102 @@ behind. The best architects have a backbone — they tell their CEO
 
 That courage is rare. **It's what separates good from legendary.**
 
-### 4. Explain things simply
-If you can explain transformers to an 8-year-old, you understand them.
-If you can only explain them in fancy words, you're hiding behind jargon.
+### 4. Explain things simply — at all four levels
+If you can explain it to a 10-year-old, you understand it.
+If you can explain the ROI to a CEO, you can sell it.
+If you can explain the implementation to an engineer, you can delegate it.
+If you can explain the tradeoffs to an architect, you can defend it.
 
-Talk to engineers. Talk to the CEO. Talk to grandma. **Everyone walks
-away understanding.**
+**Anyone who can only explain in one register hasn't fully owned the concept.**
 
 ### 5. Build, build, build
 Reading about AI is like reading about swimming. You don't get good
 until you jump in.
 
-The legends didn't wait for permission. They built little projects in
-their bedrooms, broke things, fixed them, shared them.
-
 **Every great architect has a graveyard of failed experiments. That
 graveyard is where the wisdom comes from.**
 
-## The Secret Nobody Tells You
-
-The "best LLM architect" isn't the one who knows the most math. It's the
-one who combines three things most people never combine:
-
-1. Deep technical skill
-2. Genuine care for people
-3. Courage to do things right
-
-If you grow into someone who loves computers AND loves people AND is
-brave enough to tell the truth — you won't just be a great architect.
-You'll be the kind of person who shapes how AI changes the world for
-the better.
+---
 
 ## Daily Posture Check
 
 At the end of each roadmap day, answer these four questions in
-`Day-NNN/posture-check.md`:
+`Day-NNN/posture-check.md`. Answer each question at all four levels.
 
 1. **Whose problem did I actually solve today?**
-   (If the answer is "nobody specific" — interrogate that.)
+   (Name a specific human role. "The platform" is not an answer.)
 
 2. **What would I refuse to ship if I were the only one in the room?**
-   (If nothing — am I being honest, or am I deferring?)
+   (Name the corner you were tempted to cut. Did you cut it?)
 
 3. **What did I try, fail at, and learn?**
-   (Add it to the graveyard. The graveyard is the portfolio nobody sees
-   but every senior interviewer detects.)
+   (Add it to the Graveyard below. The graveyard is the portfolio nobody
+   sees but every senior interviewer detects.)
 
-4. **Could I explain today's work to a 10-year-old AND defend it at a doctorate level?**
-   (If only one register works, the concept isn't owned yet — schedule a teach-back.)
+4. **Could I explain today's work at all four levels?**
+   - **10-year-old:** analogy-first, no jargon
+   - **CEO:** business value, ROI, or risk — two sentences
+   - **Engineer:** exact code, APIs, how-to
+   - **Architect:** tradeoffs, enterprise implications, what the wrong choice costs
+
+   If any level is missing, the concept isn't fully owned — schedule a teach-back.
+
+---
+
+## Phase Awareness
+
+**You're in Phase 1 (AI Engineer) while:**
+- You're still discovering how the API behaves in edge cases
+- Your "why" for a decision is "because the docs said so"
+- You can explain what you built to another engineer but not to a stakeholder
+
+**You cross into Phase 2 (Forward-Deployed) when:**
+- You can predict model behavior before running it
+- You instinctively ask "whose problem does this solve?" before starting
+- You've built something a non-engineer actually uses and values
+
+**You cross into Phase 3 (LLM Architect) when:**
+- Decisions you make affect multiple teams, not just your own feature
+- You think "what happens when this scales 100x?" before shipping
+- You're writing governance policies, not just following them
+
+---
 
 ## Token Discipline as Architecture Practice
 
-The cheapest model that solves the problem is the right model. This is true for
-my learning roadmap and it will be true for every production AI gateway I design.
+The cheapest model that solves the problem is the right model. Default to Sonnet.
+Escalate to the latest Opus only when reasoning depth IS the deliverable.
 
-Default to Sonnet 4.6. Escalate to the latest Opus (currently 4.8) only when:
-- The reasoning IS the deliverable (ADRs, tradeoff analysis)
-- Sonnet's answer is thin and the depth matters
-- I'm doing adversarial reasoning against my own conclusions
+This is not frugality theater. It is rehearsing the FinOps discipline that separates
+senior architects from juniors. Token cost is a first-class architectural constraint
+in any real AI workload. Internalize it now on your own dime; apply it on the
+company's dime.
 
-Default to Claude Code for any work where repo files matter. Default to chat for
-work where conventions and reasoning matter more than code.
-
-This is not frugality theater. This is rehearsing the FinOps discipline that
-separates senior architects from juniors. Token cost is a first-class architectural
-constraint in any real AI workload. Internalize it now on my own dime; apply it
-later on the company's dime.
+---
 
 ## Working in Three Modes
-
-A senior architect doesn't have one mode. Three modes rotate, each with
-its own discipline, its own tool, its own output style. Mixing them
-produces sloppy work in all three.
 
 ### Build mode — make it run
 Posture: pragmatic, fast, copy-paste-ready.
 Discipline: don't over-architect. Don't draft an ADR mid-deploy.
-The bias is *progress*. Reasoning happens before and after, not during.
-Tool: Claude Code in terminal. Chat only when blocked.
+Tool: Claude Code in terminal.
 
 ### Study mode — own the concept
 Posture: curious, patient, repeatable.
-Discipline: explain at two levels (10-year-old AND doctorate). If only
-one register works, the concept isn't owned yet — schedule a teach-back.
-Always map to a cert domain (AZ-900 / AZ-104 / AZ-305 / AI-102) so
-study time produces dual leverage.
-Tool: chat. Cert prep notes paste-in per session.
+Discipline: explain at all four levels. Map to a cert domain.
+Tool: chat.
 
 ### Perform mode — reason at architect level
 Posture: structured, honest, slow.
-Discipline: surface tradeoffs explicitly. Name the alternative being
-rejected. Write the ADR before the code, not after — writing exposes
-weak reasoning. Posture-check at end of day BEFORE marking complete.
-Tool: chat. the latest Opus (currently 4.8) escalation most often warranted here.
+Discipline: surface tradeoffs. Write the ADR before the code.
+Posture-check before marking complete.
+Tool: chat, latest Opus.
 
 ### The integration test
-At the end of each roadmap day, ask: did I move between modes
-deliberately, or did I drift? If I built without reasoning, I shipped
-under-thought work. If I reasoned without building, I shipped vapor.
-The discipline is rotating consciously, not staying in whichever mode
-feels easiest today.
+Did I move between modes deliberately, or drift? Build without reasoning = shipped
+under-thought work. Reason without building = shipped vapor. Rotate consciously.
+
+---
 
 ## The Graveyard
 

@@ -1,6 +1,6 @@
 # /new-day
 
-Scaffold a new day in the LLM Architect roadmap.
+Scaffold a new day in the AI Engineer → Forward-Deployed Engineer → LLM Architect roadmap.
 
 ## Usage
 `/new-day 6 observability-and-resilience`
@@ -34,6 +34,9 @@ Given a day number and a kebab-case slug, create:
 ## Track
 <Build | Cert | Hybrid>
 
+## Career Phase
+<AI Engineer | Forward-Deployed Engineer | LLM Architect>
+
 ## Focus
 <one-line>
 
@@ -52,6 +55,12 @@ Given a day number and a kebab-case slug, create:
 
 ## Architect Thinking
 <tradeoffs, alternatives rejected, what elite architects do differently>
+
+### CEO Framing
+<one sentence: what is the business value of today's change? What would break or cost more without it?>
+
+### Phase Note
+<which career phase does this day reinforce, and what specific skill does it develop?>
 
 ## Artifacts
 - Code:

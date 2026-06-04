@@ -44,7 +44,7 @@
     `llm.cache.read_tokens` in our gateway. Same pattern, different provider-specific
     field names.
 
-## Concepts at two levels
+## Concepts at four levels
 
 ---
 ## Prompt Caching
@@ -55,7 +55,22 @@ manual before answering you. Prompt caching is like giving the rep a "cheat shee
 they can keep on their desk. The first caller pays for printing the cheat sheet. Every
 caller after that gets a faster, cheaper answer because the cheat sheet is already there.
 
-### If you're an architect
+### If you're a CEO
+Prompt caching cuts AI input token costs by roughly 90% on the cached portion — for
+any AI feature with a static system prompt, that means paying full price once and ~10%
+on every subsequent request. At 10,000 daily requests with a 3,000-token system prompt,
+uncached cost is ~$90/day; cached cost drops to ~$9/day. That's $30,000/year per gateway,
+from one configuration change.
+
+### If you're an Engineer
+Annotate stable content blocks with `cache_control: {"type":"ephemeral","ttl":"1h"}`.
+Verify it's working by checking `cache_creation_input_tokens > 0` on the first request
+and `cache_read_input_tokens > 0` on subsequent requests. Common failures: prompt under
+1,024 tokens (minimum cacheable size for most Anthropic models), or using a Claude 4
+model without specifying a TTL — Claude 4 silently ignores `{"type":"ephemeral"}` without
+a `ttl` field. Log both fields as Activity tags; alert on hit rate dropping below threshold.
+
+### If you're an Architect
 Anthropic (and Azure OpenAI for compatible models) implements prompt caching as a
 server-side KV store keyed on a prefix hash of the request content. Annotating a
 content block with `cache_control: {"type":"ephemeral","ttl":"1h"}` signals the
@@ -86,7 +101,22 @@ had to order it from another library, that "find rate" would tell the librarian 
 the collection was working. Cache hit rate does the same thing for your AI gateway —
 it tells you whether the "pre-loaded answers" are actually being used.
 
-### If you're an architect
+### If you're a CEO
+If your cache hit rate drops to zero — because someone changed the system prompt or a
+TTL expired — your AI cost multiplies by 10x with no error, no alert, and no notification.
+You discover it on the next invoice. Cache hit rate as an SLO metric means an alert fires
+within minutes of the regression, and the on-call engineer can fix it before it costs anything
+material. This is the difference between proactive cost governance and reactive damage control.
+
+### If you're an Engineer
+Compute hit rate as `cache_read_input_tokens / (cache_read_input_tokens + cache_creation_input_tokens)`.
+Track it as a custom metric in Application Insights using `TelemetryClient` or an OpenTelemetry
+counter. Write a KQL scheduled query alert that fires when `avg(hitRate) < 0.1` during a
+1-hour business-hours window (gate on `requestCount > 50` to avoid false positives on low traffic).
+Common mistake: alerting on absolute miss count — this fires legitimately on cold starts and
+TTL expiry; hit rate percentage in a traffic-bearing window is the correct signal.
+
+### If you're an Architect
 Cache hit rate (`cacheHits / totalRequests * 100`) is a leading indicator of cost
 efficiency. It belongs on an SLO dashboard alongside latency and error rate — not buried
 in logs. The distinction matters because:
@@ -112,7 +142,19 @@ who made which calls so the bill gets split fairly. Token attribution is the sam
 for AI costs — tracking which team, feature, or user consumed how many tokens, so
 you know who to charge or where to optimize.
 
-### If you're an architect
+### If you're a CEO
+Without token attribution, you have one AI bill for the entire company and no way to
+break it down. You can't tell finance which product is driving spend, you can't hold
+teams accountable for cost efficiency, and you can't identify which feature to optimize
+first. Token attribution turns the bill into a line-item report. It's the foundation
+of any internal AI chargeback model.
+
+### If you're an Engineer
+Tag every telemetry span with a `caller_id` or `team_id` dimension at the gateway layer.
+In .NET, set it as an Activity tag: `activity.SetTag("gateway.caller_id", callerId)`.
+This flows through to `customDimensions` in App Insights. Query: `dependencies | where name == "claude.chat.api" | summarize totalInputTokens = sum(toint(customDimensions["llm.tokens.input"])) by tostring(customDimensions["gateway.caller_id"])`. The `caller_id` must be propagated from the inbound request — typically from a JWT claim or API key lookup — not invented in the provider layer.
+
+### If you're an Architect
 In enterprise AI gateways, every request produces a usage tuple: `(input_tokens,
 output_tokens, cache_read_tokens, cache_creation_tokens)`. These fields, surfaced as
 Activity tags on distributed traces, flow into Application Insights and become queryable

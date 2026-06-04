@@ -12,12 +12,17 @@ allowed-tools: Bash, Read, Write
 - Need a deterministic, repeatable deploy
 - Day 5+ deployment work
 
-## Why this path (architect note)
+## Why this path
 `az webapp deploy` wraps multiple deploy strategies and chooses one
 heuristically. On constrained networks or larger payloads it can fail
 silently mid-stream with TLS resets. The Kudu publish API is the
 underlying primitive — explicit, observable, idempotent when paired
 with `WEBSITE_RUN_FROM_PACKAGE=1`. Elite architects prefer primitives
+
+**Forward-Deployed angle:** a repeatable, scriptable deploy means you can
+push a fix with the customer watching. A flaky deploy process is a trust
+problem, not just a technical one — customers notice when you can't ship
+reliably.
 they can reason about over heuristic wrappers, especially in CI/CD.
 
 ## Pre-flight

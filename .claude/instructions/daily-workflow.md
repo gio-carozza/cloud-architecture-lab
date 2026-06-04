@@ -150,6 +150,7 @@ Paste:
 I'm starting Day ___ of my cloud-architecture-lab roadmap.
 PREVIOUS DAY: Day ___ completed ___.
 TODAY'S FOCUS: ___  (from STEP 2 DECIDE)
+CAREER PHASE: ___ (AI Engineer | Forward-Deployed Engineer | LLM Architect)
 CONSTRAINTS: ___
 
 Produce the Day ___ summary.md using the 13-section daily roadmap format
@@ -286,6 +287,8 @@ Day ___ documentation pass.
 2. Update docs/standards/azure-environment.md if resources/settings changed
 3. Finalize docs/notes/Day-___/completion-checklist.md (mark [x])
 4. Write docs/notes/Day-___/architect-thinking.md with key insights
+   — include a "CEO Framing" subsection: one sentence on the business value of today's change
+   — include a "Phase Note" subsection: which career phase did this day reinforce and why
 5. Update CLAUDE.md (day status, new ADRs, new conventions)
 6. Update docs/notes/Day-___/files-changed.md — upsert one row per file touched
    this pass; dedup on file path; label Step column "docs pass"
@@ -314,11 +317,11 @@ Paste:
 Posture check for Day ___.
 What I built: ___
 What broke: ___
-Ask me the four posture questions from _principles.md and then provide the answers to those questions in a way that a 10 year old, A CEO, and Legendary LLM Architect could understand:
+Ask me the four posture questions from _principles.md and then provide the answers to those questions in a way that a 10 year old, a CEO, an Engineer, and an LLM Architect could understand:
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship?
 3. What did I try, fail at, and learn?
-4. Can I explain this at 10yo, CEO, AND architect level?
+4. Can I explain this at 10yo, CEO, Engineer, AND Architect level?
 Push back hard if my answers are weak or self-congratulatory.
 ```
 Copy the result. → STOP. Close chat.

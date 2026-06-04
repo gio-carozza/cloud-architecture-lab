@@ -1,6 +1,6 @@
 # Certification Domain Coverage
 
-Last updated: Day-007 (scaffold run 2026-06-03)
+Last updated: Day-008 (2026-06-04)
 
 > ⚠️ **AI-102 retires June 30, 2026.** Complete before that date or pivot to successor cert.
 
@@ -14,8 +14,9 @@ Last updated: Day-007 (scaffold run 2026-06-03)
 | Configure & manage virtual networking | | | | |
 | Monitor & maintain Azure resources | | Day 6 | | Day 6, 7 |
 | Cost optimization | | | Day 7 | Day 7 |
-| Implement & manage AI solutions | | | | Day 5, 6, 7 |
-| Optimize AI workloads | | | | Day 7 |
+| Implement & manage AI solutions | | | | Day 5, 6, 7, 8 |
+| Implement generative AI solutions | | | | Day 8 |
+| Optimize AI workloads | | | | Day 7, 8 |
 
 ## Domain scaffold status
 
@@ -46,8 +47,8 @@ Last updated: Day-007 (scaffold run 2026-06-03)
 ### AI-102 (as of December 23, 2025) — ⚠️ retires June 30, 2026
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
-| 1 | Plan and manage an Azure AI solution | 20–25% | ✅ | Day 5, 6, 7 |
-| 2 | Implement generative AI solutions | 15–20% | ✅ | Day 7 |
+| 1 | Plan and manage an Azure AI solution | 20–25% | ✅ | Day 5, 6, 7, 8 ✅ |
+| 2 | Implement generative AI solutions | 15–20% | ✅ | Day 7, 8 ✅ |
 | 3 | Implement an agentic solution | 5–10% | ✅ | — |
 | 4 | Implement computer vision solutions | 10–15% | ✅ | — |
 | 5 | Implement natural language processing solutions | 15–20% | ✅ | — |

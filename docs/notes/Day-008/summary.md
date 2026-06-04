@@ -106,10 +106,10 @@ They name the computation model explicitly before writing an interface. "Batch" 
   - `Controllers/BatchController.cs`
   - `Telemetry/GatewayTelemetry.cs` — two new counters, one histogram
 - **Docs:**
-  - `docs/adr/ADR-010-introduce-batch-job-provider-seam.md`
+  - `docs/adr/ADR-010-introduce-parallel-batch-provider-abstraction.md`
   - `docs/architecture/day-008-batch-api-cost-controls.md`
   - `docs/standards/kql-cookbook.md` — Query 10
-  - `docs/notes/Day-008/` — summary, checklist, architect-thinking, posture-check
+  - `docs/notes/Day-008/` — summary, checklist, architect-thinking, posture-check, files-changed
 - **Infra:**
   - `Infra/Day-008/appsettings-template.md` — no new settings (batch uses existing `Anthropic__ApiKey` and `Anthropic__BaseUrl`)
 

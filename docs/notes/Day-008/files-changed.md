@@ -23,3 +23,7 @@
 | `docs/notes/Day-008/files-changed.md` | docs pass | This file — full audit log upsert |
 | `src/lab-observability-api/Options/AnthropicOptions.cs` | build | Added MaxBatchSize (default 100) |
 | `src/lab-observability-api/Controllers/AiBatchController.cs` | build | Added budget cap check: rejects batches over MaxBatchSize with batch_size_exceeded error |
+| `docs/notes/Day-008/posture-check.md` | docs pass | Filled — four posture questions answered with honest graveyard-ready admissions |
+| `docs/standards/_principles.md` | docs pass | Appended 4 Day 8 graveyard rows: contract divergence, accepted ADR with placeholder, missing blast-radius cap, build lock |
+| `docs/notes/Day-008/summary.md` | docs pass | Corrected ADR filename; added files-changed to artifacts list |
+| `.claude/instructions/daily-workflow.md` | docs pass | Added auto-print handoff section and step transition prompts |

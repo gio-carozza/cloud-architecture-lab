@@ -42,6 +42,24 @@ Your slash commands (in .claude/commands/):
 
 ---
 
+## THE AUTO-PRINT HANDOFF (how each step hands you the next)
+
+Every Claude Code step ends by PRINTING the next step's prompt, pre-filled
+with the day number and known paths — so you never hunt for what's next.
+To activate it, the last line of each Claude Code prompt below already says:
+"When finished, print the next step's prompt..." Leave that line in.
+
+- Claude Code steps (0, 3, 6, 7, 8, 9, 10, 12) auto-print the next prompt.
+- Chat steps (2, 4, 5, 11) can't be auto-fed (different surface) — the prior
+  step prints "OPEN A NEW CHAT" plus the prompt to paste there. You open the
+  chat yourself.
+- STEP 1 (PRUNE) is manual in claude.ai — the prior step prints a reminder.
+- Content blanks (___) stay yours: focus, the phase's changes, what broke.
+  No file can pre-know them; they come from your summary or your memory of
+  the day.
+
+---
+
 ## STEP 0 — CLOSE PREVIOUS DAY  (Claude Code · Sonnet)
 
 Before starting any new day, verify the previous day is frozen. Paste:
@@ -54,6 +72,8 @@ Verify Day ___ is fully closed out:
 5. Check docs/notes/_index.md — Day ___ status = Complete?
 6. Run git status — working tree clean?
 Report any open items. Fix before proceeding.
+When finished and clean, print the STEP 1 PRUNE manual reminder with this
+day's number filled in.
 ```
 → STOP if any item is open. Complete it before moving to STEP 1.
 
@@ -72,6 +92,7 @@ Before opening Claude Code for the new day, update your **project knowledge**
   azure-environment.md, kql-cookbook.md) stay in project knowledge permanently.
 
 This step is manual and takes ~2 minutes. It is not done by Claude Code.
+→ Next: STEP 2 — DECIDE, in a new chat (Sonnet).
 
 ---
 
@@ -88,6 +109,7 @@ Propose: (1) the Day ___ workload in one sentence, (2) a kebab-case slug
 for /new-day. One response. No summary yet.
 ```
 Get the slug confirmed. → STOP. Close chat.
+→ Next: STEP 3 — SCAFFOLD, back in Claude Code.
 
 ---
 
@@ -112,6 +134,11 @@ docs/architecture/day-___-<slug>.md, and Infra/Day-___/appsettings-template.md
 
 If it DOES exist (resuming a day), skip /new-day — the skeleton is already there.
 
+After scaffolding, paste:
+```
+Print the STEP 4 DRAFT prompt with this day's number filled in, prefixed with
+"OPEN A NEW CHAT (Sonnet)".
+```
 Leave Claude Code open. → Go to STEP 4 in a new chat.
 
 ---
@@ -133,6 +160,7 @@ anything broken/deferred. Don't know the focus? Replace CONSTRAINTS with:
 "Recommend today's focus from CLAUDE.md and yesterday's parking lot."
 
 Copy the summary. → STOP. Close chat.
+→ Next: STEP 5 (ADR) if the summary lists one, else STEP 6 (POPULATE) in Claude Code.
 
 ---
 
@@ -156,6 +184,7 @@ Implementation notes naming the exact files affected.
 Blanks come from the Architect Thinking section of your summary.
 
 Copy the ADR content. → STOP. Close chat.
+→ Next: STEP 6 — POPULATE, back in Claude Code.
 
 ---
 
@@ -181,6 +210,9 @@ This finds the next ADR number and creates the file from the template. Then:
 Replace the template content in docs/adr/ADR-___-<title>.md with:
 <PASTE APPROVED ADR FROM STEP 5>
 Set Status: Accepted, Date: today.
+When finished, print the STEP 7 BUILD prompt with the day number and the
+first phase's "Changes needed" bullets (from the summary) and "DO NOT modify"
+list (from the ADR) filled in.
 ```
 
 ---
@@ -198,6 +230,8 @@ Changes needed:
 DO NOT modify: ___
 After changes: build. Report errors and diff summary. Don't run or deploy.
 If anything is ambiguous, stop and ask before guessing.
+When the build passes clean, print the STEP 8 TEST prompt with the day number
+filled in.
 ```
 Blanks = the bullets under that phase + the ADR's "Files NOT affected."
 
@@ -214,6 +248,8 @@ Paste:
 Local verification for Day ___.
 Run the app, execute the tests in docs/notes/Day-___/completion-checklist.md.
 Report pass/fail for each. Fix failures and re-test.
+When all local tests pass, print the STEP 9 DEPLOY prompt with the day number
+filled in.
 ```
 → STOP when local tests pass.
 
@@ -234,6 +270,8 @@ Then telemetry verification (if today added telemetry):
 ```
 Wait 3 minutes, then run the KQL check from the completion checklist.
 Report results.
+When Azure tests pass, print the STEP 10 DOCUMENT prompt with the day number
+filled in.
 ```
 → STOP when Azure tests pass.
 
@@ -261,6 +299,12 @@ Then update cert study materials for domains touched today:
 ```
 (Reads the day's summary cert section, populates only the domains touched.)
 
+After /cert-update, paste:
+```
+Print the STEP 11 REFLECT prompt with the day number filled in, prefixed with
+"OPEN A NEW CHAT (latest Opus)".
+```
+
 ---
 
 ## STEP 11 — REFLECT  (new chat · latest Opus)
@@ -270,14 +314,15 @@ Paste:
 Posture check for Day ___.
 What I built: ___
 What broke: ___
-Ask me the four posture questions from _principles.md:
+Ask me the four posture questions from _principles.md and then provide the answers to those questions in a way that a 10 year old, A CEO, and Legendary LLM Architect could understand:
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship?
 3. What did I try, fail at, and learn?
-4. Can I explain this at 10yo AND architect level?
+4. Can I explain this at 10yo, CEO, AND architect level?
 Push back hard if my answers are weak or self-congratulatory.
 ```
 Copy the result. → STOP. Close chat.
+→ Next: STEP 12 — CLOSE, back in Claude Code.
 
 ---
 
@@ -289,7 +334,10 @@ Update docs/notes/Day-___/posture-check.md:
 <PASTE POSTURE CHECK>
 Add graveyard entries to docs/standards/_principles.md:
 <PASTE ENTRIES>
+Analyze and update all documents in the .claude, docs, and infra directories and subdirectories and both CLAUDE.md files so that the entire repo remains in tact without loop holes or missing or incomplete elements 
 git add -A && git commit -m "docs(day-___): posture check and graveyard"
+When committed, print: "Day ___ closed. Tomorrow → STEP 0 to verify this day
+is frozen, then begin Day ___+1."
 ```
 
 Done. Tomorrow → STEP 0.
@@ -318,6 +366,8 @@ After this, /cert-update in STEP 10 populates domains as you touch them.
 - About to type "give me the code" in chat? Stop — that's Claude Code.
 - A slash command does nothing? Check it exists: "Show me .claude/commands/<name>.md"
 - summary.md missing when BUILD needs it? You skipped STEP 6 — populate it first.
+- Handoff didn't print? Just open daily-workflow.md to the next step yourself —
+  the printed prompt is a convenience, not a dependency.
 
 ---
 

@@ -28,4 +28,19 @@ public static class GatewayTelemetry
         Meter.CreateCounter<long>(
             "ai.provider.cache.misses",
             description: "Number of requests that populated the prompt cache");
+
+    public static readonly Counter<long> BatchJobsSubmitted =
+        Meter.CreateCounter<long>(
+            "ai.provider.batch.submitted",
+            description: "Number of batch jobs successfully submitted");
+
+    public static readonly Counter<long> BatchJobsCompleted =
+        Meter.CreateCounter<long>(
+            "ai.provider.batch.completed",
+            description: "Number of batch jobs whose results were retrieved");
+
+    public static readonly Histogram<long> BatchResultCount =
+        Meter.CreateHistogram<long>(
+            "ai.provider.batch.result_count",
+            description: "Number of individual results returned per batch retrieval");
 }

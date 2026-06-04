@@ -119,6 +119,22 @@ try
 
     builder.Services.AddScoped<IChatModelProvider, ClaudeChatModelProvider>();
 
+    // -----------------------------------------------------------------------
+    // Batch HTTP client — separate from the interactive client.
+    // NO resilience pipeline: retrying a submit may duplicate a batch job.
+    // Per-call timeout is modest (each HTTP call is individually quick).
+    // -----------------------------------------------------------------------
+    builder.Services.AddHttpClient<ClaudeBatchApiClient>((sp, client) =>
+    {
+        var options = sp.GetRequiredService<IOptions<AnthropicOptions>>().Value;
+        client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+        client.DefaultRequestHeaders.Add("x-api-key", options.ApiKey);
+        client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
+
+    builder.Services.AddScoped<IBatchChatModelProvider, ClaudeBatchChatModelProvider>();
+
     builder.Services.AddHealthChecks();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();

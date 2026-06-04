@@ -11,7 +11,8 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
 - All queries assume W3C Trace Context propagation (active since Day 6)
 - Custom dimensions used: `CorrelationId`, `llm.tokens.input`, `llm.tokens.output`,
   `llm.provider`, `llm.model`, `llm.latency_ms`,
-  `llm.cache.read_tokens` (Day 7+), `llm.cache.creation_tokens` (Day 7+)
+  `llm.cache.read_tokens` (Day 7+), `llm.cache.creation_tokens` (Day 7+),
+  `batch.job_id` (Day 8+), `batch.request_count` (Day 8+)
 
 ---
 
@@ -158,4 +159,45 @@ dependencies
           actualCost = round(actualCost, 4),
           uncachedCost = round(uncachedCost, 4),
           savingsUSD = round(savingsUSD, 4)
+```
+
+## 10. Batch job activity and cost vs sync equivalent — Day 8+
+
+> **Important:** batch latency (minutes to hours) is expected behavior, not a
+> degradation signal. Do NOT alarm on `batch.submit`, `batch.poll`, or
+> `batch.retrieve` span duration. The `alert-ai-gateway-5xx-rate` rule and
+> interactive latency thresholds do not apply to batch spans.
+
+```kql
+// Batch submissions and completions per hour
+customMetrics
+| where timestamp > ago(24h)
+| where name in (
+    "ai.provider.batch.submitted",
+    "ai.provider.batch.completed",
+    "ai.provider.batch.result_count")
+| summarize total = sum(valueSum) by name, bin(timestamp, 1h)
+| render timechart
+```
+
+```kql
+// Batch cost vs synchronous equivalent (last 24h)
+// Batch is 50% of synchronous rate — savings are unconditional (no cache hit
+// dependency). avgInputTokensPerRequest is an approximation; refine once you
+// have real token logs from batch spans.
+let inputPricePerMillion = 3.0;          // claude-sonnet-4-6: $3/1M input tokens
+let avgInputTokensPerRequest = 500.0;    // approximation
+customMetrics
+| where timestamp > ago(24h)
+| where name == "ai.provider.batch.result_count"
+| summarize batchResultCount = sum(valueSum)
+| extend
+    syncEquivalentUSD  = batchResultCount * avgInputTokensPerRequest * (inputPricePerMillion / 1000000),
+    batchCostUSD       = batchResultCount * avgInputTokensPerRequest * (inputPricePerMillion / 1000000) * 0.5,
+    savingsUSD         = batchResultCount * avgInputTokensPerRequest * (inputPricePerMillion / 1000000) * 0.5
+| project
+    batchResultCount,
+    syncEquivalentUSD  = round(syncEquivalentUSD, 4),
+    batchCostUSD       = round(batchCostUSD, 4),
+    savingsUSD         = round(savingsUSD, 4)
 ```

@@ -11,7 +11,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 - Backend developer (.NET, APIs, SQL), MIS master's
 - Pivoting to Azure Cloud AI / LLM Architect role
 - Build-first learner; wants architect-level reasoning, not tutorials
-- Days 1–7 complete. Day 8 next.
+- Days 1–8 complete. Day 9 next.
 
 ## Stack
 - .NET 8 Web API (namespace: Lab.Observability.Api)
@@ -138,7 +138,7 @@ provider-abstracted for future Azure OpenAI, Bedrock, and Foundry.
 A multi-provider, observable, governed enterprise AI gateway:
 1. Provider abstraction (done — Day 5, ADR-005)
 2. Observability & resilience (done — Day 6, ADR-006, ADR-008)
-3. Cost controls — prompt caching (done — Day 7, ADR-009); batch API (next)
+3. Cost controls — prompt caching (done — Day 7, ADR-009); batch API (done — Day 8, ADR-010)
 4. Multi-model routing & evaluation
 5. RAG with Azure AI Search
 6. Enterprise agent platform

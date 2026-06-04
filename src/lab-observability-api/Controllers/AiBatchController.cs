@@ -1,8 +1,10 @@
 using Lab.Observability.Api.Contracts;
 using Lab.Observability.Api.Extensions;
 using Lab.Observability.Api.Models.AI;
+using Lab.Observability.Api.Options;
 using Lab.Observability.Api.Services.AI;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Lab.Observability.Api.Controllers;
 
@@ -11,11 +13,16 @@ namespace Lab.Observability.Api.Controllers;
 public class AiBatchController : ControllerBase
 {
     private readonly IBatchChatModelProvider _provider;
+    private readonly AnthropicOptions _options;
     private readonly ILogger<AiBatchController> _logger;
 
-    public AiBatchController(IBatchChatModelProvider provider, ILogger<AiBatchController> logger)
+    public AiBatchController(
+        IBatchChatModelProvider provider,
+        IOptions<AnthropicOptions> options,
+        ILogger<AiBatchController> logger)
     {
         _provider = provider;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -37,6 +44,20 @@ public class AiBatchController : ControllerBase
             return BadRequest(new ApiError(
                 Code: "invalid_request",
                 Message: "All requests must have a non-empty prompt.",
+                CorrelationId: HttpContext.GetCorrelationId()));
+        }
+
+        if (requests.Count > _options.MaxBatchSize)
+        {
+            _logger.LogWarning(
+                "Batch submit refused — over budget cap. CorrelationId={CorrelationId} RequestCount={RequestCount} MaxBatchSize={MaxBatchSize}",
+                HttpContext.GetCorrelationId(),
+                requests.Count,
+                _options.MaxBatchSize);
+
+            return BadRequest(new ApiError(
+                Code: "batch_size_exceeded",
+                Message: $"Batch size {requests.Count} exceeds the configured maximum of {_options.MaxBatchSize}. Split into smaller batches.",
                 CorrelationId: HttpContext.GetCorrelationId()));
         }
 

@@ -21,3 +21,5 @@
 | `docs/notes/_index.md` | docs pass | Day 008 status → Complete |
 | `CLAUDE.md` | docs pass | Days 1–8 complete; cost controls item 3 updated with ADR-010 |
 | `docs/notes/Day-008/files-changed.md` | docs pass | This file — full audit log upsert |
+| `src/lab-observability-api/Options/AnthropicOptions.cs` | build | Added MaxBatchSize (default 100) |
+| `src/lab-observability-api/Controllers/AiBatchController.cs` | build | Added budget cap check: rejects batches over MaxBatchSize with batch_size_exceeded error |

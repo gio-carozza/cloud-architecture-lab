@@ -10,4 +10,5 @@ public class AnthropicOptions
     public int MaxTokens { get; set; } = 512;
     public bool EnablePromptCaching { get; init; } = true;
     public string SystemPrompt { get; init; } = "";
+    public int MaxBatchSize { get; init; } = 100;
 }

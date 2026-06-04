@@ -13,7 +13,7 @@ Last updated: Day-008 (2026-06-04)
 | Deploy & manage Azure compute | | | | |
 | Configure & manage virtual networking | | | | |
 | Monitor & maintain Azure resources | | Day 6 | | Day 6, 7 |
-| Cost optimization | | | Day 7 | Day 7 |
+| Cost optimization | | | Day 7, 8 | Day 7, 8 |
 | Implement & manage AI solutions | | | | Day 5, 6, 7, 8 |
 | Implement generative AI solutions | | | | Day 8 |
 | Optimize AI workloads | | | | Day 7, 8 |
@@ -42,7 +42,7 @@ Last updated: Day-008 (2026-06-04)
 | 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | Day 7 |
 | 2 | Design data storage solutions | 20–25% | ✅ | — |
 | 3 | Design business continuity solutions | 15–20% | ✅ | — |
-| 4 | Design infrastructure solutions | 30–35% | ✅ | — |
+| 4 | Design infrastructure solutions | 30–35% | ✅ | Day 8 ✅ |
 
 ### AI-102 (as of December 23, 2025) — ⚠️ retires June 30, 2026
 | # | Domain | Weight | Scaffold | Content |

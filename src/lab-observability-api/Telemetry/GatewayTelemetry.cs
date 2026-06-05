@@ -43,4 +43,9 @@ public static class GatewayTelemetry
         Meter.CreateHistogram<long>(
             "ai.provider.batch.result_count",
             description: "Number of individual results returned per batch retrieval");
+
+    public static readonly Histogram<double> StreamTtftMs =
+        Meter.CreateHistogram<double>(
+            "ai.chat.stream.ttft_ms",
+            description: "Time to first token in milliseconds for streaming responses");
 }

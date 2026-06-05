@@ -111,8 +111,9 @@ try
         options.CircuitBreaker.MinimumThroughput = 5;
         options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
 
-        // Retry stage present but disabled — see ADR-006 (no retries on chat POST).
-        // Day 7 will replace this with a classification-based predicate.
+        // Retry stage present but disabled per ADR-006 — no retries on non-idempotent
+        // chat POST. MaxRetryAttempts=1 + ShouldHandle=false is the final state
+        // (v10 rejects MaxRetryAttempts=0 as invalid; intent is unchanged).
         options.Retry.MaxRetryAttempts = 1;
         options.Retry.ShouldHandle = _ => ValueTask.FromResult(false);
     });

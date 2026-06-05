@@ -10,3 +10,4 @@
 | [Day 006](Day-006/) | observability-and-resilience | Hybrid | Complete |
 | [Day 007](Day-007/) | prompt-caching-and-cost-observability | Hybrid | Complete |
 | [Day 008](Day-008/) | batch-api-cost-controls | Build | Complete |
+| [Day 009](Day-009/) | streaming-responses-on-interactive-path | Build | Complete |

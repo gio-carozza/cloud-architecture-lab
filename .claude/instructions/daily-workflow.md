@@ -17,7 +17,7 @@ STEP 4  DRAFT          chat (new) · Sonnet     full Day N summary in 13-section
 STEP 5  ADR            chat (new) · latest Opus  reason out the decision (skip if none)
 STEP 6  POPULATE       Claude Code · Sonnet    fill summary + checklist + /adr
 STEP 7  BUILD          Claude Code · Sonnet    implement each phase
-STEP 8  TEST           Claude Code · Sonnet    run locally
+STEP 8  TEST + AUDIT   Claude Code · Sonnet    local tests + 6-pillar gate before deploy
 STEP 9  DEPLOY         Claude Code · Sonnet    /deploy + verify
 STEP 10 DOCUMENT       Claude Code · Sonnet    update docs + commit + /cert-update
 STEP 11 REFLECT        chat (new) · latest Opus  posture check
@@ -66,7 +66,7 @@ Before starting any new day, verify the previous day is frozen. Paste:
 ```
 Verify Day ___ is fully closed out:
 1. Check docs/notes/Day-___/completion-checklist.md — all items [x]?
-2. Check docs/notes/Day-___/posture-check.md — all four questions answered?
+2. Check docs/notes/Day-___/posture-check.md — all five questions answered?
 3. Check docs/notes/Day-___/files-changed.md — no duplicate rows, no stale text?
 4. Check docs/standards/_principles.md — graveyard entries added?
 5. Check docs/notes/_index.md — Day ___ status = Complete?
@@ -242,17 +242,30 @@ Build fails? Paste: `Build failed with: ___ . Fix it. Rebuild. Report.`
 
 ---
 
-## STEP 8 — TEST  (Claude Code)
+## STEP 8 — TEST + AUDIT  (Claude Code)
 
 Paste:
 ```
 Local verification for Day ___.
 Run the app, execute the tests in docs/notes/Day-___/completion-checklist.md.
 Report pass/fail for each. Fix failures and re-test.
-When all local tests pass, print the STEP 9 DEPLOY prompt with the day number
-filled in.
 ```
-→ STOP when local tests pass.
+→ Fix all failures before continuing.
+
+Then, once local tests pass, run the pre-deploy pillars audit:
+```
+Pillars audit for Day ___.
+Read: docs/notes/Day-___/summary.md, docs/notes/Day-___/files-changed.md,
+src/lab-observability-api/Program.cs, and every source file listed in
+files-changed.md that was added or modified this day.
+Run all 6-pillar checks from .claude/skills/pillars-audit/SKILL.md.
+Report GREEN/YELLOW/RED per pillar with specific evidence from the code.
+List any RED items — these block deploy and must be fixed first.
+Document any YELLOW items as known debt in files-changed.md (step: audit).
+When the audit is complete with no RED items, print the STEP 9 DEPLOY prompt
+with the day number filled in.
+```
+→ STOP when local tests pass AND audit returns no RED items.
 
 ---
 
@@ -317,11 +330,12 @@ Paste:
 Posture check for Day ___.
 What I built: ___
 What broke: ___
-Ask me the four posture questions from _principles.md and then provide the answers to those questions in a way that a 10 year old, a CEO, an Engineer, and an LLM Architect could understand:
+Ask me the five posture questions from _principles.md and then provide the answers to those questions in a way that a 10 year old, a CEO, an Engineer, and an LLM Architect could understand:
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship?
 3. What did I try, fail at, and learn?
 4. Can I explain this at 10yo, CEO, Engineer, AND Architect level?
+5. Which pillar took the most damage today, and what's the minimum fix?
 Push back hard if my answers are weak or self-congratulatory.
 ```
 Copy the result. → STOP. Close chat.

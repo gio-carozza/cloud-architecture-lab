@@ -18,10 +18,13 @@ The .NET 8 AI Gateway. This is the anchor workload of the entire roadmap.
 - Structured logging only
 - Never return stack traces
 
-## Day 6 Complete
-Serilog as logger, OpenTelemetry as the export pipeline (see ADR-006, ADR-008).
-Correlation middleware, resilience pipeline, structured error handling, and
-LLM-specific Activity instrumentation all in place. Deploy verification deferred
-until Azure CLI is restored.
-See ../../docs/architecture/observability-architecture.md (forthcoming) for
-current state.
+## Days 6–9 Complete
+Day 6: Serilog + OpenTelemetry export pipeline (ADR-006, ADR-008), correlation
+middleware, resilience pipeline, structured error handling, LLM Activity spans.
+Day 7: Prompt caching inside the provider boundary (ADR-009), CacheHits/CacheMisses
+counters, system prompt as cacheable content array with TTL.
+Day 8: Parallel batch provider seam (ADR-010), IBatchChatModelProvider,
+ClaudeBatchApiClient, AiBatchController, batch telemetry, MaxBatchSize cap.
+Day 9: SSE streaming on interactive path (ADR-011), StreamAsync on IChatModelProvider,
+ChatChunk/ChatChunkUsage models, ClaudeApiClient.StreamChatAsync, StreamTtftMs histogram.
+See ../../docs/architecture/observability-architecture.md for current state.

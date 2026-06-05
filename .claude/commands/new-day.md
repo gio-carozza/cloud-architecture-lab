@@ -99,9 +99,48 @@ See posture-check.md (filled at end of day, BEFORE marking complete)
 ## 3. What did I try, fail at, and learn?
 <add to docs/standards/_principles.md "Graveyard" table>
 
-## 4. Could I explain today's work to a 10-year-old AND defend it at a doctorate level?
-<if no, the work isn't owned yet — schedule a teach-back session>
+## 4. Could I explain today's work at all four levels?
+
+### 10-year-old
+<analogy-first, no jargon, one paragraph>
+
+### CEO
+<business value, ROI, or risk — two sentences max>
+
+### Engineer
+<exact APIs, code patterns, how-to>
+
+### Architect
+<tradeoffs, enterprise implications, what the wrong choice costs>
+
+*If any level is missing, the concept isn't fully owned — schedule a teach-back.*
+
+## 5. Which pillar took the most damage today, and what's the minimum fix?
+<name the weakest WAF pillar or Responsible AI gap from today's changes>
+<state whether it was fixed (GREEN), accepted as debt (YELLOW), or still open (RED)>
+*A day with all GREENs is either a great day or a shallow audit — be honest about which.*
 ```
+
+## Required sections in architect-thinking.md
+
+```markdown
+# Day NNN — Architect Thinking
+
+## 1. <Core design decision title>
+<tradeoffs, alternatives rejected, what elite architects do differently>
+
+## 2. <Second decision or deeper dive>
+...
+
+## CEO Framing
+<one or two sentences: what does the architectural decision mean in business terms?
+What would break, cost more, or be riskier if the wrong choice had been made?>
+```
+
+`architect-thinking.md` is the reasoning trail, not a summary. Write what you would
+say to defend the design in a senior design review. The CEO Framing section translates
+the architectural decision into business consequence — not "what the day built" (that's
+in summary.md), but "what this specific design choice protects against or enables."
 
 ## Required initial content for appsettings-template.md
 

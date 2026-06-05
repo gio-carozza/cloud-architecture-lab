@@ -12,7 +12,8 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
 - Custom dimensions used: `CorrelationId`, `llm.tokens.input`, `llm.tokens.output`,
   `llm.provider`, `llm.model`, `llm.latency_ms`,
   `llm.cache.read_tokens` (Day 7+), `llm.cache.creation_tokens` (Day 7+),
-  `batch.job_id` (Day 8+), `batch.request_count` (Day 8+)
+  `batch.job_id` (Day 8+), `batch.request_count` (Day 8+),
+  `ai.chat.stream.ttft_ms` (Day 9+, customMetrics table)
 
 ---
 
@@ -200,4 +201,35 @@ customMetrics
     syncEquivalentUSD  = round(syncEquivalentUSD, 4),
     batchCostUSD       = round(batchCostUSD, 4),
     savingsUSD         = round(savingsUSD, 4)
+```
+
+---
+
+## 11. Streaming TTFT p50/p95/p99 (last hour)
+```kql
+customMetrics
+| where timestamp > ago(1h)
+| where name == "ai.chat.stream.ttft_ms"
+| summarize
+    p50_ms = percentile(value, 50),
+    p95_ms = percentile(value, 95),
+    p99_ms = percentile(value, 99),
+    count  = count()
+  by bin(timestamp, 5m)
+| order by timestamp desc
+| render timechart
+```
+
+## 12. Streaming TTFT by model (last 24h)
+```kql
+customMetrics
+| where timestamp > ago(24h)
+| where name == "ai.chat.stream.ttft_ms"
+| extend model = tostring(customDimensions["ai.model"])
+| summarize
+    p50_ms  = percentile(value, 50),
+    p95_ms  = percentile(value, 95),
+    requests = count()
+  by model
+| order by p95_ms asc
 ```

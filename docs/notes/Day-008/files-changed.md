@@ -27,3 +27,7 @@
 | `docs/standards/_principles.md` | docs pass | Appended 4 Day 8 graveyard rows: contract divergence, accepted ADR with placeholder, missing blast-radius cap, build lock |
 | `docs/notes/Day-008/summary.md` | docs pass | Corrected ADR filename; added files-changed to artifacts list |
 | `.claude/instructions/daily-workflow.md` | docs pass | Added auto-print handoff section and step transition prompts |
+| `docs/notes/Day-005/completion-checklist.md` | alignment | Removed template code-block wrapper; updated two missing file refs to their promoted locations |
+| `src/lab-observability-api/CLAUDE.md` | alignment | Updated "Day 6 Complete" → "Days 6–8 Complete"; removed (forthcoming) from observability-architecture.md link |
+| `src/lab-observability-api/Program.cs` | alignment | Replaced stale "Day 7 will replace this" comment with final-state note per ADR-006 |
+| `src/lab-observability-api/Options/AnthropicOptions.cs` | alignment | Updated default Model from stale `claude-opus-4-7` to `claude-sonnet-4-6` |

@@ -165,8 +165,8 @@ graveyard is where the wisdom comes from.**
 
 ## Daily Posture Check
 
-At the end of each roadmap day, answer these four questions in
-`Day-NNN/posture-check.md`. Answer each question at all four levels.
+At the end of each roadmap day, answer these five questions in
+`Day-NNN/posture-check.md`. Answer Q4 at all four levels.
 
 1. **Whose problem did I actually solve today?**
    (Name a specific human role. "The platform" is not an answer.)
@@ -185,6 +185,13 @@ At the end of each roadmap day, answer these four questions in
    - **Architect:** tradeoffs, enterprise implications, what the wrong choice costs
 
    If any level is missing, the concept isn't fully owned — schedule a teach-back.
+
+5. **Which pillar took the most damage today, and what's the minimum fix?**
+   (Name the weakest WAF pillar or Responsible AI gap from today's changes.
+   State whether it was fixed before deploy — GREEN — accepted as documented
+   debt — YELLOW — or left open — RED. A day with all GREENs is either a
+   great day or a shallow audit. Be honest about which.
+   Full audit checklist: `.claude/skills/pillars-audit/SKILL.md`)
 
 ---
 

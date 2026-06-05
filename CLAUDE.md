@@ -14,7 +14,7 @@ Full career path: `docs/standards/career-path.md`
 - **Next phase: Forward-Deployed Engineer** (~Day 21) — applying AI to real business problems, rapid prototyping, CEO-level communication
 - **Target phase: LLM Architect** (~Day 51+) — enterprise governance, multi-provider, compliance, $200k–$250k tier
 - Build-first learner; wants architect-level reasoning, not tutorials
-- Days 1–8 complete. Day 9 next.
+- Days 1–9 complete. Day 10 next.
 
 ## Stack
 - .NET 8 Web API (namespace: Lab.Observability.Api)
@@ -147,7 +147,8 @@ Build the gateway. Learn the APIs. Own cost and observability.
 - Provider abstraction (done — Day 5, ADR-005)
 - Observability & resilience (done — Day 6, ADR-006, ADR-008)
 - Cost controls — prompt caching (done — Day 7, ADR-009); batch API (done — Day 8, ADR-010)
-- **Remaining:** streaming responses, multi-turn context management, eval framework basics
+- Streaming responses — SSE on interactive path, TTFT histogram, ADR-011 (done — Day 9)
+- **Remaining:** multi-turn context management, eval framework basics
 
 ### Phase 2: Forward-Deployed Engineer (Days 21–50)
 Apply AI to real business problems. Communicate at CEO level. Rapid prototyping.

@@ -1,9 +1,3 @@
-
----
-
-# 4. `docs/notes/Day-005/completion-checklist.md`
-
-```md
 # Day-005 — Completion Checklist
 
 ## Goal
@@ -73,8 +67,8 @@ Use this checklist to confirm Day-005 is complete both technically and architect
 - [x] `docs/adr/ADR-005-introduce-provider-abstraction-for-claude-integration.md` created
 - [x] `docs/architecture/day-005-sequence-flow.md` created
 - [x] `Infra/Day-005/appsettings-template.md` created
-- [x] `docs/notes/Day-005/kql.md` created
-- [x] `docs/notes/Day-005/deployment-guide.md` created
+- [x] KQL queries written (promoted to `docs/standards/kql-cookbook.md` on Day 6)
+- [x] Deployment guide written (promoted to `CLAUDE.md` Gotchas + `.claude/skills/azure-deploy/SKILL.md` on Day 6)
 - [x] this checklist file committed to repo
 
 ---

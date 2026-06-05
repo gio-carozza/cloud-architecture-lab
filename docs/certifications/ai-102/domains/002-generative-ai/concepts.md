@@ -2,6 +2,40 @@
 
 ---
 
+<!-- Day 9 Additions: SSE streaming, TTFT, provider seam design -->
+
+## Server-Sent Events (SSE) Streaming for LLM Responses
+
+### If you're 10 years old
+Imagine you ask a librarian a question and they read you the answer one sentence at a time as they find it, instead of making you wait until they've read the whole book. SSE streaming works like that — instead of waiting for the AI to finish writing everything, you start seeing the words appear on your screen almost immediately, just like typing.
+
+### If you're a CEO
+Streaming turns a 4-second blank wait into real-time text appearing word by word — the difference between an AI product that feels alive and one that feels broken. Every major AI product (Claude.ai, ChatGPT, Copilot) streams. A gateway that can't stream can't back a real interactive product and loses customer trust before the content even lands.
+
+### If you're an Engineer
+Anthropic's streaming API is activated by adding `"stream": true` to the POST body. The response becomes `text/event-stream` with line-by-line SSE frames. Key event types: `message_start` (input tokens + cache tokens), `content_block_delta` with `delta.type=text_delta` (the actual text fragment), `message_delta` (stop reason + output tokens), `message_stop` (terminal). In .NET 8, use `HttpCompletionOption.ResponseHeadersRead` on `SendAsync` to receive the response stream before the body completes. Read lines with `StreamReader.ReadLineAsync(CancellationToken)`. Parse each `data: {...}` JSON frame. Wire `HttpContext.RequestAborted` as the cancellation token so client disconnect terminates the upstream Anthropic call. Set `Content-Type: text/event-stream`, `Cache-Control: no-cache`, and `X-Accel-Buffering: no` (nginx directive — required on App Service to prevent proxy buffering). Call `FlushAsync()` after each chunk write. Validate input BEFORE setting SSE headers — once `text/event-stream` is committed, the HTTP status code cannot be changed; errors must become SSE `event: error` frames.
+
+### If you're an Architect
+Streaming changes the latency SLO from total response time to time-to-first-token (TTFT). These are distinct metrics with different failure modes and different fixes: a high TTFT problem is a provider/network issue; a high total-duration problem is a model/length issue. Instrumenting only total latency makes both indistinguishable. Enterprise implications: (1) the provider abstraction seam must decide whether streaming is an extension of the existing `ChatAsync` interface or a new sibling seam — this is an ISP + Liskov question, not a style choice (batch earned a new seam because it breaks Liskov; streaming preserves it via single-chunk graceful degradation); (2) every intermediary in the request path (API gateway, load balancer, CDN, reverse proxy) must have buffering disabled or SSE becomes a buffered batch response that merely pretends to stream — the `X-Accel-Buffering: no` header is the nginx-specific directive for Azure App Service; (3) mid-stream error semantics differ from pre-stream errors: once the 200 response and `Content-Type: text/event-stream` header are sent, the status code is immutable — errors must be emitted as SSE error frames, never as HTTP status changes. Common beginner mistake: testing SSE locally and claiming success without verifying on the actual deployment target (App Service, API Gateway, CloudFront) where proxy buffering will silently defeat incremental delivery.
+
+---
+
+## Time-to-First-Token (TTFT) as a Latency SLO
+
+### If you're 10 years old
+TTFT is like measuring how long you wait before the TV starts showing the show — not how long the whole show takes. If the first word appears in 200ms, the experience feels fast even if the full answer takes 5 seconds. If the first word takes 3 seconds, the experience feels broken even if the rest comes quickly.
+
+### If you're a CEO
+TTFT is the metric that directly controls whether users perceive your AI as fast or slow. Total completion time is invisible in a streaming product; TTFT is what users feel. Setting a p95 TTFT SLA of < 500ms and alerting on it is more valuable than any total-latency SLA for an interactive chat workload.
+
+### If you're an Engineer
+Measure TTFT by starting a `Stopwatch` just before sending the HTTP request to the LLM provider, and recording the elapsed time the instant the first `text_delta` event is parsed and yielded. In OpenTelemetry, emit as a `Histogram<double>` so you get p50/p95/p99 percentiles, not just averages. Tag with `ai.provider` and `ai.model` so you can compare providers. KQL query: `customMetrics | where name == "ai.chat.stream.ttft_ms" | summarize p95=percentile(value, 95) by bin(timestamp, 5m)`. Typical p50 TTFT values: local dev to Anthropic ≈ 100–500ms; Azure East US to Anthropic ≈ 800–1500ms. Cache hits on the system prompt don't meaningfully reduce TTFT (caching saves input token processing, but the model still needs to generate the first output token).
+
+### If you're an Architect
+TTFT is the primary SLO for the streaming path and requires a separate alert rule from the total-latency alert on the synchronous path. Three architectural decisions flow from it: (1) TTFT and total-duration metrics must be emitted separately — do not try to derive one from the other; (2) the alert threshold for streaming should be on TTFT p95, not mean; outliers dominate UX more than averages in interactive workloads; (3) TTFT is provider-specific — it measures model time-to-first-token, which varies by model family, not just API endpoint. A multi-provider gateway routes based on TTFT SLO, not just total latency, which means TTFT must be tagged by model ID to be actionable in routing decisions.
+
+---
+
 ## Batch API Processing Pattern
 
 ### If you're 10 years old

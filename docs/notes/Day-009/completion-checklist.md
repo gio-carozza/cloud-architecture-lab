@@ -21,8 +21,7 @@
 
 ## Telemetry (Phase D)
 
-- [x] `GatewayTelemetry.StreamTtftMs` histogram (`ai.chat.stream.ttft_ms`) added
-  > Note: metric name uses `ai.chat.stream.*` prefix (per approved summary) rather than `ai.provider.*` convention — accepted deviation, documented in pillars audit (OPS EXCELLENCE YELLOW O2)
+- [x] `GatewayTelemetry.StreamTtftMs` histogram (`ai.provider.stream.ttft_ms`) added — metric name aligns with `ai.provider.*` convention
 - [x] Token counts from final usage chunk logged via `LogInformation` in `ClaudeChatModelProvider.StreamAsync`
 - [ ] `GatewayTelemetry.StreamDurationMs` — NOT built (not in approved Day 9 summary; deferred)
 
@@ -62,5 +61,5 @@
 
 - [x] `docs/architecture/day-009-streaming-responses-on-interactive-path.md` written
 - [x] `docs/notes/Day-009/architect-thinking.md` written
-- [ ] `docs/notes/Day-009/posture-check.md` filled (STEP 11 — before marking complete)
-- [ ] Git commit: `feat(day-009): streaming responses on interactive path`
+- [x] `docs/notes/Day-009/posture-check.md` filled (STEP 11 — before marking complete)
+- [x] Git commit: `feat(day-009): streaming responses on interactive path`

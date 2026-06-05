@@ -43,7 +43,7 @@ fixes, indistinguishable without the histogram.
 - POST /api/ai/chat/stream on AiController: text/event-stream response,
   response buffering disabled, HttpContext.RequestAborted wired through to cancel
   the Anthropic stream on client disconnect.
-- TTFT histogram (ai.chat.stream.ttft_ms) on GatewayTelemetry, plus a
+- TTFT histogram (ai.provider.stream.ttft_ms) on GatewayTelemetry, plus a
   claude.chat.stream.api span following the Day 6 two-span pattern.
 - Mid-stream error contract: once the 200 + SSE headers are sent, failures emit an
   SSE event: error frame with a correlationId — never a half-written body, never

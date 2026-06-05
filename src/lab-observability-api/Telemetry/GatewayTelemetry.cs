@@ -46,6 +46,6 @@ public static class GatewayTelemetry
 
     public static readonly Histogram<double> StreamTtftMs =
         Meter.CreateHistogram<double>(
-            "ai.chat.stream.ttft_ms",
+            "ai.provider.stream.ttft_ms",
             description: "Time to first token in milliseconds for streaming responses");
 }

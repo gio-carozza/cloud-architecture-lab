@@ -152,10 +152,16 @@ public sealed class ClaudeChatModelProvider : IChatModelProvider
         {
             if (!usageLogged)
             {
-                _logger.LogWarning(
-                    "Streaming session ended before final usage data was received (client disconnect or mid-stream error). Model={Model} DurationMs={DurationMs}",
-                    _options.Model,
-                    ttftStopwatch.Elapsed.TotalMilliseconds);
+                if (ct.IsCancellationRequested)
+                    _logger.LogDebug(
+                        "Streaming session cancelled by client before usage data arrived. Model={Model} DurationMs={DurationMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
+                else
+                    _logger.LogWarning(
+                        "Streaming session ended before final usage data was received. Model={Model} DurationMs={DurationMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
             }
         }
     }

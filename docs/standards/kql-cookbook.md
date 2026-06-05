@@ -13,7 +13,7 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
   `llm.provider`, `llm.model`, `llm.latency_ms`,
   `llm.cache.read_tokens` (Day 7+), `llm.cache.creation_tokens` (Day 7+),
   `batch.job_id` (Day 8+), `batch.request_count` (Day 8+),
-  `ai.chat.stream.ttft_ms` (Day 9+, customMetrics table)
+  `ai.provider.stream.ttft_ms` (Day 9+, customMetrics table)
 
 ---
 
@@ -209,7 +209,7 @@ customMetrics
 ```kql
 customMetrics
 | where timestamp > ago(1h)
-| where name == "ai.chat.stream.ttft_ms"
+| where name == "ai.provider.stream.ttft_ms"
 | summarize
     p50_ms = percentile(value, 50),
     p95_ms = percentile(value, 95),
@@ -224,7 +224,7 @@ customMetrics
 ```kql
 customMetrics
 | where timestamp > ago(24h)
-| where name == "ai.chat.stream.ttft_ms"
+| where name == "ai.provider.stream.ttft_ms"
 | extend model = tostring(customDimensions["ai.model"])
 | summarize
     p50_ms  = percentile(value, 50),

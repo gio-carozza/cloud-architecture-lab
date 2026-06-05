@@ -275,7 +275,7 @@ for, extending the seam.
     await foreach writing `data:` frames + flush per chunk, HttpContext.RequestAborted as
     the token, `event: error` + correlationId on mid-stream failure.
 - `src/lab-observability-api/Telemetry/GatewayTelemetry.cs`
-  - Add `Histogram<double> StreamTtftMs` (`ai.chat.stream.ttft_ms`); add ai.chat.stream /
+  - Add `Histogram<double> StreamTtftMs` (`ai.provider.stream.ttft_ms`); add ai.chat.stream /
     claude.chat.stream.api ActivitySource spans; tags llm.stream.ttft_ms,
     llm.stream.chunks, and end-of-stream llm.tokens.* and llm.cache.*.
 

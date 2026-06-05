@@ -2,6 +2,40 @@
 
 ---
 
+<!-- Day 9 Additions: streaming response pattern, TTFT SLO design, proxy buffering -->
+
+## Streaming vs. Buffered Response Pattern
+
+### If you're 10 years old
+Imagine watching a YouTube video. You don't have to wait for the whole video to download before you can start watching — it loads a little bit at a time as you watch. Streaming APIs work the same way: instead of making you wait for the whole answer, you start seeing words appear right away, almost like watching someone type. A "buffered" response is the opposite — you wait, wait, wait, then everything appears at once.
+
+### If you're a CEO
+Streaming is the difference between an AI product that feels instant and one that feels broken. Every major AI product users compare yours to (Claude, ChatGPT, Copilot) streams. A buffered gateway response with a 4-second blank wait will cause customers to assume the product is slow or failing before the answer even appears.
+
+### If you're an Engineer
+Streaming in HTTP uses `Content-Type: text/event-stream` (Server-Sent Events, SSE). The server sends `data: <json>\n\n` frames incrementally and calls `FlushAsync()` after each. The client reads line-by-line as frames arrive. In .NET 8 with Anthropic: set `"stream": true` in the POST body, use `HttpCompletionOption.ResponseHeadersRead` on `SendAsync`, and `StreamReader.ReadLineAsync(CancellationToken)` to read SSE events. Return type on the provider interface is `IAsyncEnumerable<ChatChunk>`. The controller sets `Content-Type: text/event-stream`, `Cache-Control: no-cache`, and `X-Accel-Buffering: no` (nginx proxy directive) BEFORE writing any body. Input validation must happen BEFORE setting SSE headers — once headers are committed, the HTTP status code cannot be changed. Mid-stream errors become SSE `event: error` frames.
+
+### If you're an Architect
+The architectural decision is whether streaming is a new interface seam or an extension of the existing chat interface — and the correct test is Liskov Substitutability, not return-type symmetry. If a provider that lacks native streaming can implement `StreamAsync` without throwing (by yielding a single terminal chunk), streaming belongs on the existing interface. If it cannot implement the method without throwing (as batch cannot implement `SubmitBatchAsync`), a new seam is warranted. This test is the difference between principled Interface Segregation and cosmetic consistency. At enterprise scale, the infrastructure concern is every proxy in the request path: App Service nginx, API Management, CDN, and load balancers all buffer responses by default. `X-Accel-Buffering: no` handles nginx; API Management requires response buffering policy disabled; CDN origins need streaming pass-through configured. Each buffering layer silently defeats SSE and produces a "works locally, broken in staging/prod" defect that is expensive to diagnose. Common beginner mistake: testing SSE locally where there is no nginx, and shipping to production without verifying incremental delivery through the full proxy chain.
+
+---
+
+## Latency SLO Design — TTFT vs. Total Response Time
+
+### If you're 10 years old
+If you're watching someone type an answer, you care about two different "waits": how long before you see the first letter, and how long before they finish typing. TTFT is the first wait — the blank screen. Total time is the whole thing. For streaming, only the first wait matters for whether the experience feels fast or slow.
+
+### If you're a CEO
+For streaming AI products, "the AI is slow" is almost always a first-token problem, not a total-duration problem. These have different causes, different fixes, and different SLAs. Measuring only total latency makes both invisible. A p95 TTFT SLA is the commitment that protects user experience; total duration is a secondary quality metric.
+
+### If you're an Engineer
+TTFT is measured by starting a `Stopwatch` before `SendAsync` and recording `Elapsed.TotalMilliseconds` on the first yielded chunk. Emit as `Histogram<double>` (not `Counter` — you need percentiles). KQL for SLO compliance: `customMetrics | where name == "ai.chat.stream.ttft_ms" | summarize p95=percentile(value, 95) by bin(timestamp, 5m)`. Alert rule: `p95 > 2000ms` over a 5-minute window, Severity 2, Action Group. Typical targets: p95 TTFT < 500ms for in-region (same Azure region as provider); < 2000ms for cross-region. Total response duration matters for cost (longer output = more tokens) but not for perceived latency in a streaming UX.
+
+### If you're an Architect
+TTFT and total response time are separate SLO dimensions requiring separate alert rules, separate histograms, and separate incident response runbooks. The diagnosis paths are different: high TTFT → provider latency, network routing, system prompt size, prompt cache miss rate; high total duration → output token count (prompt engineering problem), model choice. Conflating them in a single `ai.provider.latency.ms` metric hides which variable is degrading. At enterprise scale, multi-provider routing based on TTFT percentiles (route to the provider with the lower p95 TTFT for interactive workloads) is a genuine cost-performance optimization — but only possible if TTFT is instrumented per provider. Common mistake: using average latency for alerts. The 99th percentile user's experience is always worse than the average; p95 is the minimum responsible alert threshold for any user-facing latency SLO.
+
+---
+
 ## Async / Job-Shaped Workload Pattern
 
 ### If you're 10 years old

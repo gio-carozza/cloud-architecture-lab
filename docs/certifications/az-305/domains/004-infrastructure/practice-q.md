@@ -104,3 +104,108 @@ D) Replace AKS with Azure Container Apps with KEDA scaling, which is simpler tha
 **Exam domain:** Design infrastructure solutions  
 **Cert:** AZ-305  
 **Roadmap day:** Day-008
+
+---
+
+## Q6: Streaming vs. buffered response — architectural driver
+
+**Scenario:** An enterprise is building an AI assistant gateway. One team proposes a synchronous REST endpoint returning the full LLM completion after 3–6 seconds. Another proposes an SSE streaming endpoint delivering tokens within 200ms. The CTO asks the architect to justify the streaming approach.
+
+**Question:** What is the primary architectural justification for streaming?
+
+A) Streaming is cheaper — SSE reduces per-token cost at the provider  
+B) Streaming reduces time-to-first-token (TTFT), transforming perceived latency from total response time to first-token arrival — the primary driver of user-perceived performance in an interactive chat product  
+C) Azure App Service does not support buffered responses longer than 2 seconds  
+D) Streaming is more secure because smaller payloads are harder to intercept  
+
+**Answer:** B
+
+**Why:** In a streaming UX, users begin reading after the first token — not the last. A 200ms TTFT with 5s total duration feels fast; a 5s blank wait feels broken, even with identical total duration. B captures the architectural value. A) is false — provider token cost is identical for `"stream": true` vs buffered. C) is false — App Service supports both. D) is false — streaming has no meaningful security advantage over buffered at the payload level.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-009
+
+---
+
+## Q7: TTFT SLO definition
+
+**Scenario:** An architect is defining SLOs for a streaming AI chat gateway. The team measures both TTFT and total response duration. The architect must select the right metric for the customer-facing SLA.
+
+**Question:** Which metric and threshold best represents a customer-facing latency commitment for a streaming AI product?
+
+A) Mean total response duration < 5 seconds  
+B) p95 TTFT < 1 second  
+C) p50 total response duration < 3 seconds  
+D) Token throughput > 20 tokens/second  
+
+**Answer:** B
+
+**Why:** p95 TTFT is the metric that directly controls whether users perceive the product as responsive. In a streaming UX, total duration is invisible — users are reading while content arrives. p95 covers the tail of the distribution that users experience as slow. A) mean total duration averages over outliers and measures an experience users don't have in a streaming product. C) p50 leaves half of users at above-median latency. D) token throughput is a secondary quality metric unrelated to the blank-screen latency SLA.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-009
+
+---
+
+## Q8: Proxy buffering in the streaming path
+
+**Scenario:** A streaming AI gateway is deployed to Azure App Service (Linux). Local integration tests confirm incremental token delivery. After the Azure deploy, the same requests deliver all tokens in a single burst. The gateway correctly sets `Content-Type: text/event-stream` and calls `FlushAsync()` after each chunk.
+
+**Question:** What infrastructure layer is silently buffering the response, and what is the fix?
+
+A) Azure Front Door is caching SSE responses; configure CDN bypass for the streaming route  
+B) Linux App Service doesn't support streaming; migrate to Windows-based App Service  
+C) nginx (the reverse proxy in App Service Linux) buffers responses by default; add `X-Accel-Buffering: no` to the response headers  
+D) Azure Load Balancer is reassembling packets before forwarding; enable TCP passthrough  
+
+**Answer:** C
+
+**Why:** Azure App Service on Linux uses nginx as a reverse proxy. Nginx buffers upstream responses by default, converting incremental SSE frames into a single burst delivery. `X-Accel-Buffering: no` is nginx's documented per-response mechanism to disable this behavior. A) Azure Front Door is not in the default App Service path. B) is false — both Linux and Windows App Service support streaming. D) Azure Load Balancer operates at Layer 4 and does not reassemble HTTP application payloads.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-009
+
+---
+
+## Q9: Client disconnect and upstream cost governance
+
+**Scenario:** Usage analysis shows 15% of streaming sessions are abandoned mid-stream. The gateway continues generating and billing for tokens until completion, even after the client disconnects. The team needs to eliminate this waste.
+
+**Question:** What is the correct architectural fix?
+
+A) Set a 30-second maximum streaming duration to limit abandoned sessions  
+B) Use a circuit breaker on the upstream LLM connection to interrupt streams when error rates rise  
+C) Pass `HttpContext.RequestAborted` as the CancellationToken to the upstream HTTP call; client disconnects propagate upstream and cancel token generation immediately  
+D) Implement client-side keep-alive pings; terminate sessions that stop sending pings  
+
+**Answer:** C
+
+**Why:** ASP.NET Core signals client disconnect through `HttpContext.RequestAborted`. Passing this token to the upstream `SendAsync` call cancels the LLM HTTP connection the instant the client disconnects — stopping token generation, billing, and I/O simultaneously. A) a fixed 30-second cutoff penalises legitimate long responses. B) circuit breakers respond to aggregate error rates, not individual client lifecycles. D) keep-alive pings require client cooperation and add complexity that `RequestAborted` already solves natively.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-009
+
+---
+
+## Q10: Interface design for streaming capability — SOLID principles
+
+**Scenario:** An AI gateway has `IChatModelProvider` with `Task<ChatResponse> SendAsync(...)`. Adding streaming. Proposal A: create `IStreamingChatModelProvider` (same pattern as `IBatchChatModelProvider`). Proposal B: extend `IChatModelProvider` with `IAsyncEnumerable<ChatChunk> StreamAsync(...)`.
+
+**Question:** Which SOLID principle determines the correct choice, and what is the deciding criterion?
+
+A) Open/Closed — the existing interface must be closed to modification; always extend via a new interface  
+B) Liskov Substitution — a non-streaming provider can implement `StreamAsync` by yielding one terminal chunk (graceful degradation), so extension is valid; batch broke this test and earned its own seam  
+C) Interface Segregation — streaming and buffered chat are separate concerns that must always be separated  
+D) Single Responsibility — each interface must have only one method  
+
+**Answer:** B
+
+**Why:** The LSP test: can a provider that lacks the capability implement the method without throwing? For streaming: yes — call `SendAsync`, yield the result as one chunk. For batch: no — a non-batch provider cannot provide a valid job ID or poll result. The asymmetry is why batch earned a new seam and streaming extends the existing one. A) OCP applies to extending classes without modifying them, not to preventing interface evolution. C) ISP requires new interfaces when different consumers need only subsets of methods — the same controller uses both buffered and streamed chat, so no segregation pressure exists. D) single-method interfaces are not required by SRP.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-009

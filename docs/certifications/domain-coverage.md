@@ -1,6 +1,6 @@
 # Certification Domain Coverage
 
-Last updated: Day-009b (2026-06-05)
+Last updated: Day-009c (2026-06-05)
 
 > ⚠️ **AI-102 retires June 30, 2026.** Complete before that date or pivot to successor cert.
 
@@ -42,7 +42,7 @@ Last updated: Day-009b (2026-06-05)
 | 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | Day 7 |
 | 2 | Design data storage solutions | 20–25% | ✅ | — |
 | 3 | Design business continuity solutions | 15–20% | ✅ | — |
-| 4 | Design infrastructure solutions | 30–35% | ✅ | Day 8 ✅ |
+| 4 | Design infrastructure solutions | 30–35% | ✅ | Day 8, 9 ✅ |
 
 ### AI-102 (as of December 23, 2025) — ⚠️ retires June 30, 2026
 | # | Domain | Weight | Scaffold | Content |

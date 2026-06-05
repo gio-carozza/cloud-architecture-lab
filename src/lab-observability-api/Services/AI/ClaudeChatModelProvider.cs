@@ -108,35 +108,55 @@ public sealed class ClaudeChatModelProvider : IChatModelProvider
 
         var ttftStopwatch = Stopwatch.StartNew();
         bool firstChunk = true;
+        bool usageLogged = false;
 
-        await foreach (var chunk in _claudeApiClient.StreamChatAsync(payload, ct))
+        // try/finally (no catch) is allowed in async iterators — CS1626 only blocks yield
+        // inside try blocks that have a catch clause. The finally here ensures the audit
+        // trail is closed even when the client disconnects (OperationCanceledException)
+        // before message_delta arrives.
+        try
         {
-            if (firstChunk)
+            await foreach (var chunk in _claudeApiClient.StreamChatAsync(payload, ct))
             {
-                GatewayTelemetry.StreamTtftMs.Record(
-                    ttftStopwatch.Elapsed.TotalMilliseconds,
-                    new KeyValuePair<string, object?>("ai.provider", "anthropic"),
-                    new KeyValuePair<string, object?>("ai.model", _options.Model));
+                if (firstChunk)
+                {
+                    GatewayTelemetry.StreamTtftMs.Record(
+                        ttftStopwatch.Elapsed.TotalMilliseconds,
+                        new KeyValuePair<string, object?>("ai.provider", "anthropic"),
+                        new KeyValuePair<string, object?>("ai.model", _options.Model));
 
-                _logger.LogInformation(
-                    "Claude streaming first token received. Model={Model} TtftMs={TtftMs}",
+                    _logger.LogInformation(
+                        "Claude streaming first token received. Model={Model} TtftMs={TtftMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
+
+                    firstChunk = false;
+                }
+
+                if (chunk.Usage is not null)
+                {
+                    _logger.LogInformation(
+                        "Claude streaming completed. Model={Model} InputTokens={InputTokens} OutputTokens={OutputTokens} CacheReadTokens={CacheReadTokens}",
+                        _options.Model,
+                        chunk.Usage.InputTokens,
+                        chunk.Usage.OutputTokens,
+                        chunk.Usage.CacheReadTokens);
+
+                    usageLogged = true;
+                }
+
+                yield return chunk;
+            }
+        }
+        finally
+        {
+            if (!usageLogged)
+            {
+                _logger.LogWarning(
+                    "Streaming session ended before final usage data was received (client disconnect or mid-stream error). Model={Model} DurationMs={DurationMs}",
                     _options.Model,
                     ttftStopwatch.Elapsed.TotalMilliseconds);
-
-                firstChunk = false;
             }
-
-            if (chunk.Usage is not null)
-            {
-                _logger.LogInformation(
-                    "Claude streaming completed. Model={Model} InputTokens={InputTokens} OutputTokens={OutputTokens} CacheReadTokens={CacheReadTokens}",
-                    _options.Model,
-                    chunk.Usage.InputTokens,
-                    chunk.Usage.OutputTokens,
-                    chunk.Usage.CacheReadTokens);
-            }
-
-            yield return chunk;
         }
     }
 }

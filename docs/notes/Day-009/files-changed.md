@@ -20,3 +20,5 @@
 | `docs/notes/Day-009/completion-checklist.md` | docs pass | Deploy and Azure verification items marked [x] with evidence |
 | `docs/notes/_index.md` | docs pass | Day 009 status updated to Complete |
 | `docs/notes/Day-009/files-changed.md` | docs pass | This file — docs pass rows upserted |
+| `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` | posture gap fix | try/finally added around await foreach — logs WRN with CorrelationId+DurationMs when stream ends without final usage data (client disconnect or mid-stream error); closes RA6 audit-trail gap |
+| `docs/adr/ADR-011-place-streaming-on-the-interactive-provider-seam.md` | posture gap fix | Side-by-side reconciliation table added to Decision section: batch vs streaming on all four decision variables (lifecycle, Liskov, ISP, verdict) |

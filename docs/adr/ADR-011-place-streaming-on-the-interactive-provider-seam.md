@@ -135,6 +135,20 @@ Opposite structural outcomes, identical test, because the underlying contract ch
 are not alike. That is what makes the 009/010/011 set principled rather than three
 independent style calls.
 
+**Side-by-side reconciliation — batch (ADR-010) vs streaming (ADR-011):**
+
+| Decision variable | Batch (ADR-010) | Streaming (ADR-011) |
+|---|---|---|
+| New lifecycle? | Yes — submit → poll → retrieve | No — one request, one completion |
+| Breaks Liskov? | Yes — non-batch provider must throw | No — degrade to single terminal chunk |
+| ISP pressure? | Yes — interactive controller must not depend on submit/poll/retrieve | No — same controller serves buffered and streamed chat |
+| Verdict | New seam: `IBatchChatModelProvider` | Extend existing: `IChatModelProvider` |
+
+The two decisions are explicit inverses on every dimension. Any future operation should
+be run through the same four-column test, not pattern-matched to either verdict by
+analogy. Batch and streaming share nothing except that both involve `IAsyncEnumerable`
+somewhere in the implementation — which is irrelevant to the seam decision.
+
 ## Alternatives Considered
 
 ### Alternative 1 — Extend IChatModelProvider with StreamAsync

@@ -29,6 +29,22 @@ when a second cacheable provider lands, this code will need refactoring. The
 forward-compatibility path is documented in ADR-009.
 
 ## Whose Problem Am I Solving?
+
+### Collaboration Lens (Day 007)
+
+**Primary — Cloud & Model-Vendor Support**
+Posture: informed questioner — arrive with repro steps and a hypothesis, not "it doesn't work"
+Today's question: is the cache_control TTL requirement for Claude 4 documented, or a discovered behavioral regression?
+
+**10yo:** Today we found out the cloud tool we use has hidden rules that changed between versions — and we learned to test our assumptions with proof instead of trusting the manual.
+**CEO:** Three undocumented vendor behaviors cost half a day of debugging; each is now a gotcha in the repo so the next engineer finds it in 30 seconds instead of three hours.
+**Engineer:** claude-opus-4-6 returns HTTP 200 with zero cache tokens — no error; TTL required for Claude 4 cache_control; nested cache_creation format undocumented. All three needed repro + hypothesis before docs confirmed them.
+**Architect:** Vendor API behavioral regressions across model generations are a category of failure unit tests cannot catch — the discipline is empirical verification after every model migration, not trust in backwards compatibility.
+
+**Also in frame:**
+- DevOps / SRE — cache hit/miss counters now in App Insights; billing spike is diagnosable in KQL, not next month's invoice
+- Security/AppSec/CISO — system prompt content entering the cache is a data-handling surface worth noting in the P1 self-audit
+
 Primary: the FinOps engineer who asks "what does this gateway cost in tokens per
 hour, and is the cache working?" Today's work answers that question with a KQL
 query instead of a spreadsheet.

@@ -18,6 +18,21 @@ This is the inverse of ADR-009's decision. Prompt caching went **inside** the in
 
 ## Whose Problem Am I Solving?
 
+### Collaboration Lens (Day 008)
+
+**Primary — Eng Manager / Tech Lead**
+Posture: proactive communicator — blast radius of a new paid ingress is blocker-class information, not a footnote
+Today's question: if you'd known a single batch submit could fan out to 10,000 paid API calls, would that have changed Phase A?
+
+**10yo:** We built a machine that does lots of AI jobs overnight, but we almost forgot to put a limit on how many it could do at once — which could have been like accidentally ordering a thousand pizzas instead of ten.
+**CEO:** The MaxBatchSize cap is a cost governance control that protects the AI budget from a single misconfigured call; shipping without it would have been the most expensive oversight of the project.
+**Engineer:** IBatchChatModelProvider seam, no-retry on submit (duplicate batch semantics), MaxBatchSize guard in the controller — each was an explicit constraint, not a default; the graveyard names the governance gap closed only after STEP 10.
+**Architect:** Any ingress that fans out to paid calls requires a blast-radius ceiling as a Phase A invariant — same tier as authn and input validation; ADR-010 names this so future contributors know it's a contract, not a suggestion.
+
+**Also in frame:**
+- DevOps / SRE — batch job lifecycle adds a new telemetry surface; status and result-count histograms are the operational signal when a batch stalls
+- Cloud & Model-Vendor Support — Anthropic batch has no-retry submit semantics and JSONL results streaming; these are vendor-specific constraints requiring doc verification, not assumption
+
 The **AI quality engineer** who runs a 1,000-prompt regression suite against the gateway before every release. Currently this costs $X at interactive rates and takes 20 minutes of wall-clock time waiting for synchronous responses. With the Batch API, it costs $X/2 and runs as a job they submit at end of day and retrieve in the morning — freeing the engineer's time and the budget.
 
 Secondary: the **FinOps lead** who asks "what fraction of our AI spend could be deferred to batch without affecting the user-facing SLA?" Day 8 gives them a gateway that can answer that question in telemetry.

@@ -40,3 +40,5 @@
 | `docs/certifications/az-900/domains/003-azure-management-governance/practice-q.md` | cert-update | Q1–Q5: Azure Monitor data types, alert rules, custom metrics, action groups, monitor scope |
 | `docs/certifications/az-900/domains/003-azure-management-governance/day-mapping.md` | cert-update | Day-009 row added |
 | `docs/certifications/domain-coverage.md` | cert-update | AI-102 Domain 2 marked Day 9; AZ-305 Domain 4 marked Day 9; AZ-900 Domain 3 marked Day 9 |
+| `docs/notes/Day-009/summary.md` | collab-lens | Collaboration Lens block inserted under "Whose Problem Am I Solving?" — primary: DevOps / SRE |
+| `docs/notes/Day-009/files-changed.md` | collab-lens | This file — collab-lens rows upserted |

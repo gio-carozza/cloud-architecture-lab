@@ -20,12 +20,12 @@
 | `docs/notes/Day-008/architect-thinking.md` | docs pass | Written — seam decision, ADR-009 symmetry, no-retry reasoning, stateless principle |
 | `docs/notes/_index.md` | docs pass | Day 008 status → Complete |
 | `CLAUDE.md` | docs pass | Days 1–8 complete; cost controls item 3 updated with ADR-010 |
-| `docs/notes/Day-008/files-changed.md` | docs pass | This file — full audit log upsert |
+| `docs/notes/Day-008/files-changed.md` | docs pass → collab-lens | This file — full audit log upsert; collab-lens rows upserted |
 | `src/lab-observability-api/Options/AnthropicOptions.cs` | build | Added MaxBatchSize (default 100) |
 | `src/lab-observability-api/Controllers/AiBatchController.cs` | build | Added budget cap check: rejects batches over MaxBatchSize with batch_size_exceeded error |
 | `docs/notes/Day-008/posture-check.md` | docs pass | Filled — four posture questions answered with honest graveyard-ready admissions |
 | `docs/standards/_principles.md` | docs pass | Appended 4 Day 8 graveyard rows: contract divergence, accepted ADR with placeholder, missing blast-radius cap, build lock |
-| `docs/notes/Day-008/summary.md` | docs pass | Corrected ADR filename; added files-changed to artifacts list |
+| `docs/notes/Day-008/summary.md` | docs pass → collab-lens | Corrected ADR filename; added files-changed to artifacts list; collab-lens block inserted under "Whose Problem Am I Solving?" — primary: Eng Manager / Tech Lead |
 | `.claude/instructions/daily-workflow.md` | docs pass | Added auto-print handoff section and step transition prompts |
 | `docs/notes/Day-005/completion-checklist.md` | alignment | Removed template code-block wrapper; updated two missing file refs to their promoted locations |
 | `src/lab-observability-api/CLAUDE.md` | alignment | Updated "Day 6 Complete" → "Days 6–8 Complete"; removed (forthcoming) from observability-architecture.md link |

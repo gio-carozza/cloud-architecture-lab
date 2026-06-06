@@ -24,6 +24,22 @@ discipline only counts if it's applied when the answer is inconvenient, not just
 when it's tidy.
 
 ## Whose Problem Am I Solving?
+
+### Collaboration Lens (Day 009)
+
+**Primary — DevOps / SRE**
+Posture: good citizen — brief the new streaming failure modes before they surface in an incident
+Today's question: can you tell from the logs whether a latency complaint is a TTFT problem or a total-duration problem without calling me?
+
+**10yo:** Today we made the gateway answer like a typewriter instead of a printer — words appear one at a time — and we added a stopwatch on the very first word so anyone watching can tell if the AI is slow to start or slow to finish.
+**CEO:** The TTFT histogram means the first latency complaint from a customer demo is diagnosable from a dashboard — and that distinction (provider slow vs. model slow) determines whether we escalate to Anthropic or optimize our prompt.
+**Engineer:** IAsyncEnumerable<ChatChunk>, TTFT stopwatch, X-Accel-Buffering:no, RequestAborted propagation, SSE event:error frame — each is an on-call artifact as much as a feature; the histogram is what turns "it felt slow" into "p95 TTFT spiked at 14:32."
+**Architect:** Streaming adds a failure mode sync paths don't have — the half-delivered response; the mid-stream error contract (event:error frame, correlationId only, never stack trace) is the architectural answer to "what does on-call see when the provider drops the stream at token 47?"
+
+**Also in frame:**
+- Security/AppSec/CISO — mid-stream error frame carries only correlationId + safe message; stack trace suppression on the streaming path requires the same discipline as the sync path, confirmed in the Day 9 pillars audit
+- Cloud & Model-Vendor Support — Anthropic SSE format (message_start / content_block_delta / message_delta / message_stop) is vendor-specific; the parser must handle all four event types or silently drop data
+
 A user staring at a spinner. Concretely: the future Phase 2 customer demo where a
 non-technical stakeholder types a question and watches the answer appear. If the
 first token takes three seconds, the demo is dead before the content matters.

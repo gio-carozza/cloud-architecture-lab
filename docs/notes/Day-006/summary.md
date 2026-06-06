@@ -23,6 +23,22 @@ not a platform. Day 6 closes this gap. This is the work that separates
 "developer who can call an LLM" from "architect who can run an LLM platform."
 
 ## Whose Problem Am I Solving?
+
+### Collaboration Lens (Day 006)
+
+**Primary — DevOps / SRE**
+Posture: good citizen — brief new failure modes at deploy time, before the 3am page
+Today's question: what would help you tell "correlation ID missing" from "service down" without escalating?
+
+**10yo:** Today we built a diary for the gateway so when it misbehaves, whoever's on-call can read what happened instead of guessing.
+**CEO:** Structured logs and a KQL starter pack cut mean-time-to-diagnose from "call the developer" to "read the dashboard" — that's the cost of every future incident we never have to escalate.
+**Engineer:** Serilog → App Insights, correlation ID middleware, token-spend KQL — the on-call runbook can now answer "is this a provider timeout or an app error?" without reading code.
+**Architect:** Observability is the contract the SRE signs off on before anything deploys; without it, every future feature ships a black box into production regardless of its own quality.
+
+**Also in frame:**
+- Security/AppSec/CISO — redaction and the no-stack-trace contract are P1 self-audit items that address the question they'd ask in review
+- Eng Manager/Tech Lead — two ADRs accepted in one day (006, 008) is a scope signal worth communicating proactively
+
 Primary: the on-call engineer at 3 AM who gets paged when the gateway
 starts misbehaving. Today's work is the difference between "stares at a
 black box" and "diagnoses in minutes."

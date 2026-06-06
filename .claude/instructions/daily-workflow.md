@@ -360,6 +360,21 @@ When committed, print: "Day ___ closed. Tomorrow → STEP 0 to verify this day
 is frozen, then begin Day ___+1."
 ```
 
+Then run a final pillars audit pass to catch anything introduced since STEP 8:
+```
+Close-of-day audit for Day ___.
+Read docs/notes/Day-___/files-changed.md and identify any files edited AFTER
+the "audit" step row was written (docs pass edits, posture-gap fixes, graveyard
+additions that touched source files).
+Re-run only the pillar checks relevant to those files. If no source files
+changed after STEP 8, run only O4 (files-changed.md coverage complete?) and
+O5 (KQL cookbook updated for any new signals?).
+Report any new RED or YELLOW items.
+If RED: fix and commit before closing. If YELLOW: upsert a debt row in
+files-changed.md with step label "close-audit". If all GREEN or N/A: record
+"close-audit: GREEN" in files-changed.md and proceed.
+```
+
 Done. Tomorrow → STEP 0.
 
 ---

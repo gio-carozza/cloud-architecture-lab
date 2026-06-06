@@ -1,8 +1,10 @@
 # Pillars Audit Skill
 
-**TRIGGER when:** user says "pillars audit", "security review", "architecture review",
-"is this ready to ship", "audit the changes", or when the STEP 8 audit gate is reached
-in the daily workflow.
+**TRIGGER when:**
+- User says "pillars audit", "security review", "architecture review", "is this ready to ship", or "audit the changes"
+- **STEP 8 gate** — pre-deploy audit in the daily workflow (full audit against all changed files)
+- **`/deploy` gate** — Step 0 of `.claude/commands/deploy.md`; if no passing audit row exists in `files-changed.md`, this runs automatically before any build step (RED items halt the deploy)
+- **STEP 12 close gate** — targeted re-audit covering only files changed after STEP 8 (docs pass edits, posture-gap fixes); focuses on O4, O5, and any newly touched source files
 
 **Purpose:** Before every deploy, check the day's changes against 6 pillars:
 5 Azure Well-Architected Framework pillars + Responsible AI. Catch what the

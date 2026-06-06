@@ -9,6 +9,17 @@ Deploy `lab-observability-api` to Azure App Service using the proven Kudu zip pa
 
 Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 
+0. **Pillars audit gate** — before any build or publish step:
+   - Determine the current day number from the most recent `docs/notes/Day-NNN/` folder.
+   - Check `docs/notes/Day-NNN/files-changed.md` for rows with `step: audit`.
+   - If a passing audit row exists **and** no source files (`src/`) have been modified
+     since that row was written, proceed to step 1.
+   - If no audit has been run yet today, run `.claude/skills/pillars-audit/SKILL.md`
+     now before continuing.
+   - If the audit returns **any RED items**, HALT immediately. List the RED items and
+     the minimum fix for each. Do not proceed to step 1 until all RED items are resolved
+     and the audit is re-run clean.
+
 1. Verify pre-flight (subscription, RG, app exists)
 
 1b. Apply day app settings: check for `Infra/Day-NNN/appsettings-template.md`
@@ -48,6 +59,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
    - Response carries `X-Correlation-Id` header (Day 6+)
 
 ## DO NOT
+- Deploy without a clean pillars audit — no RED items may be open at the time of step 4 (publish)
 - Use `az webapp deploy` (known to fail on this network)
 - Zip the `publish` folder itself (must be `publish\*`)
 - Deploy without verifying app settings include `Anthropic__*` keys

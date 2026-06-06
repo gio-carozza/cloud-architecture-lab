@@ -38,7 +38,7 @@ can be written into them. Build the empty skeleton, then draft into it, then
 fill it. No chicken-and-egg.
 
 Your slash commands (in .claude/commands/):
-/new-day · /adr · /deploy · /cert-scaffold · /cert-update
+/new-day · /adr · /deploy · /cert-scaffold · /cert-update · /collab-lens
 
 ---
 
@@ -216,6 +216,8 @@ first phase's "Changes needed" bullets (from the summary) and "DO NOT modify"
 list (from the ADR) filled in.
 ```
 
+Then run `/collab-lens ___` to enrich the "Whose Problem Am I Solving?" section of summary.md.
+
 ---
 
 ## STEP 7 — BUILD  (Claude Code, one prompt per phase)
@@ -336,6 +338,7 @@ Ask me the five posture questions from _principles.md and then provide the answe
 3. What did I try, fail at, and learn?
 4. Can I explain this at 10yo, CEO, Engineer, AND Architect level?
 5. Which pillar took the most damage today, and what's the minimum fix?
+If the day's collaboration lens named a primary collaborator, confirm posture Q1 names that same specific role.
 Push back hard if my answers are weak or self-congratulatory.
 ```
 Copy the result. → STOP. Close chat.
@@ -397,6 +400,7 @@ After this, /cert-update in STEP 10 populates domains as you touch them.
 | /deploy | 9 | Kudu zip deploy + post-deploy verification |
 | /cert-update N | 10 | Populates cert domains touched that day |
 | /cert-scaffold EXAM | one-time | Builds cert domain structure from MS skills outline |
+| /collab-lens N | 6 | Inserts collaborator lens block into summary.md |
 
 ---
 

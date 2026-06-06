@@ -50,6 +50,7 @@ Full career path: `docs/standards/career-path.md`
 - New ADR:  `/adr <kebab-title>` slash command
 - Cert scaffold: `/cert-scaffold <EXAM>` (one-time per exam)
 - Cert update:   `/cert-update <N>` (end of each day)
+- Collab lens:   `/collab-lens <N>` (daily collaborator focus — run after STEP 6 populates summary.md)
 - Full daily loop: `.claude/instructions/daily-workflow.md`
 
 ## Architecture (top-level map)
@@ -198,6 +199,7 @@ The project knowledge holds ONLY:
 - This file (CLAUDE.md)
 - `_principles.md` (architect posture)
 - `career-path.md` (three-phase career progression)
+- `collaboration-map.md` (collaborator matrix across all three phases — reviewed at phase transitions)
 - `naming-conventions.md`, `azure-environment.md` (live environment facts)
 - The SKILL.md files (`.claude/skills/*/SKILL.md`)
 - The CURRENT day's working artifacts (summary.md, completion-checklist.md, posture-check.md)
@@ -276,6 +278,11 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 - That's the signal to consider sub-foldering
 - Don't pre-optimize; let it accrete first
 
+**When a phase transition occurs (Day 20, Day 50):**
+- Review `docs/standards/collaboration-map.md` — update any phase rows that no longer match lived reality
+- Update the `**Current phase:**` line in CLAUDE.md before the first day of the new phase
+- The `/collab-lens` skill reads `**Current phase:**` as its phase filter; stale phase = wrong collaborator selected
+
 ## Certification Tooling
 - `/cert-scaffold <exam>` — run once per exam to build domain structure
 - `/cert-update <day>` — run at end of each day session to populate
@@ -285,3 +292,11 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 - Content: 10yo + CEO + Engineer + Architect explanations, synthesized practice questions,
   curated MS Learn + community resource links
 - Do NOT reproduce paid exam bank content
+
+## Collaboration Tooling
+- `/collab-lens <N>` — run in STEP 6 after summary.md is populated; inserts a bounded
+  `### Collaboration Lens` block into summary.md under "Whose Problem Am I Solving?"
+- Skill procedure: `.claude/skills/collaboration-lens/SKILL.md`
+- Reference map: `docs/standards/collaboration-map.md` — one block per collaborator, one row per phase
+- Output cap: 1 PRIMARY (posture + question + 4-level compression) + at most 2 secondary = ≤ 12 lines
+- DAILY touch is the lens; the map is reviewed at phase transitions only

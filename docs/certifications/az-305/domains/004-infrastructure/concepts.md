@@ -2,6 +2,24 @@
 
 ---
 
+<!-- Day 6 Additions: monitoring infrastructure design, workspace-based App Insights, alert rules -->
+
+## Designing Monitoring Infrastructure — Observability as an Architectural Concern
+
+### If you're 10 years old
+Building a house without smoke detectors isn't just against the rules — it's dangerous. Monitoring infrastructure is the "smoke detectors and sprinklers" of your cloud system. You design and install them BEFORE you move in, not after the first fire. Good architects treat observability as part of the building plan, not as something you bolt on later.
+
+### If you're a CEO
+Every hour without proper monitoring is an hour where problems can fester invisibly. Monitoring infrastructure — alert rules, dashboards, log workspaces — is not optional overhead; it's how you find out about problems before your customers do. A system without monitoring is a liability: you're relying on user complaints as your error detection system.
+
+### If you're an Engineer
+Monitoring infrastructure for an Azure-hosted API requires provisioning three resources in order: (1) **Log Analytics workspace** — the data backing store (`az monitor log-analytics workspace create`); (2) **Application Insights** (workspace-based) — the telemetry layer referencing the workspace (`az monitor app-insights component create --workspace $LAW`); (3) **Alert Rule** — evaluates a metric or KQL condition and fires an Action Group on breach. Wire the app: set `APPLICATIONINSIGHTS_CONNECTION_STRING` on the App Service via environment variables. Alert rule example: 5xx error rate > 5% over 5 minutes → Severity 2 → Action Group (email + SMS to on-call). The full stack (workspace + App Insights + alert + action group) is the minimum production-grade observability floor for any Azure-hosted service.
+
+### If you're an Architect
+Observability infrastructure is a first-class architecture decision, not a deployment afterthought. The AZ-305 design framework for monitoring requires answering four questions: (1) **What is the topology?** — one workspace per environment (dev/staging/prod) or shared; (2) **What are the retention requirements?** — 90 days for operational, 2+ years for compliance/audit logs; (3) **What are the alert SLAs?** — p95 latency threshold, error rate threshold, and the severity/action group routing matrix; (4) **Who owns the data?** — RBAC on the workspace determines who can read log data (PII implications for LLM request logs). For AI gateways specifically, the monitoring design must account for: token cost telemetry (custom events with model/provider/path dimensions), latency histograms (TTFT, total duration), and error classification (provider transient vs. client error vs. auth failure). These are not automatic — they require explicit instrumentation design, specified in the architecture document before deployment. Common beginner mistake: provisioning App Insights as a classic resource on new deployments, losing cross-resource KQL capability and inheriting a legacy resource that Microsoft will eventually force-migrate.
+
+---
+
 <!-- Day 9 Additions: streaming response pattern, TTFT SLO design, proxy buffering -->
 
 ## Streaming vs. Buffered Response Pattern
@@ -110,6 +128,53 @@ The routing criterion is the **latency SLA**: if the business requirement can to
 **Why this matters in enterprise:** The unconditional 50% cost reduction on batch-eligible workloads is one of the highest-ROI architectural decisions available for AI-heavy platforms. Missing it because "synchronous was easier to implement" is a recurring pattern that costs organisations tens of thousands of dollars per month at scale.
 
 **Common beginner mistake:** Treating the batch vs. synchronous choice as a performance decision ("batch is slower") rather than a cost-governance decision ("batch is cheaper for deferrable work"). Synchronous is not "better" — it is more expensive and appropriate only when latency SLA demands it.
+
+---
+
+<!-- Day 7 Additions: application-layer caching for AI workloads, YAGNI in abstraction design -->
+
+## Recommending a Caching Solution — Application Layer vs. Infrastructure Layer
+
+### If you're 10 years old
+There are two places you can save things for later. You can save them inside the app itself (like your phone keeping a photo so it doesn't have to download it again), or you can save them in a shared box outside the app (like a library). For AI prompts, the best cache is the one closest to where the AI call happens — inside the app, right before the call is made, using the AI provider's own memory.
+
+### If you're a CEO
+Caching reduces costs by avoiding repeat work. For AI applications, the most effective cache is one that lives between the app and the AI model — it intercepts repeated system prompts before they're billed. Azure Redis Cache and CDN are valid tools for data and HTTP responses; they do not intercept AI system prompt billing. The right tool for AI prompt cost reduction is the AI provider's own caching API, applied in the application code. Choosing the wrong cache tier wastes engineering time and infrastructure budget.
+
+### If you're an Engineer
+Evaluate caching at three layers for AI gateway workloads: (1) **Provider-native** (`cache_control` annotations on system prompt blocks) — eliminates re-billing on repeated input tokens, ~90% cost reduction, no infrastructure cost, requires ≥1024-token blocks and explicit TTL on Claude 4 models; (2) **Application-layer** (Azure Cache for Redis) — stores complete response payloads for exact-match queries, useful for deterministic prompts with identical user inputs, requires cache key design and TTL management; (3) **HTTP/CDN layer** (Azure CDN, API Management) — caches HTTP responses for GET endpoints, not applicable to POST-based AI API calls. Start with provider-native caching (zero infrastructure overhead, direct billing reduction) before evaluating Redis (adds cluster cost and cache key design complexity).
+
+### If you're an Architect
+AZ-305 "Recommend a caching solution for applications" tests whether you match the cache tier to the workload. For AI workloads:
+
+| Cache tier | What it caches | Infrastructure cost | AI relevance |
+|---|---|---|---|
+| Provider-native | Input tokens (system prompt) | None (billed at read price) | High — direct billing reduction |
+| Azure Cache for Redis | Response payloads | ~$0.05–$0.30/hr + data transfer | Medium — only for exact-match prompts |
+| API Management cache | HTTP responses | Policy overhead | Low — POST responses rarely cacheable |
+| CDN | Static/GET responses | Per-GB egress | None — AI completions are POST |
+
+Design decision hierarchy: exhaust provider-native caching first (zero infrastructure cost, maximum impact on input-token spend), then evaluate Redis only if response payloads are large, stable, and queried with identical inputs. Adding Redis for a workload with variable user inputs requires semantic similarity evaluation for cache key design — a non-trivial engineering investment. Common beginner mistake: defaulting to Azure Cache for Redis as the first caching recommendation without checking whether a zero-infrastructure provider-native option eliminates the cost driver more directly.
+
+---
+
+## YAGNI and Abstraction Deferral in Provider Design
+
+### If you're 10 years old
+YAGNI stands for "You Aren't Gonna Need It." If you're building a lemonade stand and someone says "let's build a coffee machine too, in case we sell coffee one day" — YAGNI says: wait until you actually sell coffee. Building things you might never use wastes time and makes everything more complicated. Good architects build for today and leave room for tomorrow, but they don't build tomorrow's solution today.
+
+### If you're a CEO
+Every line of code that solves a problem you don't have yet is a line you'll pay to maintain forever, and a line that can break. The discipline of resisting "maybe we'll need this later" is how engineering teams stay lean and fast. The rule: add abstraction when the second use case arrives with concrete requirements — not in anticipation of it.
+
+### If you're an Engineer
+The YAGNI test: do you have a second, concrete use case for the abstraction right now? If no, don't build it. In ADR-009: `CachingChatModelProvider` as a decorator above `IChatModelProvider` would be correct if a second cacheable provider existed. It doesn't. Building the decorator now means: (1) the decorator must be tested against a provider that doesn't exist yet; (2) any future provider must implement a contract nobody has validated; (3) the added complexity has no current user. The accepted cost of deferring: when the second cacheable provider lands, `ClaudeApiClient` caching code must be extracted to the decorator level. That refactoring path is explicitly documented in ADR-009 — deliberate deferral, not an oversight.
+
+### If you're an Architect
+YAGNI applies the Well-Architected Framework's cost efficiency principle to design complexity: over-abstraction is waste. The AZ-305 exam tests this in "design for change, not prediction" scenarios — can you identify when a proposed abstraction is premature versus genuinely required? The ADR-009 decision captures the canonical trade-off: (1) building `CachingChatModelProvider` now gives forward compatibility but at the cost of an untested abstraction boundary with no current second user; (2) placing caching inside `ClaudeApiClient` gives a working system with a documented refactoring path when the second use case arrives. The deciding factor is whether the abstraction has two concrete implementations today. If not, defer. Document the deferral explicitly in an ADR so it is a deliberate choice, not an oversight.
+
+**Why this matters in enterprise:** Abstractions without at least two concrete implementations are hypotheses, not requirements. The maintenance cost of a premature abstraction — documentation, testing, conceptual overhead — often exceeds the cost of the eventual refactoring when the real requirement arrives. The AZ-305 exam tests whether you can articulate why an abstraction is warranted now vs. deferred.
+
+**Common beginner mistake:** Building "extensible" frameworks before the second use case exists, then maintaining a complex abstraction hierarchy that the second provider never uses in the form that was anticipated.
 
 ---
 

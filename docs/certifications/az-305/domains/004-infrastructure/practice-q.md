@@ -107,6 +107,111 @@ D) Replace AKS with Azure Container Apps with KEDA scaling, which is simpler tha
 
 ---
 
+## Q11: Observability infrastructure provisioning order
+
+**Scenario:** A team is deploying a new Azure App Service API and needs to set up production monitoring. They need Application Insights, a Log Analytics workspace, and an alert rule for 5xx errors. A junior engineer asks: "Does the order we provision these resources matter?"
+
+**Question:** What is the correct provisioning dependency order?
+
+A) Application Insights → Log Analytics workspace → Alert rule  
+B) Alert rule → Application Insights → Log Analytics workspace  
+C) Log Analytics workspace → Application Insights → Alert rule (workspace must exist before App Insights can reference it; App Insights must exist before alert rules reference its data)  
+D) All three can be provisioned in parallel — there are no dependencies between them  
+
+**Answer:** C
+
+**Why:** Workspace-based Application Insights requires the Log Analytics workspace ID at creation time — hard dependency. Alert rules that evaluate App Insights data (via KQL or metric conditions) require the App Insights resource to exist as the target scope. The correct sequence is: workspace → App Insights → alert rule. A and B invert the workspace → App Insights dependency. D is false — there are hard creation-time dependencies.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-006
+
+---
+
+## Q12: Monitoring design — workspace topology
+
+**Scenario:** An enterprise runs three environments (dev, staging, production) each with their own Azure App Service and Application Insights. All three App Insights resources share a single Log Analytics workspace. A security audit flags that developers can query production telemetry from their dev workstations.
+
+**Question:** What architectural change addresses the audit finding while maintaining operational capability?
+
+A) Delete the shared workspace and use classic Application Insights (no Log Analytics required)  
+B) Create a separate Log Analytics workspace per environment and re-link each App Insights resource to its environment's workspace — apply RBAC per workspace  
+C) Disable developer access to the portal for the production App Insights component  
+D) Move production App Insights to a different Azure subscription  
+
+**Answer:** B
+
+**Why:** RBAC is applied at the workspace level in workspace-based App Insights. A separate workspace per environment is the standard topology for controlling who can read prod data — developers get access to dev/staging workspaces, only ops and on-call get prod workspace access. A) reverting to classic loses workspace capabilities and doesn't fix the access problem. C) portal access can be restricted but doesn't prevent programmatic query access to the shared workspace. D) a different subscription adds cost and management overhead; separate workspaces already solve the RBAC requirement within the same subscription.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-006
+
+---
+
+## Q13: Alert rule design — error rate threshold
+
+**Scenario:** An architect is setting up alerting for an AI gateway deployed on Azure App Service. The requirement is: "notify the on-call engineer if the 5xx error rate exceeds 5% over a 5-minute window, so they can investigate before the issue escalates."
+
+**Question:** Which combination of Azure resources correctly implements this requirement?
+
+A) An Azure Service Health alert targeting the App Service plan  
+B) An Azure Monitor alert rule with a KQL condition evaluating `requests` table in App Insights, an Action Group with email notification, Severity 2  
+C) Azure Cost Management budget alert set to fire when monthly spend exceeds $500  
+D) Azure Advisor recommendation for "enable diagnostic logs"  
+
+**Answer:** B
+
+**Why:** Azure Monitor alert rules evaluate KQL conditions against Log Analytics (or metrics) on a schedule and fire an Action Group (email, SMS, webhook) when the condition is met. The correct KQL: `requests | where timestamp > ago(5m) | summarize error_rate = countif(resultCode >= 500) / count() | where error_rate > 0.05`. Action Group routes the alert to the on-call engineer. A) Service Health alerts notify about Azure platform incidents, not application error rates. C) Cost Management alerts are billing thresholds, not operational metrics. D) Advisor recommendations are best-practice suggestions, not threshold alerts.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-006
+
+---
+
+## Q14: Log ingestion cost governance
+
+**Scenario:** An enterprise architect is designing a Log Analytics workspace for a high-traffic AI gateway. The gateway logs every token count, latency, and model call — approximately 50GB of logs per day. The initial estimate puts Log Analytics ingestion cost at $8,000/month.
+
+**Question:** Which architectural approach most directly reduces this cost without losing operational visibility?
+
+A) Switch to classic Application Insights (no Log Analytics = no ingestion cost)  
+B) Apply a commitment tier pricing on the workspace (e.g., 50GB/day commitment) instead of pay-as-you-go, AND configure a data collection rule to filter verbose diagnostic logs before ingestion  
+C) Move all telemetry to Azure Storage blobs and query with Azure Synapse  
+D) Stop logging token counts — only log errors  
+
+**Answer:** B
+
+**Why:** Commitment tiers offer significant discounts over pay-as-you-go at sustained ingestion volumes (e.g., 50GB/day commitment tier is ~25% cheaper than PAYG at that scale). Data collection rules allow pre-ingestion filtering — dropping verbose fields or entire log categories that aren't needed for alerting or compliance. A) classic App Insights still has ingestion costs and loses cross-resource KQL. C) Storage + Synapse is cheaper per GB but adds query latency and doesn't support real-time alerting. D) removing token telemetry eliminates cost attribution capability — a governance regression.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-006
+
+---
+
+## Q15: Observability as infrastructure — design document requirement
+
+**Scenario:** A solutions architect is reviewing a design document for a new AI-powered customer service platform. The document covers compute (App Service), storage (Cosmos DB), and networking (VNet). The architect flags it as incomplete before approving.
+
+**Question:** Which missing section is the architect most likely flagging?
+
+A) The document doesn't specify the Azure region for deployment  
+B) The document has no observability infrastructure design — no Log Analytics workspace, Application Insights, alert rules, or retention policy are specified  
+C) The document doesn't include a disaster recovery site in a secondary region  
+D) The document uses App Service instead of Azure Kubernetes Service  
+
+**Answer:** B
+
+**Why:** Production systems require observability infrastructure specified in the design document — not retrofitted post-deploy. Missing: Log Analytics workspace (topology, retention), Application Insights (workspace-based, connection string wiring), alert rules (thresholds, severity, action groups), and RBAC. Without this, the first production incident has no tooling for diagnosis. A) region is important but is typically covered for compute resources. C) DR is a business continuity concern, not the most likely flag on a greenfield AI service design. D) AKS vs. App Service is a valid concern but would be flagged separately.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-006
+
+---
+
 ## Q6: Streaming vs. buffered response — architectural driver
 
 **Scenario:** An enterprise is building an AI assistant gateway. One team proposes a synchronous REST endpoint returning the full LLM completion after 3–6 seconds. Another proposes an SSE streaming endpoint delivering tokens within 200ms. The CTO asks the architect to justify the streaming approach.
@@ -209,3 +314,108 @@ D) Single Responsibility — each interface must have only one method
 **Exam domain:** Design infrastructure solutions  
 **Cert:** AZ-305  
 **Roadmap day:** Day-009
+
+---
+
+## Q16: Recommending a caching solution — AI gateway system prompt
+
+**Scenario:** An enterprise AI gateway processes 20,000 requests per day. Each request includes a 4,000-token system prompt that is identical for all requests and changes weekly. The team wants to reduce input-token billing with minimal infrastructure overhead. They ask the architect to recommend a caching solution.
+
+**Question:** Which caching solution best meets these requirements?
+
+A) Azure Cache for Redis (Standard tier) — cache full response payloads using the user message as the key  
+B) Provider-native prompt caching — annotate the system prompt block with `cache_control: {"type":"ephemeral","ttl":"1h"}` inside the AI client  
+C) Azure API Management response cache policy — cache the HTTP response for repeated identical POST requests  
+D) Azure CDN — cache POST responses using the request URL as the cache key  
+
+**Answer:** B
+
+**Why:** The system prompt is large (4,000 tokens — above the 1,024 minimum), stable (weekly changes), and repeated on every request — the ideal candidate for provider-native caching. This reduces input-token billing by ~90% with zero additional infrastructure. A) Redis would need to cache complete response payloads, which vary per user message; cache key design for variable inputs is complex and the input-token billing problem is not addressed. C) API Management response caching applies to GET requests and identical POST bodies; user messages vary, so cache hits would be rare or non-existent. D) CDNs do not cache POST request bodies or variable AI responses in standard configurations.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-007
+
+---
+
+## Q17: YAGNI vs. premature abstraction in provider design
+
+**Scenario:** An AI gateway has one LLM provider (Anthropic). The team is implementing prompt caching. Proposal A builds a `CachingChatModelProvider` decorator above `IChatModelProvider`. Proposal B implements caching inside `ClaudeApiClient` (the Anthropic implementation). There is no confirmed second cacheable provider in the roadmap.
+
+**Question:** Which principle determines the correct choice, and what should the architect recommend?
+
+A) Open/Closed Principle — always use a decorator to avoid modifying existing code; choose Proposal A  
+B) YAGNI — no second provider exists to generalise for; choose Proposal B (inside the provider), document the refactoring path for when a second cacheable provider arrives  
+C) Single Responsibility — caching and API calling are separate concerns; always separate them with Proposal A  
+D) DRY — build the decorator now to prevent future duplication when a second provider lands  
+
+**Answer:** B
+
+**Why:** YAGNI: the decorator is the right abstraction when there are two or more providers with caching needs. With one provider and no confirmed second, the abstraction solves a problem that doesn't exist, adds an untested interface boundary, and creates maintenance overhead with no current user. Building caching inside the provider is the simplest correct solution today. The forward-compatibility path is documented in an ADR — deliberate deferral, not an oversight. A) OCP prevents modification of closed types; `IChatModelProvider` is an open extension point. C) SRP is overridden by YAGNI when the second concern has no current user. D) DRY applies to actual existing duplication, not anticipated future duplication.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-007
+
+---
+
+## Q18: Cache tier selection — AI workload
+
+**Scenario:** An architect evaluates caching options for an AI chat API. User messages vary on every request, but a 3,500-token system prompt is identical for all requests. The goal is to reduce input-token billing. The team asks whether Azure Cache for Redis is the right choice.
+
+**Question:** What is the correct architectural recommendation?
+
+A) Redis is the correct choice — it is the standard caching layer for all Azure API workloads  
+B) Provider-native prompt caching directly eliminates the billing for repeated system prompt tokens with no infrastructure cost; Redis would cache full responses (which vary per user message) and does not address the input-token billing problem  
+C) Redis is required because provider-native caching APIs do not support system prompt blocks  
+D) Use both Redis and provider-native caching together for maximum cost coverage  
+
+**Answer:** B
+
+**Why:** Provider-native caching directly targets the cost driver: the 3,500-token system prompt billed on every request. Cache reads cost ~10% of creation price — effectively eliminating 90% of system prompt billing with no infrastructure. Redis would need to cache the full response per user message, but user messages vary, making cache hits rare without semantic similarity evaluation (a non-trivial engineering investment). Redis solves a different problem and adds operational complexity not warranted here. A) Redis is a general-purpose solution, not universally optimal. C) is false — both Anthropic and Azure OpenAI provide native prompt caching for system prompt blocks. D) combining both adds cost and complexity for overlapping partial benefits.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-007
+
+---
+
+## Q19: Operational toggle via App Service configuration
+
+**Scenario:** An AI gateway adds an `EnablePromptCaching` boolean setting controlling whether the `cache_control` annotation is sent to the provider. The team needs to disable caching in staging and enable it in production, and to toggle it without redeploying code during troubleshooting. The setting is currently hardcoded in `appsettings.json`.
+
+**Question:** What is the correct pattern for making this setting operationally toggleable without a code deployment?
+
+A) Store the flag in Azure Key Vault — operators update the secret value without redeploying  
+B) Bind the flag to an App Service environment variable (`Anthropic__EnablePromptCaching`) via `IOptions<AnthropicOptions>` — update via Azure Portal or REST API without a code deployment  
+C) Expose the flag as a query parameter on the API endpoint — each client decides whether to request caching  
+D) Configure the flag in Azure API Management policies — route non-caching requests to a separate backend  
+
+**Answer:** B
+
+**Why:** App Service environment variables are the standard Azure pattern for operational configuration that changes without code deployment. The double-underscore notation (`Anthropic__EnablePromptCaching`) maps to nested `Anthropic:EnablePromptCaching` in the .NET configuration hierarchy; `IOptions<AnthropicOptions>` binds it at startup. Updating the variable on the App Service and restarting the app (or using a deployment slot swap) applies the change — no code change, no pipeline run. A) Key Vault stores credentials and secrets, not operational feature flags; it is operationally heavier for a simple boolean and requires vault reference wiring. C) exposing an internal implementation detail as a client parameter violates the gateway's abstraction. D) API Management routing adds infrastructure complexity for a configuration toggle that App Service environment variables solve directly.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-007
+
+---
+
+## Q20: Measuring caching ROI with KQL
+
+**Scenario:** A team implements prompt caching and measures a 90% cache hit rate. Their FinOps team asks for a KQL query that estimates daily token-level savings in dollars. The team has `llm.cache.read_tokens` and `llm.cache.creation_tokens` logged as custom dimensions on the `claude.chat.api` dependency span. Token pricing: $3.00/M creation, $0.30/M cache reads.
+
+**Question:** Which KQL query correctly estimates the daily dollar saving from caching?
+
+A) `dependencies | where name == "claude.chat.api" | summarize savings=sum(toint(customDimensions["llm.cache.read_tokens"])) by bin(timestamp, 1d)`  
+B) `dependencies | where name == "claude.chat.api" | summarize cache_reads=sum(toint(customDimensions["llm.cache.read_tokens"])) by bin(timestamp, 1d) | extend savings_usd=(cache_reads/1000000.0)*(3.00-0.30)`  
+C) `customMetrics | where name == "ai.provider.cache.hits" | summarize sum(value) by bin(timestamp, 1d)`  
+D) `traces | where customDimensions["llm.cache.read_tokens"] > 0 | summarize count() by bin(timestamp, 1d)`  
+
+**Answer:** B
+
+**Why:** Dollar saving per cache-read token = (creation price − read price) = $3.00/M − $0.30/M = $2.70/M. Option B sums the total cache read tokens per day and multiplies by the price differential, giving the daily saving — the tokens that were NOT billed at creation price. A) sums token counts without applying any dollar value, producing a number with no monetary meaning. C) counts cache hit events from the counter metric, not token volumes — a hit on 1 token and a hit on 4,000 tokens are counted equally. D) queries the wrong table (`traces` for ILogger output, not Activity spans) and counts requests, not tokens.
+
+**Exam domain:** Design infrastructure solutions  
+**Cert:** AZ-305  
+**Roadmap day:** Day-007

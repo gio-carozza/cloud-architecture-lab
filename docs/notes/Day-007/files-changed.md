@@ -24,3 +24,10 @@
 | `docs/standards/naming-conventions.md` | standards | Action Groups section updated with full pattern and two real examples |
 | `docs/certifications/ai-102/study-notes/day-007-mapping.md` | cert-update | New file — AI-102 Domain 1 and 6 mapping, 5 exam questions, two-level concept explanations |
 | `docs/notes/_index.md` | closeout | Day 007 status updated from "In Progress" to "Complete" |
+| `docs/certifications/ai-102/domains/001-plan-manage/concepts.md` | cert-update | Day 7 additions: prompt caching for cost management + cache hit rate as operational metric (all four levels) |
+| `docs/certifications/ai-102/domains/001-plan-manage/practice-q.md` | cert-update | Q11–Q15: prompt caching threshold, placement in provider abstraction, cache hit rate KQL, silent failure diagnosis, savings estimation |
+| `docs/certifications/ai-102/domains/001-plan-manage/day-mapping.md` | cert-update | Day-007 row added |
+| `docs/certifications/az-305/domains/004-infrastructure/concepts.md` | cert-update | Day 7 additions: caching solution recommendation tiers + YAGNI/abstraction deferral (all four levels) |
+| `docs/certifications/az-305/domains/004-infrastructure/practice-q.md` | cert-update | Q16–Q20: caching solution recommendation, YAGNI principle, cache tier selection, operational toggle pattern, KQL savings query |
+| `docs/certifications/az-305/domains/004-infrastructure/day-mapping.md` | cert-update | Day-007 row added |
+| `docs/certifications/domain-coverage.md` | cert-update | AZ-305 Domain 4 updated to Day 6, 7, 8, 9; header updated to Day-007 cert-update |

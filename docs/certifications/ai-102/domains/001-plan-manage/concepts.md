@@ -2,6 +2,63 @@
 
 ---
 
+<!-- Day 6 Additions: structured logging, correlation IDs, token telemetry as metrics, error classification -->
+
+## Structured Logging and Distributed Tracing for AI Workloads
+
+### If you're 10 years old
+Imagine every request to your AI app leaves a trail of breadcrumbs. Each breadcrumb has the exact time and what happened. If something goes wrong, you follow the trail backwards and find exactly where things went sideways. "Structured logging" means each breadcrumb has labelled pockets — a pocket for the time, a pocket for who made the request, a pocket for how long it took — so you can search through millions of breadcrumbs instantly.
+
+### If you're a CEO
+When an AI feature breaks at 2am, the on-call engineer needs to find the problem in minutes, not hours. Structured logging is the investment that makes this possible. Without it, the engineer is reading unstructured text looking for clues. With it, they run a query and see the problem in 30 seconds. The ROI is measured in mean-time-to-resolution — and indirectly in customer trust when incidents are resolved quickly.
+
+### If you're an Engineer
+In .NET 8, implement structured logging via Serilog + Azure Monitor OpenTelemetry exporter: `UseSerilog()` in `Program.cs`, `services.AddOpenTelemetry().UseAzureMonitor()`. Each log call is a structured record: `_logger.LogInformation("LLM call completed {Provider} {Model} {InputTokens} {OutputTokens} {LatencyMs}", ...)`. These become queryable dimensions in Application Insights: `traces | where customDimensions["Provider"] == "anthropic"`. Correlation IDs: use `CorrelationIdMiddleware` to read `X-Correlation-Id` from request headers (or generate a new GUID), store in `HttpContext.Items`, and enrich all log lines via `LogContext.PushProperty("CorrelationId", ...)`. The correlation ID must travel the entire request — from incoming HTTP through the LLM provider call — so any failure in the chain is linked to the original request in a single KQL query.
+
+### If you're an Architect
+Structured logging and distributed tracing are the foundation of operational AI. Three design principles: (1) **correlation as a first-class field** — every log line, metric, and trace span must carry the same correlation ID so a single incident can be stitched across the gateway, the LLM provider call, and any downstream effects; (2) **semantic logging** — a log saying `"completed"` is not queryable; a log with `{"event":"llm_call_completed","provider":"anthropic","model":"claude-sonnet-4-6","input_tokens":1200,"output_tokens":340,"latency_ms":1850}` enables p95 latency queries by model, error rate by provider, and cost trending by path; (3) **log levels as routing signals** — `Information` for normal operations, `Warning` for retry attempts and degraded paths, `Error` for unhandled exceptions. Misclassifying everything as `Information` floods logs with noise and renders alert rules on `Error`-level events worthless. At enterprise scale, structured logging is the prerequisite for all downstream analytics — cost attribution, SLO compliance, and anomaly detection all depend on consistent, labelled telemetry from day one. Common beginner mistake: logging full prompt and completion text — this creates PII exposure risk, inflates log ingestion costs, and may violate data governance policies. Log token counts, model IDs, and latency; never log actual prompt content unless under a controlled access and retention policy.
+
+---
+
+## Token Telemetry as a Cost Metric
+
+### If you're 10 years old
+Imagine you're running a candy store and each AI answer costs a certain number of candies (tokens). If you don't count how many candies each type of question uses, you'll run out of candies and not know why. Token telemetry means counting the candies per question, labelling them by type, and storing those counts so you can see where they're all going.
+
+### If you're a CEO
+Token usage is your direct AI cost driver — each token costs money. Without token telemetry, you have a monthly invoice but no breakdown of which feature, which user type, or which processing path is driving the bill. With it, you can identify that 60% of your AI spend comes from 5% of your requests — and make targeted decisions about caching, batching, or prompt optimisation that dramatically reduce costs. Unmonitored token spend grows silently and surprises every team that skips this.
+
+### If you're an Engineer
+Log token usage as a structured custom event on every LLM call with dimensions: `{ "llm.provider": "anthropic", "llm.model": "claude-sonnet-4-6", "llm.tokens.input": 1200, "llm.tokens.output": 340, "llm.tokens.cache_read": 800, "llm.path": "sync" }`. Additionally emit as OpenTelemetry `Counter<long>` instruments — `llm.tokens.input` and `llm.tokens.output` counters aggregate in `customMetrics`, enabling time-series budget queries. KQL for hourly cost trend: `customEvents | where name == "llm_call_completed" | summarize total_input=sum(tolong(customDimensions["llm.tokens.input"])), total_output=sum(tolong(customDimensions["llm.tokens.output"])) by bin(timestamp, 1h)`. The `path` dimension (`sync`/`batch`) is critical — without it, you cannot separate interactive cost from batch cost.
+
+### If you're an Architect
+Token telemetry occupies a dual role in AI observability: it is both a **cost signal** (tokens × price-per-token = direct spend) and a **quality signal** (output-token growth may indicate prompt regression or model behavior change). The architectural design principle is to treat token counts as **metrics**, not log fields: metrics aggregate cheaply at O(1) per time-bucket; logs require O(N) scan for aggregation. Use `Counter<long>` instruments for input/output token totals (enables time-series cost graphs) and log the per-request breakdown as a custom event for root-cause queries. The `model` and `provider` dimensions on both the metric and the event enable cost attribution across the full provider strategy when additional models are added. For AI-102: the exam tests whether you know that Azure OpenAI usage is tracked in Azure Cost Management at the resource level, but **request-level attribution** (by path, model, user, or feature) requires application-layer telemetry — there is no built-in Azure feature that provides this automatically. Common beginner mistake: emitting token counts only to Application Insights `traces` as unstructured text, making it impossible to aggregate or alert on cost trends without manual log parsing.
+
+---
+
+## Error Classification for AI Workloads
+
+### If you're 10 years old
+When something goes wrong, there are different kinds of "wrong." If you spell a word incorrectly, no amount of trying again will fix it — it's a "you" problem. If the internet goes down for a moment, trying again in a few seconds might work — it's a "temporary" problem. AI gateways classify errors the same way: "your fault", "their temporary fault", "they won't let you in" — so the system knows whether to retry, report, or give up.
+
+### If you're a CEO
+Not all AI errors are equal. An authentication error should alert the team and stop retrying immediately — retrying wastes budget and time on something a human must fix. A transient provider error should retry silently and only alert if retries are exhausted. Proper error classification means your on-call alerts are accurate signals, not noise, and costs are not wasted on futile retries.
+
+### If you're an Engineer
+Classify LLM provider errors into four buckets and handle each differently:
+- **4xx Client error** (400, 422): caller sent bad input — return 400 to caller, log at `Warning`, no retry
+- **401/403 Auth error**: credential problem — return 401/403, log at `Error`, alert immediately, no retry
+- **429 Throttle**: rate limit — retry with backoff honouring `Retry-After`, log at `Warning`
+- **5xx Transient**: provider fault — retry with jitter, log at `Warning` per attempt, `Error` on final failure
+- **Timeout / IOException**: network failure — retry with jitter, log at `Warning`
+
+Map `HttpRequestException` + HTTP status code to the class in the exception handler. Add an `error_class` dimension to every telemetry event. Safe error contract for callers: return only `{ "error": "An unexpected error occurred.", "correlationId": "..." }` — never return stack traces or provider error messages.
+
+### If you're an Architect
+Error classification is the prerequisite for actionable alerting in an AI gateway. Without it, all failures are homogenised into a single error-rate metric that cannot distinguish "the API key expired" from "Anthropic had a 10-second blip." Four classes are the minimum viable taxonomy: **Client** (caller bug), **Auth** (credential problem requiring human action), **Throttle** (quota issue requiring scaling or batching), **Transient** (provider temporary fault requiring retry). Each class has a different retry policy, a different alert severity, and a different remediation runbook. The architecture decision: encode error classification in the provider abstraction layer (`IChatModelProvider`) so all implementations classify consistently — rather than leaving classification to individual callers. At enterprise scale, error classification feeds the SLO burn-rate calculation: transient errors that stay below SLO thresholds are acceptable operational noise; auth errors are never acceptable and always actionable. Common beginner mistake: logging all errors as `Error` level with no classification, then paging on every 400 bad request from a misconfigured client, drowning the on-call rotation in noise.
+
+---
+
 ## Cost-Per-Token Attribution Across Processing Paths
 
 ### If you're 10 years old
@@ -71,6 +128,40 @@ Azure AI Services and Azure OpenAI enforce quota at multiple levels: tokens-per-
 **Why this matters in enterprise:** Quota exhaustion is one of the most common causes of AI service outages in production. It is predictable and preventable with proper planning — but only if you understand the quota model for each processing path.
 
 **Common beginner mistake:** Setting quota on a single shared deployment for all workloads, then being surprised when a nightly batch job causes 429 errors for users the next morning.
+
+---
+
+<!-- Day 7 Additions: prompt caching for cost management, cache hit rate as operational metric -->
+
+## Prompt Caching for AI Workload Cost Management
+
+### If you're 10 years old
+Imagine your teacher reads the same 5-page story to 30 students in a row. Instead of reading it fresh each time, what if they memorised it once and just recited it? Prompt caching works the same way — instead of sending a long instruction to the AI every single time someone asks a question, the AI remembers the instruction after the first call and charges you much less for every subsequent read.
+
+### If you're a CEO
+For every AI request, you pay for every word of the instruction the system sends. If your system prompt is 2,000 words and you make 10,000 calls per day, you're paying for 20 million instruction-words daily. Prompt caching cuts that 90% — the AI remembers the instruction after the first call and charges 10× less for each subsequent read. This is one of the highest-ROI cost reductions available in production AI systems, requiring only a single configuration change.
+
+### If you're an Engineer
+Implement prompt caching by annotating the system prompt as a cacheable content block. In Anthropic's API: instead of a string `"system": "..."`, send `"system": [{"type":"text","text":"...","cache_control":{"type":"ephemeral","ttl":"1h"}}]`. Requirements: (1) the cached block must be ≥1024 tokens — shorter blocks are silently ignored; (2) for Claude 4 models (`claude-sonnet-4-6`, `claude-opus-4-8`, `claude-haiku-4-5-20251001`), the `ttl` field is mandatory — `{"type":"ephemeral"}` without TTL produces 0 cache tokens and full billing with no error; (3) read tokens appear in `usage.cache_read_input_tokens`, creation tokens in `usage.cache_creation_input_tokens` — log both as custom dimensions. Common error: expecting `cache_creation_input_tokens > 0` on every request — it is non-zero only on the first call (and after TTL expiry); subsequent cache hits show `cache_read_input_tokens`.
+
+### If you're an Architect
+Prompt caching is an API-level optimization where the LLM provider stores a hashed copy of annotated content blocks after the first request. Subsequent requests with the same leading content up to the cache boundary pay a fraction of the creation cost (Anthropic: ~10% of creation price per cache read). The key architectural decisions are: (1) **placement** — caching logic belongs inside the provider boundary (`ClaudeApiClient`), not in a middleware decorator above the provider seam, because `cache_control` is Anthropic-specific and `ChatRequest` must remain provider-agnostic (ADR-009); (2) **observability** — cache creation and read token counts must be logged with the same telemetry dimensions as regular tokens so effectiveness is queryable; (3) **minimum size** — the 1024-token minimum means short system prompts offer no benefit; the optimization is most valuable for large, stable instruction blocks. Enterprise implication: at 10,000 calls/day with a 3,000-token system prompt at $3/M tokens, the cache reduces input cost from ~$90/day to ~$9/day — a 90% reduction that accumulates silently if not measured. Common beginner mistake: implementing caching without measuring it, operating on the assumption that cache hits are occurring when a misconfigured TTL or wrong model ID silently zeroes all cache reads.
+
+---
+
+## Cache Hit Rate as an Operational Metric
+
+### If you're 10 years old
+Imagine you keep score every time the AI uses its memory (cache hit) vs. every time it has to re-read the instructions from scratch (cache miss). If you're getting lots of hits, you're saving money. If you're getting all misses, either the instructions keep changing or something is broken. Cache hit rate is just that score — and measuring it is how you prove the savings are real.
+
+### If you're a CEO
+Cache hit rate is the number that tells you whether your cost optimization is actually working. If your AI is set up for caching but the hit rate is 0%, you're paying full price for every request and the configuration failed silently. A 90% hit rate means 90% of your input-token cost on those calls has been eliminated. Without measuring this number, you cannot prove ROI to finance or detect when the savings disappear.
+
+### If you're an Engineer
+Log `cache_read_input_tokens` and `cache_creation_input_tokens` as custom dimensions on every LLM call span. Cache hit rate KQL: `dependencies | where name == "claude.chat.api" | summarize hits=countif(toint(customDimensions["llm.cache.read_tokens"]) > 0), total=count() by bin(timestamp, 1h) | extend hitRate=hits*100.0/total`. Estimated savings KQL: `dependencies | where name == "claude.chat.api" | summarize cache_reads=sum(toint(customDimensions["llm.cache.read_tokens"])) by bin(timestamp, 1d) | extend savings_usd=(cache_reads/1000000.0)*2.70`. Alert candidate: cache hit rate < 10% during business hours — likely indicates broken cache configuration (wrong TTL, wrong model ID, system prompt below threshold).
+
+### If you're an Architect
+Cache hit rate is a second-order cost metric: it measures how efficiently your caching configuration is reducing the primary cost metric (input tokens). The design principle is to treat cache metrics as first-class telemetry. Two reasons: (1) **silent failures** — a missing TTL on Claude 4, a wrong model ID, or a sub-threshold prompt all produce zero cache reads with no API error; without hit-rate monitoring, you pay full price indefinitely while believing you've saved 90%; (2) **trend detection** — a hit rate degrading from 90% to 20% over a week signals that the system prompt is changing too frequently, the TTL is too short, or deployments are routing to multiple model versions. Both diagnoses require the hit-rate time series. For AI-102: the exam tests whether you understand that enabling a caching feature is not the same as the feature working — observability of the cache is a separate, required design step. Common beginner mistake: checking the provider billing dashboard monthly and concluding caching is working, rather than instrumenting hit rate as a real-time operational signal.
 
 ---
 

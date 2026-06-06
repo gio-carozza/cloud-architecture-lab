@@ -104,3 +104,108 @@ D) Azure Monitor monitors VMs and Azure Kubernetes Service only; App Service req
 **Exam domain:** Describe Azure management and governance  
 **Cert:** AZ-900  
 **Roadmap day:** Day-009
+
+---
+
+## Q6: Application Insights storage model
+
+**Scenario:** A DevOps team is provisioning a new Application Insights resource for a .NET 8 API on Azure App Service. A team member creates it in the Azure portal using the default settings and finds it labeled "Classic" in the portal.
+
+**Question:** What is the most important reason to delete this resource and create a workspace-based Application Insights instead?
+
+A) Classic Application Insights does not support ASP.NET Core applications  
+B) Classic Application Insights does not support custom metrics  
+C) Classic Application Insights is being deprecated — workspace-based stores data in a Log Analytics workspace enabling cross-resource KQL, unified RBAC, and configurable retention  
+D) Classic Application Insights costs more per GB than workspace-based  
+
+**Answer:** C
+
+**Why:** Workspace-based App Insights is the current and future-supported mode. It uses a Log Analytics workspace as its backing store, enabling cross-resource KQL queries (joining AI tables with other Azure resource logs), workspace-level RBAC, and configurable retention policies. A) false — classic supports all .NET applications. B) false — classic supports custom metrics. D) the cost model differs, but the primary architectural reason to prefer workspace-based is capability and longevity, not unit pricing.
+
+**Exam domain:** Describe Azure management and governance  
+**Cert:** AZ-900  
+**Roadmap day:** Day-006
+
+---
+
+## Q7: Log Analytics workspace role
+
+**Scenario:** A company asks: "We already have Application Insights. Why do we also need a Log Analytics workspace?"
+
+**Question:** What is the correct explanation of how Log Analytics workspace relates to workspace-based Application Insights?
+
+A) They are competing services — you use one or the other, not both  
+B) Log Analytics workspace is the optional long-term archive for Application Insights data  
+C) Log Analytics workspace is the backing data store for workspace-based Application Insights — App Insights is the instrumentation layer that writes to it  
+D) Log Analytics workspace stores infrastructure metrics; Application Insights stores application traces — they store different data in separate systems  
+
+**Answer:** C
+
+**Why:** In workspace-based mode, Application Insights is an instrumentation front-end: it receives telemetry from the SDK and writes it into a Log Analytics workspace (the actual storage and query layer). KQL queries run against the workspace. A) they are complementary, not competing. B) the workspace is the primary store, not an archive. D) both store infrastructure and application data — the distinction is not by data type.
+
+**Exam domain:** Describe Azure management and governance  
+**Cert:** AZ-900  
+**Roadmap day:** Day-006
+
+---
+
+## Q8: App Insights connection string vs. instrumentation key
+
+**Scenario:** A team configures an Azure App Service application to send telemetry to Application Insights by setting the `APPINSIGHTS_INSTRUMENTATIONKEY` environment variable using the classic instrumentation key from the portal.
+
+**Question:** What configuration should they use instead, and why?
+
+A) Use `APPLICATIONINSIGHTS_SAMPLING_PERCENTAGE` to reduce telemetry volume  
+B) Use `APPLICATIONINSIGHTS_CONNECTION_STRING` with the full connection string value — it includes the ingestion endpoint explicitly and supports Private Link and sovereign cloud scenarios that an instrumentation key alone cannot  
+C) Use `APPLICATIONINSIGHTS_AUTH_STRING` with a managed identity credential  
+D) Instrumentation key is the current standard; connection string is only needed for on-premises servers  
+
+**Answer:** B
+
+**Why:** The connection string format (`InstrumentationKey=...;IngestionEndpoint=...`) explicitly encodes the endpoint, enabling Private Link ingestion, sovereign cloud endpoints, and regional routing. The instrumentation key alone assumes the public global endpoint. Microsoft recommends the connection string for all new configurations. A) sampling configuration is unrelated to connectivity. C) `APPLICATIONINSIGHTS_AUTH_STRING` is not a standard env var name. D) is the opposite of the truth.
+
+**Exam domain:** Describe Azure management and governance  
+**Cert:** AZ-900  
+**Roadmap day:** Day-006
+
+---
+
+## Q9: KQL query scope with workspace-based App Insights
+
+**Scenario:** An architect wants to write a single KQL query that correlates Application Insights traces from a .NET API with activity logs from Azure Key Vault to diagnose a suspicious incident.
+
+**Question:** Which configuration enables this cross-resource query?
+
+A) Enable diagnostic forwarding from Key Vault to the Application Insights resource directly  
+B) Use workspace-based Application Insights and forward Key Vault diagnostic logs to the same Log Analytics workspace — both datasets are then queryable together via KQL  
+C) Use Azure Sentinel to correlate across resources — standard Azure Monitor cannot join across resource types  
+D) Export Application Insights data to Azure Storage and use Azure Synapse to join with Key Vault logs  
+
+**Answer:** B
+
+**Why:** When both App Insights telemetry and Key Vault diagnostic logs land in the same Log Analytics workspace, a single KQL `join` or `union` across their respective tables is possible — the workspace is the unification layer. A) App Insights is not a log ingestion target for other Azure resource diagnostics. C) Azure Monitor with workspace-based App Insights natively supports this without Sentinel. D) exporting to Storage + Synapse works but is expensive, slow, and unnecessary.
+
+**Exam domain:** Describe Azure management and governance  
+**Cert:** AZ-900  
+**Roadmap day:** Day-006
+
+---
+
+## Q10: Monitoring resource provisioning order
+
+**Scenario:** A team is automating their Azure observability stack with an ARM template. The template includes both Application Insights and a Log Analytics workspace. The template fails with a dependency error when creating the App Insights resource.
+
+**Question:** What is the correct provisioning order?
+
+A) App Insights → Log Analytics workspace (App Insights must exist to accept the workspace ID)  
+B) Log Analytics workspace → App Insights (the workspace must exist before App Insights can reference it as its backing store)  
+C) Both can be provisioned in parallel — there is no dependency between them  
+D) API Management → Log Analytics workspace → App Insights (API Management must orchestrate the creation)  
+
+**Answer:** B
+
+**Why:** Workspace-based Application Insights requires the Log Analytics workspace ID at creation time. The workspace is the dependency; it must exist first. In ARM/Bicep, this is expressed with a `dependsOn` or by using the workspace's symbolic name as the input reference. A) inverts the dependency. C) they have a hard dependency. D) API Management is not involved in App Insights provisioning.
+
+**Exam domain:** Describe Azure management and governance  
+**Cert:** AZ-900  
+**Roadmap day:** Day-006

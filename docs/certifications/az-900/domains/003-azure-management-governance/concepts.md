@@ -34,6 +34,42 @@ Custom metrics are the bridge between what Azure monitors by default and what yo
 
 ---
 
+## Application Insights — Workspace-Based vs. Classic
+
+<!-- Day 6 Additions -->
+
+### If you're 10 years old
+Think of your app's telemetry data like letters. Classic Application Insights stores letters in its own private mailbox. Workspace-based Application Insights puts them in a shared filing cabinet (Log Analytics) so all your apps' letters are in the same place — making it much easier to find things that happened across multiple apps at the same time.
+
+### If you're a CEO
+Microsoft is retiring the "classic" version of Application Insights. Workspace-based App Insights stores all telemetry in a shared Log Analytics workspace, which enables a single pane of glass across all monitored services. Building on classic today means a mandatory migration tomorrow; workspace-based is the correct foundation for any new Azure monitoring investment.
+
+### If you're an Engineer
+Workspace-based Application Insights requires a Log Analytics workspace as its backing store. Create the workspace first (`az monitor log-analytics workspace create`), then create App Insights referencing it (`--workspace` flag). Configure the application with the `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable — not the older instrumentation key. Connection strings include the ingestion endpoint explicitly and support sovereign cloud routing. In .NET 8: install `Azure.Monitor.OpenTelemetry.AspNetCore` and call `services.AddOpenTelemetry().UseAzureMonitor()`. All OTel traces, metrics, and logs flow to the workspace automatically.
+
+### If you're an Architect
+The shift from classic to workspace-based Application Insights is a structural change, not just a feature upgrade. Key architectural implications: (1) data lands in a **Log Analytics workspace** — the same storage engine as all other Azure resource logs — enabling `union` queries across App Insights tables (`requests`, `dependencies`, `traces`) and ARM activity logs in a single KQL statement; (2) data retention, access control (RBAC), and export are all configured on the workspace, not on the App Insights component; (3) connection strings contain the ingestion endpoint explicitly, making them compatible with sovereign clouds and Private Link setups where instrumentation keys are insufficient. At enterprise scale, one workspace per environment (dev/staging/prod) with all application components forwarding to it is the standard topology — it enables cross-service incident correlation without needing multiple dashboards. Common beginner mistake: provisioning App Insights without a workspace in new deployments, which creates a classic resource that Microsoft will eventually force-migrate.
+
+---
+
+## Log Analytics Workspace
+
+<!-- Day 6 Additions -->
+
+### If you're 10 years old
+Imagine a massive library where all the diaries from every computer and app in your company are collected. Log Analytics workspace is that library. You can search through all the diaries using KQL (a search language), find out exactly when something went wrong, and answer questions like "which app had the most errors today?" Even if you have 20 apps, they all write to the same library.
+
+### If you're a CEO
+Log Analytics workspace is where Azure centralises all diagnostic and application data. It is the single source of truth for operational questions — "is it working?", "when did it break?", "what changed 10 minutes before the outage?" Every hour your team spends guessing what went wrong in production is an hour that proper log analytics access would have resolved in minutes.
+
+### If you're an Engineer
+A Log Analytics workspace is a data store identified by a workspace ID. All resources that emit diagnostic logs can forward to it via Diagnostic Settings. App Insights workspace-based mode stores `requests`, `dependencies`, `traces`, `exceptions`, `customEvents`, `customMetrics` tables in the workspace. Query via KQL in the Azure portal or via `az monitor log-analytics query --workspace <id> --analytics-query "..."`. Data retention default: 30 days free, configurable up to 730 days (at cost). Archive tier extends to 12 years. Common KQL pattern for AI gateway: `customEvents | where customDimensions["llm.provider"] == "anthropic" | summarize avg(toreal(customDimensions["llm.tokens.total"])) by bin(timestamp, 1h)`.
+
+### If you're an Architect
+Log Analytics workspace is the centralised log store in Azure's observability architecture. Its position in the hierarchy: Azure Monitor → Log Analytics workspace ← Application Insights (workspace-based), Diagnostic Settings (all resource types). Architectural decisions at the workspace level: (1) one workspace per environment (dev/staging/prod) vs. one global workspace — the former simplifies RBAC and prevents dev noise from obscuring prod alerts; the latter reduces cost and enables cross-env queries; (2) data retention cost is workspace-level — shorter retention for high-volume verbose logs, longer for audit/security logs; (3) Log Analytics workspaces support commitment tiers (100GB–5000GB/day) that discount significantly over pay-as-you-go at scale. The AZ-305 exam tests whether you can recommend the correct workspace topology given a scenario's RBAC, cost, and compliance requirements. Common beginner mistake: forwarding all diagnostic logs to a single workspace with no retention policy, then discovering a $5,000/month log ingestion bill.
+
+---
+
 ## Azure App Service
 
 ### If you're 10 years old

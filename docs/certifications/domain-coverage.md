@@ -1,6 +1,6 @@
 # Certification Domain Coverage
 
-Last updated: Day-009c (2026-06-05)
+Last updated: Day-007 cert-update (2026-06-06)
 
 > ⚠️ **AI-102 retires June 30, 2026.** Complete before that date or pivot to successor cert.
 
@@ -12,7 +12,8 @@ Last updated: Day-009c (2026-06-05)
 | Azure architecture & services | Day 1 | | | |
 | Deploy & manage Azure compute | | | | |
 | Configure & manage virtual networking | | | | |
-| Monitor & maintain Azure resources | Day 9 | Day 6 | | Day 6, 7 |
+| Monitor & maintain Azure resources | Day 6, 9 | Day 6 | Day 6 | Day 6, 7 |
+| Design business continuity solutions | | | Day 6 | |
 | Cost optimization | | | Day 7, 8 | Day 7, 8 |
 | Implement & manage AI solutions | | | | Day 5, 6, 7, 8 |
 | Implement generative AI solutions | | | | Day 8, 9 |
@@ -25,7 +26,7 @@ Last updated: Day-009c (2026-06-05)
 |---|---|---|---|---|
 | 1 | Describe cloud concepts | 25–30% | ✅ | — |
 | 2 | Describe Azure architecture and services | 35–40% | ✅ | — |
-| 3 | Describe Azure management and governance | 30–35% | ✅ | Day 9 ✅ |
+| 3 | Describe Azure management and governance | 30–35% | ✅ | Day 6, 9 ✅ |
 
 ### AZ-104 (as of April 17, 2026)
 | # | Domain | Weight | Scaffold | Content |
@@ -41,8 +42,8 @@ Last updated: Day-009c (2026-06-05)
 |---|---|---|---|---|
 | 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | Day 7 |
 | 2 | Design data storage solutions | 20–25% | ✅ | — |
-| 3 | Design business continuity solutions | 15–20% | ✅ | — |
-| 4 | Design infrastructure solutions | 30–35% | ✅ | Day 8, 9 ✅ |
+| 3 | Design business continuity solutions | 15–20% | ✅ | Day 6 |
+| 4 | Design infrastructure solutions | 30–35% | ✅ | Day 6, 7, 8, 9 ✅ |
 
 ### AI-102 (as of December 23, 2025) — ⚠️ retires June 30, 2026
 | # | Domain | Weight | Scaffold | Content |

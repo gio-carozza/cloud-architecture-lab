@@ -31,3 +31,13 @@
 | `src/lab-observability-api/CLAUDE.md` | alignment | Updated "Day 6 Complete" → "Days 6–8 Complete"; removed (forthcoming) from observability-architecture.md link |
 | `src/lab-observability-api/Program.cs` | alignment | Replaced stale "Day 7 will replace this" comment with final-state note per ADR-006 |
 | `src/lab-observability-api/Options/AnthropicOptions.cs` | alignment | Updated default Model from stale `claude-opus-4-7` to `claude-sonnet-4-6` |
+| `docs/certifications/ai-102/domains/001-plan-manage/concepts.md` | cert-update | Day 8 additions: cost-per-token attribution, operationalizing generative AI, quota management, model selection governance, responsible AI |
+| `docs/certifications/ai-102/domains/001-plan-manage/practice-q.md` | cert-update | Q1–Q5: cost attribution, quota isolation, operationalization, model selection, responsible AI / content safety |
+| `docs/certifications/ai-102/domains/001-plan-manage/day-mapping.md` | cert-update | Day-008 row added |
+| `docs/certifications/ai-102/domains/002-generative-ai/concepts.md` | cert-update | Batch API processing pattern, batch vs. synchronous routing, budget controls, Azure OpenAI Global Batch quota model |
+| `docs/certifications/ai-102/domains/002-generative-ai/practice-q.md` | cert-update | Q1–Q5: choosing processing path, batch lifecycle, budget enforcement, provider abstraction, cost tradeoff |
+| `docs/certifications/ai-102/domains/002-generative-ai/day-mapping.md` | cert-update | Day-008 row added |
+| `docs/certifications/az-305/domains/004-infrastructure/concepts.md` | cert-update | Async/job-shaped workload pattern, WAF compute selection for batch, cost optimization pillar — deferrable workload routing, latency SLA as architectural constraint |
+| `docs/certifications/az-305/domains/004-infrastructure/practice-q.md` | cert-update | Q1–Q5: batch compute selection, WAF cost optimization, async HTTP contract, latency SLA routing, over-engineered compute |
+| `docs/certifications/az-305/domains/004-infrastructure/day-mapping.md` | cert-update | Day-008 row added |
+| `docs/certifications/domain-coverage.md` | cert-update | AI-102 Domain 1 and Domain 2 marked Day 8; AZ-305 Domain 4 marked Day 8 |

@@ -30,3 +30,13 @@
 | `docs/standards/_principles.md` | close (STEP 12) | Four Day 9 graveyard entries added: p95/p99 tail measurement, CS1626 error-propagation design, ADR trilogy reconciliation, RA6 streaming disconnect gap |
 | `docs/notes/Day-009/completion-checklist.md` | close (STEP 12) | posture-check and final git commit items marked [x] |
 | `docs/notes/Day-009/files-changed.md` | close (STEP 12) | This file — close pass rows upserted |
+| `docs/certifications/ai-102/domains/002-generative-ai/concepts.md` | cert-update | Day 9 additions: SSE streaming, TTFT as latency SLO, batch API pattern, batch vs. sync routing, budget controls, Azure OpenAI Global Batch quota model |
+| `docs/certifications/ai-102/domains/002-generative-ai/practice-q.md` | cert-update | Q6–Q10: App Service SSE buffering, TTFT vs. total latency, mid-stream error handling, client disconnect resource management, provider interface design for streaming |
+| `docs/certifications/ai-102/domains/002-generative-ai/day-mapping.md` | cert-update | Day-009 row added |
+| `docs/certifications/az-305/domains/004-infrastructure/concepts.md` | cert-update | Day 9 additions: streaming vs. buffered response pattern, TTFT SLO design, proxy buffering on App Service, client disconnect cost governance, Liskov test for interface extension |
+| `docs/certifications/az-305/domains/004-infrastructure/practice-q.md` | cert-update | Q6–Q10: streaming driver, TTFT SLO definition, proxy buffering fix, client disconnect cost, LSP interface design |
+| `docs/certifications/az-305/domains/004-infrastructure/day-mapping.md` | cert-update | Day-009 row added |
+| `docs/certifications/az-900/domains/003-azure-management-governance/concepts.md` | cert-update | Day 9 additions: Azure Monitor overview, custom metrics/histograms via OpenTelemetry, App Service as streaming compute host |
+| `docs/certifications/az-900/domains/003-azure-management-governance/practice-q.md` | cert-update | Q1–Q5: Azure Monitor data types, alert rules, custom metrics, action groups, monitor scope |
+| `docs/certifications/az-900/domains/003-azure-management-governance/day-mapping.md` | cert-update | Day-009 row added |
+| `docs/certifications/domain-coverage.md` | cert-update | AI-102 Domain 2 marked Day 9; AZ-305 Domain 4 marked Day 9; AZ-900 Domain 3 marked Day 9 |

@@ -1,7 +1,7 @@
 # Career Path: AI Engineer → Forward-Deployed Engineer → LLM Architect
 
 ## Where You Are Now
-**Current phase: AI Engineer — Day 8 complete, Day 9 next.**
+**Current phase: AI Engineer — Day 9 complete, Day 10 next.**
 Phase 1 target completion: ~Day 20.
 
 ---
@@ -43,11 +43,13 @@ understand the difference between a model's capability ceiling and a prompt engi
 problem. This phase ends when you can build reliably, not just experimentally.
 
 **Phase 1 exit criteria:**
-- [ ] Provider abstraction in place (IChatModelProvider or equivalent)
-- [ ] Prompt caching implemented and verified with token metrics
-- [ ] Batch API path implemented with cost controls
-- [ ] Observability: structured logs with correlation IDs, token usage per request
-- [ ] Can explain any AI behavior at 10yo, CEO, Engineer, and Architect level
+- [x] Provider abstraction in place (IChatModelProvider or equivalent) — Day 5, ADR-005
+- [x] Prompt caching implemented and verified with token metrics — Day 7, ADR-009
+- [x] Batch API path implemented with cost controls — Day 8, ADR-010
+- [x] Observability: structured logs with correlation IDs, token usage per request — Day 6, ADR-006
+- [ ] Can explain any AI behavior at 10yo, CEO, Engineer, and Architect level (ongoing — assessed at phase close)
+- [ ] Multi-turn context management
+- [ ] Eval framework basics
 
 ---
 

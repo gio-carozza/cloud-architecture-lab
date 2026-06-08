@@ -68,7 +68,7 @@ If the block would exceed 12 content lines, cut a secondary or shorten a level-l
 ### Collaboration Lens (Day NNN)
 
 **Primary — [Collaborator Name]**
-Posture: [phase row "My posture" cell, made specific to today's work in ≤15 words]
+Posture: [phase row "My posture" cell, made specific to today's work in ≤25 words]
 Today's question: [phase row "Crucial question", made specific to today's actual decisions]
 
 **10yo:** [one sentence — analogy anchored in today's work]

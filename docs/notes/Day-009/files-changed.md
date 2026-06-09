@@ -71,3 +71,10 @@
 | `docs/certifications/domain-coverage.md` | sync-audit | "Last updated" header corrected from Day-007 to Day-009 |
 | `.claude/skills/dotnet-api-conventions/SKILL.md` | sync-audit | Line 154: future tense "Day 6 will add Serilog" corrected to past tense |
 | `.claude/skills/adr-writer/SKILL.md` | sync-audit | ADR-006 example filename corrected to actual ADR-006 name |
+| `src/lab-observability-api/Controllers/AiBatchController.cs` | bug-fix | Null element in request list causes NRE before whitespace check — added `r is null` guard |
+| `src/lab-observability-api/Services/Claude/ClaudeApiClient.cs` | bug-fix | Null responseText falls through to return raw provider JSON — now returns empty string with warning log |
+| `src/lab-observability-api/Services/Claude/ClaudeApiClient.cs` | bug-fix | JsonException in SSE loop silently swallowed — now logs warning before continuing |
+| `src/lab-observability-api/Services/Claude/ClaudeBatchApiClient.cs` | bug-fix | GetStatusAsync and GetResultsAsync hardcode isTransient:false even for 429/503 — fixed to correct transient detection |
+| `.claude/hooks/cert-tag.json` | cert-cleanup | Removed retired AI-102 tags; updated to AZ-104/AZ-305 only |
+| `.gitignore` | cert-cleanup | Added .claude/cert-tags-today.txt (hook-generated, machine-local) |
+| `docs/certifications/az-104/objectives.md` | cert-expansion | Expanded stub to full domain map with sub-objectives across all 5 domains |

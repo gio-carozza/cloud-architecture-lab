@@ -1,4 +1,4 @@
-# .NET
+# .NET build artifacts
 bin/
 obj/
 publish/
@@ -25,10 +25,6 @@ publish/
 # OS
 .DS_Store
 Thumbs.db
-# Build artifacts
-*.zip
-publish/
-bin/
-obj/
 
+# Repo tooling output
 audit-output/

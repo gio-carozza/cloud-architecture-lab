@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Lab.Observability.Api.Services.Claude;
 using Xunit;
 
 namespace Lab.Observability.Api.Tests.Controllers;
@@ -14,13 +15,52 @@ public class AiBatchControllerTests
     };
 
     private readonly HttpClient _client;
+    private readonly GatewayWebApplicationFactory _factory;
 
     public AiBatchControllerTests(GatewayWebApplicationFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
     // ---- Submit validation --------------------------------------------------
+
+    [Fact]
+    public async Task Submit_NullElementInList_Returns400_InvalidRequest()
+    {
+        using var content = new StringContent("[null]", Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/ai/batch", content);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var error = await ReadErrorAsync(response);
+        Assert.Equal("invalid_request", error.Code);
+    }
+
+    [Fact]
+    public async Task GetStatus_ProviderThrowsTransientException_Returns503()
+    {
+        _factory.FakeBatchProvider.ExceptionToThrow = new ClaudeProviderException(
+            "rate limited", isTransient: true, providerErrorCode: "rate_limit");
+        try
+        {
+            var response = await _client.GetAsync("/api/ai/batch/any-id");
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        finally { _factory.FakeBatchProvider.Reset(); }
+    }
+
+    [Fact]
+    public async Task GetResults_ProviderThrowsTransientException_Returns503()
+    {
+        _factory.FakeBatchProvider.ExceptionToThrow = new ClaudeProviderException(
+            "service unavailable", isTransient: true, providerErrorCode: "service_unavailable");
+        try
+        {
+            var response = await _client.GetAsync("/api/ai/batch/any-id/results");
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        finally { _factory.FakeBatchProvider.Reset(); }
+    }
 
     [Fact]
     public async Task Submit_EmptyList_Returns400_InvalidRequest()

@@ -6,11 +6,19 @@ namespace Lab.Observability.Api.Tests.Fakes;
 public class FakeBatchChatModelProvider : IBatchChatModelProvider
 {
     public string ProviderName => "fake";
+    public Exception? ExceptionToThrow { get; set; }
+    public void Reset() => ExceptionToThrow = null;
+
+    private void ThrowIfSet()
+    {
+        if (ExceptionToThrow is not null) throw ExceptionToThrow;
+    }
 
     public Task<BatchJob> SubmitBatchAsync(
         IReadOnlyList<ChatRequest> requests,
         CancellationToken ct)
     {
+        ThrowIfSet();
         return Task.FromResult(new BatchJob
         {
             Id           = "fake-batch-id",
@@ -23,6 +31,7 @@ public class FakeBatchChatModelProvider : IBatchChatModelProvider
 
     public Task<BatchJobStatus> GetBatchStatusAsync(string id, CancellationToken ct)
     {
+        ThrowIfSet();
         return Task.FromResult(new BatchJobStatus
         {
             Id             = id,
@@ -34,6 +43,7 @@ public class FakeBatchChatModelProvider : IBatchChatModelProvider
 
     public Task<IReadOnlyList<BatchResult>> GetBatchResultsAsync(string id, CancellationToken ct)
     {
+        ThrowIfSet();
         IReadOnlyList<BatchResult> results = new List<BatchResult>
         {
             new() { CustomId = "request-0", IsSuccess = true,

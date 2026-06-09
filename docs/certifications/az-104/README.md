@@ -23,7 +23,7 @@ reason candidates fail it.
 2. Implement and manage storage
 3. Deploy and manage Azure compute resources
 4. Implement and manage virtual networking
-5. Monitor and back up Azure resources
+5. Monitor and maintain Azure resources
 
 ## Files
 - `objectives.md` (TODO: populate from official PDF)

@@ -61,4 +61,13 @@
 | `.claude/commands/new-day.md` | post-close | Added Test Gate section in completion-checklist scaffold template; skip condition for pure-docs days |
 | `.claude/commands/deploy.md` | post-close | Step 0 renamed to "Pre-deploy gates"; added 0a: `dotnet test` must pass before pillars audit; deployment-log.md template updated with dotnet test result line |
 | `docs/certifications/az-104/objectives.md` | post-close | New stub — 5 AZ-104 domain objectives; note to populate from official Skills Measured PDF |
-| `CLAUDE.md` | post-close | Test count updated from 19 → 25; test description accurate |
+| `CLAUDE.md` | post-close | Test count updated from 19 → 25; then hardcoded count removed entirely (self-maintaining) |
+| `docs/standards/azure-environment.md` | sync-audit | `claude-opus-4-7` corrected to `claude-opus-4-6` — the actual invalid model ID discovered Day 7 |
+| `docs/certifications/README.md` | sync-audit | Cert path updated to reflect AI-102 retired; AI-102 relabeled "historical record only" |
+| `docs/certifications/ai-102/README.md` | sync-audit | Retirement notice added at top — do not schedule |
+| `docs/certifications/az-104/README.md` | sync-audit | Domain 5 name: "Monitor and back up" → "Monitor and maintain" (current exam wording) |
+| `docs/certifications/az-305/README.md` | sync-audit | Build→Cert mapping table: added Day 7, 8, 9 rows (were missing despite domain-level entries existing) |
+| `docs/certifications/az-900/README.md` | sync-audit | Files section updated to reference actual domains/ structure (was referencing non-existent study-notes/, practice/) |
+| `docs/certifications/domain-coverage.md` | sync-audit | "Last updated" header corrected from Day-007 to Day-009 |
+| `.claude/skills/dotnet-api-conventions/SKILL.md` | sync-audit | Line 154: future tense "Day 6 will add Serilog" corrected to past tense |
+| `.claude/skills/adr-writer/SKILL.md` | sync-audit | ADR-006 example filename corrected to actual ADR-006 name |

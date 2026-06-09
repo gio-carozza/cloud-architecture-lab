@@ -37,7 +37,7 @@ environment variables (set as App Service configuration, NOT in appsettings.json
 
 ### Anthropic provider configuration
 - `Anthropic__ApiKey`
-- `Anthropic__Model` (`claude-sonnet-4-6` — updated Day 7; was `claude-opus-4-7`)
+- `Anthropic__Model` (`claude-sonnet-4-6` — updated Day 7; was `claude-opus-4-6` — invalid model ID discovered via silent cache miss)
 - `Anthropic__BaseUrl` (`https://api.anthropic.com/v1`)
 - `Anthropic__MaxTokens`
 - `Anthropic__EnablePromptCaching` (`true` — added Day 7)

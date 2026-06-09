@@ -1,5 +1,7 @@
 # AI-102 — Azure AI Engineer Associate
 
+> ⚠️ **Retired June 30, 2026.** This folder is a historical record. Successor: **AI-103** (Azure AI Apps and Agents Developer Associate) — Phase 2, ~Day 21+. Do not schedule AI-102.
+
 ## Why this cert first (alongside build)
 AI-102 is the most directly applicable cert to the AI Gateway work. Every
 observability, prompt management, and Azure OpenAI integration topic in the

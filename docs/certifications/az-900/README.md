@@ -21,6 +21,6 @@ AZ-104 and AZ-305. The daily Secondary tags help you keep that vocabulary fresh.
 3. Describe Azure management and governance
 
 ## Files
-- `objectives.md` (TODO: populate)
-- `study-notes/`
-- `practice/`
+- `domains/001-cloud-concepts/` — concepts, practice-q, day-mapping, resources
+- `domains/002-azure-architecture-services/` — concepts, practice-q, day-mapping, resources
+- `domains/003-azure-management-governance/` — concepts, practice-q, day-mapping, resources

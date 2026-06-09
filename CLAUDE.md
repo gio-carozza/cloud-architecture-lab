@@ -44,7 +44,7 @@ Full career path: `docs/standards/career-path.md`
 - Build:    `dotnet build src/lab-observability-api/lab-observability-api.csproj`
 - Run:      `dotnet run --project src/lab-observability-api`
 - Publish:  `dotnet publish src/lab-observability-api/lab-observability-api.csproj -c Release -o ./publish`
-- Test:     `dotnet test` (runs `lab-observability-api.Tests` — 25 integration tests, no real API calls)
+- Test:     `dotnet test` (runs `lab-observability-api.Tests` — no real API calls)
 - Deploy:   `/deploy` slash command (wraps the Kudu zip path)
 - New day:  `/new-day <N> <slug>` slash command
 - New ADR:  `/adr <kebab-title>` slash command

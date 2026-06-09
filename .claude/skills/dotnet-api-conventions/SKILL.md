@@ -151,7 +151,7 @@ and translated to safe HTTP status codes by the provider, not surfaced raw.
 - Use structured logging only: `_logger.LogInformation("Sent {Tokens} to {Provider}", tokens, name);`
 - Never log secrets, API keys, or full prompt bodies in production.
 - Include correlation ID in every log scope.
-- Day 6 will add Serilog + Application Insights — anticipate this in code.
+- Day 6 added Serilog + Application Insights — already wired; use `ILogger<T>` and the existing telemetry helpers.
 
 ## Common mistakes (avoid)
 - Putting Anthropic SDK types in `ChatRequest`/`ChatResponse` (breaks abstraction)

@@ -5,10 +5,10 @@ Parallel certification track for the Azure Cloud AI / LLM Architect path.
 ## Strategy
 - **Build-first, cert-reinforcement-second.** Every roadmap day maps activities
   to specific cert domains. Cert prep is integrated, not separate.
-- **Path:** AZ-900 → AI-102 (paced with build) → AZ-104 (parallel from Day 10–15) → AZ-305
+- **Path:** AZ-900 (Phase 1) → AZ-104 + AZ-305 (Phase 2–3) → AI-103 (Phase 2, ~Day 21+)
 
 ## Folders
-- `ai-102/` — Azure AI Engineer Associate (**Primary track now**)
+- `ai-102/` — Azure AI Engineer Associate (**Retired June 30, 2026 — historical record only**)
 - `az-104/` — Azure Administrator Associate
 - `az-305/` — Azure Solutions Architect Expert
 - `az-900/` — Azure Fundamentals

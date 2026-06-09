@@ -30,6 +30,9 @@ muscle the daily roadmap is building.
 | 002–003 | Resource group governance, naming | 1 (governance) |
 | 004 | Well-Architected Framework applied | All four |
 | 006 | Monitoring & resilience design | 1 (monitoring), 3 (continuity) |
+| 007 | Prompt caching, cost-per-token design decisions | 4 (infrastructure — cost optimization) |
+| 008 | Batch API, async/deferred compute patterns | 4 (infrastructure — async patterns) |
+| 009 | Streaming SSE, latency SLO, TTFT telemetry design | 4 (infrastructure — latency design) |
 
 ## Files
 - `objectives.md` (TODO: populate)

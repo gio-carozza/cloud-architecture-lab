@@ -37,7 +37,7 @@ writing exposes weak reasoning that code alone never surfaces.
 - Title = kebab-case, verb-led when possible
 - Examples:
   - `ADR-005-introduce-provider-abstraction-for-claude-integration.md`
-  - `ADR-006-adopt-serilog-with-application-insights-sink.md`
+  - `ADR-006-harden-ai-gateway-with-resilience-and-observability.md`
 
 ## Status lifecycle
 - **Proposed** — drafted, not yet accepted

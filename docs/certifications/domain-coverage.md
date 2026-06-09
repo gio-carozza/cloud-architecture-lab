@@ -1,6 +1,6 @@
 # Certification Domain Coverage
 
-Last updated: Day-007 cert-update (2026-06-06)
+Last updated: Day-009 cert-update (2026-06-08)
 
 > ⚠️ **AI-102 retired June 30, 2026.** Historical coverage preserved below. Successor: **AI-103** (Azure AI Apps and Agents Developer Associate) — scaffold at Phase 2 (~Day 21).
 

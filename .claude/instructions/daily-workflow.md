@@ -240,6 +240,26 @@ Blanks = the bullets under that phase + the ADR's "Files NOT affected."
 
 Build fails? Paste: `Build failed with: ___ . Fix it. Rebuild. Report.`
 
+### Test coverage requirement (every STEP 7)
+
+After each phase that adds a new endpoint, changes input validation, or
+introduces a new error path, add integration tests to
+`src/lab-observability-api.Tests` before moving to STEP 8. Minimum per
+new feature:
+
+| Test type | What to verify |
+|---|---|
+| Input validation | null/empty/too-long prompt → 400 with correct error code |
+| Error contract | provider exception → correct HTTP status, no stack trace, `correlationId` present |
+| Happy path | valid request → 200 with expected response shape |
+| Architecture seam | middleware headers present (correlation ID, SSE proxy headers) |
+
+**CEO lens**: every untested input-validation guard is a budget control that can silently regress.
+**Architect lens**: the error contract (no stack traces, typed error codes) is the public interface — it needs a test.
+**AI Engineer lens**: provider swap-in tests confirm the abstraction seam holds.
+
+Run `dotnet test` before leaving STEP 7. All tests must pass before STEP 8.
+
 → STOP when build passes clean.
 
 ---

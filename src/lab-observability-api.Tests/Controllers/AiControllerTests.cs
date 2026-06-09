@@ -149,6 +149,70 @@ public class AiControllerTests
         Assert.Contains("data:", body);
     }
 
+    [Fact]
+    public async Task StreamChat_Response_HasSseProxyHeaders()
+    {
+        _factory.FakeChatProvider.Reset();
+
+        var response = await PostStreamChatAsync("Hello");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(
+            response.Headers.TryGetValues("Cache-Control", out var cc) &&
+            cc.Any(v => v.Contains("no-cache")),
+            "SSE response must include Cache-Control: no-cache for proxy compatibility.");
+        Assert.True(
+            response.Headers.TryGetValues("X-Accel-Buffering", out var xab) &&
+            xab.Any(v => v == "no"),
+            "SSE response must include X-Accel-Buffering: no for nginx compatibility.");
+    }
+
+    [Fact]
+    public async Task StreamChat_Chunks_AreValidJson_WithTextDelta()
+    {
+        _factory.FakeChatProvider.Reset();
+
+        var response = await PostStreamChatAsync("Hello");
+        var body = await response.Content.ReadAsStringAsync();
+
+        var dataLines = body.Split('\n')
+            .Where(l => l.StartsWith("data:"))
+            .Select(l => l["data:".Length..].Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .ToList();
+
+        Assert.NotEmpty(dataLines);
+        foreach (var data in dataLines)
+        {
+            using var doc = JsonDocument.Parse(data);
+            Assert.True(
+                doc.RootElement.TryGetProperty("textDelta", out _),
+                $"SSE chunk missing 'textDelta': {data}");
+        }
+    }
+
+    [Fact]
+    public async Task Chat_GenericException_Returns500_InternalError_NoStackTrace()
+    {
+        _factory.FakeChatProvider.ExceptionToThrow =
+            new InvalidOperationException("unexpected internal error");
+        try
+        {
+            var response = await PostChatAsync("Hello");
+
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.DoesNotContain("StackTrace", body, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("InvalidOperationException", body, StringComparison.OrdinalIgnoreCase);
+
+            var error = Deserialize<ErrorBody>(body);
+            Assert.Equal("internal_error", error.Code);
+            Assert.NotNull(error.CorrelationId);
+        }
+        finally { _factory.FakeChatProvider.Reset(); }
+    }
+
     // ---- Helpers ------------------------------------------------------------
 
     private Task<HttpResponseMessage> PostChatAsync(string prompt) =>

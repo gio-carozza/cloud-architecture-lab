@@ -192,6 +192,27 @@ the deploy, not the scaffold.
 > Append-only. Each deploy run adds a dated section. Never edit prior runs.
 ```
 
+## Test coverage — required items in completion-checklist.md
+
+Every completion checklist must include a test gate section. Scaffold it as:
+
+```markdown
+## Test Gate
+
+- [ ] `dotnet test` — all passing (no regressions)
+- [ ] New tests added for every new endpoint or validation guard:
+  - [ ] Input validation: null/empty/too-long → 400 with correct error code
+  - [ ] Error contract: provider exception → correct HTTP status, no stack trace, correlationId present
+  - [ ] Happy path: valid request → 200 with expected response shape
+- [ ] Middleware/infrastructure tests updated if new headers or middleware added
+```
+
+**When to skip a test:** only if the day is purely docs, cert prep, or infra
+(no source changes). If any `.cs` file changed, the gate is mandatory.
+
+See `src/lab-observability-api.Tests/` for existing patterns (WebApplicationFactory,
+fake providers, collection fixture, SSE headers, correlation ID round-trip).
+
 ## Reminders
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
 - Inside the day folder, no day prefix on filenames

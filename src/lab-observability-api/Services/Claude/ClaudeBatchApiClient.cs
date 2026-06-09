@@ -94,7 +94,9 @@ public sealed class ClaudeBatchApiClient
                 message: $"Batch status returned {(int)response.StatusCode}.",
                 providerStatusCode: response.StatusCode,
                 providerErrorCode: "batch_status_failed",
-                isTransient: false);
+                isTransient: response.StatusCode == HttpStatusCode.TooManyRequests ||
+                             response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+                             response.StatusCode == HttpStatusCode.GatewayTimeout);
         }
 
         return ParseBatchJobStatus(body);
@@ -120,7 +122,9 @@ public sealed class ClaudeBatchApiClient
                 message: $"Batch results returned {(int)response.StatusCode}.",
                 providerStatusCode: response.StatusCode,
                 providerErrorCode: "batch_results_failed",
-                isTransient: false);
+                isTransient: response.StatusCode == HttpStatusCode.TooManyRequests ||
+                             response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+                             response.StatusCode == HttpStatusCode.GatewayTimeout);
         }
 
         var results = new List<BatchResult>();

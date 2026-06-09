@@ -39,7 +39,7 @@ public class AiBatchController : ControllerBase
                 CorrelationId: HttpContext.GetCorrelationId()));
         }
 
-        if (requests.Any(r => string.IsNullOrWhiteSpace(r.Prompt)))
+        if (requests.Any(r => r is null || string.IsNullOrWhiteSpace(r.Prompt)))
         {
             return BadRequest(new ApiError(
                 Code: "invalid_request",

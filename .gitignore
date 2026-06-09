@@ -15,6 +15,7 @@ publish/
 # Claude Code (machine-local only)
 .claude/settings.local.json
 .claude/.cache/
+.claude/cert-tags-today.txt
 
 # IDE
 .vs/

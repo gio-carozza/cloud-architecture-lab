@@ -138,9 +138,14 @@ public sealed class ClaudeApiClient
                 (int)response.StatusCode,
                 stopwatch.Elapsed.TotalMilliseconds);
 
-            return string.IsNullOrWhiteSpace(responseText)
-                ? responseBody
-                : responseText;
+            if (string.IsNullOrWhiteSpace(responseText))
+            {
+                _logger.LogWarning(
+                    "Could not extract text from Anthropic response body — returning empty string to prevent raw JSON leak.");
+                return string.Empty;
+            }
+
+            return responseText;
         }
         catch (BrokenCircuitException ex)
         {
@@ -570,8 +575,9 @@ public sealed class ClaudeApiClient
                             break;
                     }
                 }
-                catch (JsonException)
+                catch (JsonException ex)
                 {
+                    _logger.LogWarning(ex, "Failed to parse SSE chunk JSON — skipping chunk.");
                     continue;
                 }
 

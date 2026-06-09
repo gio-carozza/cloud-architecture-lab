@@ -2,9 +2,11 @@ using System.Text.Json;
 using Lab.Observability.Api.Contracts;
 using Lab.Observability.Api.Extensions;
 using Lab.Observability.Api.Models.AI;
+using Lab.Observability.Api.Options;
 using Lab.Observability.Api.Services.AI;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Lab.Observability.Api.Controllers;
 
@@ -14,11 +16,16 @@ public class AiController : ControllerBase
 {
     private readonly IChatModelProvider _provider;
     private readonly ILogger<AiController> _logger;
+    private readonly AnthropicOptions _options;
 
-    public AiController(IChatModelProvider provider, ILogger<AiController> logger)
+    public AiController(
+        IChatModelProvider provider,
+        ILogger<AiController> logger,
+        IOptions<AnthropicOptions> options)
     {
         _provider = provider;
         _logger = logger;
+        _options = options.Value;
     }
 
     [HttpPost("chat")]
@@ -31,6 +38,14 @@ public class AiController : ControllerBase
             return BadRequest(new ApiError(
                 Code: "invalid_request",
                 Message: "Prompt is required.",
+                CorrelationId: HttpContext.GetCorrelationId()));
+        }
+
+        if (request.Prompt.Length > _options.MaxPromptLength)
+        {
+            return BadRequest(new ApiError(
+                Code: "prompt_too_long",
+                Message: $"Prompt exceeds the maximum allowed length of {_options.MaxPromptLength} characters.",
                 CorrelationId: HttpContext.GetCorrelationId()));
         }
 
@@ -54,6 +69,18 @@ public class AiController : ControllerBase
                 new ApiError(
                     Code: "invalid_request",
                     Message: "Prompt is required.",
+                    CorrelationId: HttpContext.GetCorrelationId()),
+                _sseJsonOptions);
+            return;
+        }
+
+        if (request.Prompt.Length > _options.MaxPromptLength)
+        {
+            Response.StatusCode = StatusCodes.Status400BadRequest;
+            await Response.WriteAsJsonAsync(
+                new ApiError(
+                    Code: "prompt_too_long",
+                    Message: $"Prompt exceeds the maximum allowed length of {_options.MaxPromptLength} characters.",
                     CorrelationId: HttpContext.GetCorrelationId()),
                 _sseJsonOptions);
             return;

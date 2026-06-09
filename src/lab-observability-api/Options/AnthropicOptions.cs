@@ -11,4 +11,5 @@ public class AnthropicOptions
     public bool EnablePromptCaching { get; init; } = true;
     public string SystemPrompt { get; init; } = "";
     public int MaxBatchSize { get; init; } = 100;
+    public int MaxPromptLength { get; init; } = 32_000;
 }

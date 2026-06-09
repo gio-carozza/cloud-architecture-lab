@@ -9,7 +9,16 @@ Deploy `lab-observability-api` to Azure App Service using the proven Kudu zip pa
 
 Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 
-0. **Pillars audit gate** — before any build or publish step:
+0. **Pre-deploy gates** — before any build or publish step:
+
+   **a. Automated tests:**
+   - Run `dotnet test` from the repo root.
+   - All tests must pass. Record the result (total/passed/failed) in the
+     deployment-log.md pre-deploy gate section.
+   - If any test fails, HALT. Fix it, re-run, and record the fix trail
+     in the log before continuing. Never deploy with a failing test suite.
+
+   **b. Pillars audit gate:**
    - Determine the current day number from the most recent `docs/notes/Day-NNN/` folder.
    - Check `docs/notes/Day-NNN/audit-log.md` for a STEP 8 pre-deploy run with no open
      RED items (all RED items → fixes entries show re-audit → GREEN).
@@ -81,6 +90,7 @@ After a successful deploy, append a new dated section to
 
 ### Pre-deploy gate
 - Commit: `<sha> <message>`
+- **dotnet test**: Passed — NN/NN (0 failed, 0 skipped)  ← or FAILED ✗ with fix trail below
 - audit-log.md STEP 8: passed / no open REDs
 
 ### 1. Build / 2. Publish / 3. Zip / 4. WEBSITE_RUN_FROM_PACKAGE / 5. Kudu deploy

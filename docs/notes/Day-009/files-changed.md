@@ -60,8 +60,14 @@
 | `.claude/instructions/daily-workflow.md` | post-close | STEP 7: added test coverage requirement table (CEO/Architect/AI Engineer lenses); added `dotnet test` gate before STEP 8 |
 | `.claude/commands/new-day.md` | post-close | Added Test Gate section in completion-checklist scaffold template; skip condition for pure-docs days |
 | `.claude/commands/deploy.md` | post-close | Step 0 renamed to "Pre-deploy gates"; added 0a: `dotnet test` must pass before pillars audit; deployment-log.md template updated with dotnet test result line |
-| `docs/certifications/az-104/objectives.md` | post-close | New stub — 5 AZ-104 domain objectives; note to populate from official Skills Measured PDF |
+| `docs/certifications/az-104/objectives.md` | post-close | Expanded stub to full domain map with sub-objectives across all 5 domains |
 | `CLAUDE.md` | post-close | Test count updated from 19 → 25; then hardcoded count removed entirely (self-maintaining) |
+| `src/lab-observability-api.Tests/Fakes/FakeBatchChatModelProvider.cs` | regression-tests | Added ExceptionToThrow/Reset()/ThrowIfSet() matching FakeChatModelProvider pattern |
+| `src/lab-observability-api.Tests/Controllers/AiBatchControllerTests.cs` | regression-tests | 3 new tests: null element → 400; batch status transient → 503; batch results transient → 503 |
+| `docs/certifications/az-305/objectives.md` | cert-expansion | Created — full 4-domain map with sub-objectives (Domain 1: identity/governance/monitoring; 2: data storage; 3: business continuity; 4: infrastructure) |
+| `docs/certifications/az-900/domains/001-cloud-concepts/day-mapping.md` | cert-expansion | Populated from Days 1–2: shared responsibility, CapEx/OpEx, service types, economies of scale |
+| `docs/certifications/az-900/domains/002-azure-architecture-services/day-mapping.md` | cert-expansion | Populated from Days 1–2, 6: regions, resource groups, subscriptions, ARM, App Service, App Insights |
+| `.gitignore` | cleanup | Removed duplicate bin/obj/publish/zip entries; added section comments |
 | `docs/standards/azure-environment.md` | sync-audit | `claude-opus-4-7` corrected to `claude-opus-4-6` — the actual invalid model ID discovered Day 7 |
 | `docs/certifications/README.md` | sync-audit | Cert path updated to reflect AI-102 retired; AI-102 relabeled "historical record only" |
 | `docs/certifications/ai-102/README.md` | sync-audit | Retirement notice added at top — do not schedule |

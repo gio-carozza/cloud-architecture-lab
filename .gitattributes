@@ -1,0 +1,6 @@
+# Normalize line endings to LF in the repo; convert to CRLF on Windows checkout
+* text=auto
+
+# Force LF for scripts and config that must not have CRLF
+*.sh text eol=lf
+*.ps1 text eol=crlf

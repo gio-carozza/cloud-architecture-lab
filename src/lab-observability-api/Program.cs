@@ -305,3 +305,6 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Exposes Program to WebApplicationFactory<Program> in the test project
+public partial class Program { }

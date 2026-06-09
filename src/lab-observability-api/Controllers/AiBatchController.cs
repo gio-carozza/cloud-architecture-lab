@@ -47,6 +47,14 @@ public class AiBatchController : ControllerBase
                 CorrelationId: HttpContext.GetCorrelationId()));
         }
 
+        if (requests.Any(r => r.Prompt.Length > _options.MaxPromptLength))
+        {
+            return BadRequest(new ApiError(
+                Code: "prompt_too_long",
+                Message: $"One or more prompts exceed the maximum allowed length of {_options.MaxPromptLength} characters.",
+                CorrelationId: HttpContext.GetCorrelationId()));
+        }
+
         if (requests.Count > _options.MaxBatchSize)
         {
             _logger.LogWarning(

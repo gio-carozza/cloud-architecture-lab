@@ -93,6 +93,16 @@ Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 
 ---
 
+### Summary
+| Pillar | Result | Key finding |
+|---|---|---|
+| Reliability | GREEN/YELLOW/RED | <one-line or "all checks pass or N/A"> |
+| Security | GREEN/YELLOW/RED | |
+| Cost | GREEN/YELLOW/RED | |
+| Performance | GREEN/YELLOW/RED | |
+| Ops Excellence | GREEN/YELLOW/RED | |
+| Responsible AI | GREEN/YELLOW/RED | |
+
 ### RED items → fixes
 - **<ID>** <finding>: <fix applied> → re-audit → **GREEN / still RED**
 

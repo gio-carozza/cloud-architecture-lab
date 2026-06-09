@@ -86,6 +86,16 @@
 
 ---
 
+### Summary
+| Pillar | Result | Key finding |
+|---|---|---|
+| Reliability | YELLOW | R4: ValidateOnStart() not wired for AnthropicOptions |
+| Security | ~~RED~~ → GREEN | S4: no prompt length cap on interactive endpoints — fixed |
+| Cost | ~~RED~~ → GREEN | C2: same root as S4 — fixed |
+| Performance | GREEN | All checks pass or N/A |
+| Ops Excellence | YELLOW | O3 stale model ID (fixed); O4 files-changed.md gap (accepted debt) |
+| Responsible AI | YELLOW | RA3: content policy → 502 not 422; RA4: token counts absent from non-streaming audit trail |
+
 ### RED items → fixes
 - **S4/C2** Both interactive endpoints lacked prompt length upper bound → added `MaxPromptLength = 32_000` to `AnthropicOptions`; added guard in `AiController.Chat` (returns 400 `prompt_too_long`) and `AiController.StreamChat` (writes 400 before SSE headers) → build clean → **GREEN**
 

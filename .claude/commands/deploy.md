@@ -74,10 +74,46 @@ If the failure is a TLS reset on `management.azure.com`, state that explicitly
 and apply the SSL workaround before retrying.
 
 After a successful deploy, append a new dated section to
-`docs/notes/Day-NNN/deployment-log.md` covering:
-- Pre-deploy gate (commit SHA, audit-log.md STEP 8 status)
-- Commands used verbatim for build, publish, zip, WEBSITE_RUN_FROM_PACKAGE, Kudu POST
-- Every post-deploy test: request → raw response → PASSED/FAILED verdict
-- Issues & fixes table (empty if none)
+`docs/notes/Day-NNN/deployment-log.md` using this structure:
 
-`deployment-log.md` is append-only — never edit prior sections.
+```markdown
+## Deploy: YYYY-MM-DD (<slug>)
+
+### Pre-deploy gate
+- Commit: `<sha> <message>`
+- audit-log.md STEP 8: passed / no open REDs
+
+### 1. Build / 2. Publish / 3. Zip / 4. WEBSITE_RUN_FROM_PACKAGE / 5. Kudu deploy
+(verbatim commands + result line for each)
+
+### Post-deploy verification
+
+#### Test N: <name>
+**Attempt 1:**
+Request: `<command>`
+Response: `<raw response or snippet>`
+Result: PASSED ✓  /  FAILED ✗ — <one-line reason>
+
+(If FAILED — include the following before Attempt 2:)
+**Fix applied:** <what changed — code, config, or workaround>
+
+**Attempt 2:**  (only if Attempt 1 failed)
+Request: `<command>`
+Response: `<raw response>`
+Result: PASSED ✓
+
+(Repeat Attempt N until PASSED. Every attempt is logged — never delete a failed attempt.)
+
+### Issues & fixes
+(Deployment-level problems not tied to a single test: SSL resets, Kudu 401,
+bad zip layout, missing env vars. Empty table if none.)
+| Issue | Fix | Result |
+|---|---|---|
+```
+
+**Logging rules:**
+- Every test attempt is logged inline, in order — never delete a failed attempt
+- "Fix applied" goes between the failed attempt and the retry, inside the test block
+- The "Issues & fixes" table is for deployment-level problems (SSL reset, Kudu 401,
+  bad zip layout) — not for test failures, which belong inline
+- `deployment-log.md` is append-only — never edit prior sections

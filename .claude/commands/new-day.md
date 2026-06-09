@@ -16,7 +16,7 @@ Given a day number and a kebab-case slug, create:
    - `posture-check.md` (the daily honesty audit)
    - `files-changed.md` (running file-change registry — dedup key is file path)
    - `audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
-   - `deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test from request to raw response to pass/fail verdict, issues & fixes)
+   - `deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test with full attempt trail — Attempt 1 result, fix applied if failed, Attempt 2, until PASSED; deployment-level issues & fixes table)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)

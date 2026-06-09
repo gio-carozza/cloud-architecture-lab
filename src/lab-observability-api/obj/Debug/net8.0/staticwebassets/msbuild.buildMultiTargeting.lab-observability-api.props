@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\lab-observability-api.props" />
-</Project>

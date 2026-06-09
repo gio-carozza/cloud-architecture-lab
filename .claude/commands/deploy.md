@@ -11,14 +11,15 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 
 0. **Pillars audit gate** — before any build or publish step:
    - Determine the current day number from the most recent `docs/notes/Day-NNN/` folder.
-   - Check `docs/notes/Day-NNN/files-changed.md` for rows with `step: audit`.
-   - If a passing audit row exists **and** no source files (`src/`) have been modified
-     since that row was written, proceed to step 1.
-   - If no audit has been run yet today, run `.claude/skills/pillars-audit/SKILL.md`
-     now before continuing.
-   - If the audit returns **any RED items**, HALT immediately. List the RED items and
-     the minimum fix for each. Do not proceed to step 1 until all RED items are resolved
-     and the audit is re-run clean.
+   - Check `docs/notes/Day-NNN/audit-log.md` for a STEP 8 pre-deploy run with no open
+     RED items (all RED items → fixes entries show re-audit → GREEN).
+   - If a passing STEP 8 run exists **and** no source files (`src/`) have been modified
+     since that run was appended, proceed to step 1.
+   - If no audit-log.md exists or no STEP 8 run has been recorded yet, run
+     `.claude/skills/pillars-audit/SKILL.md` now and append the output before continuing.
+   - If the audit contains **any open RED items**, HALT immediately. List the RED items and
+     the minimum fix for each. Do not proceed to step 1 until all RED items are resolved,
+     the fixes are recorded in audit-log.md, and the re-audit confirms GREEN.
 
 1. Verify pre-flight (subscription, RG, app exists)
 

@@ -261,10 +261,11 @@ Read: docs/notes/Day-___/summary.md, docs/notes/Day-___/files-changed.md,
 src/lab-observability-api/Program.cs, and every source file listed in
 files-changed.md that was added or modified this day.
 Run all 6-pillar checks from .claude/skills/pillars-audit/SKILL.md.
-Report GREEN/YELLOW/RED per pillar with specific evidence from the code.
-List any RED items — these block deploy and must be fixed first.
-Document any YELLOW items as known debt in files-changed.md (step: audit).
-When the audit is complete with no RED items, print the STEP 9 DEPLOY prompt
+Append the full per-check output (all checks, RAG per pillar, RED/YELLOW fix
+sections) to docs/notes/Day-___/audit-log.md under "## Run: STEP 8 pre-deploy (YYYY-MM-DD)".
+Fix any RED items, update the RED items → fixes section, re-audit.
+Upsert YELLOW items as debt rows in files-changed.md (step: audit).
+When the audit is complete with no open RED items, print the STEP 9 DEPLOY prompt
 with the day number filled in.
 ```
 → STOP when local tests pass AND audit returns no RED items.
@@ -369,10 +370,12 @@ additions that touched source files).
 Re-run only the pillar checks relevant to those files. If no source files
 changed after STEP 8, run only O4 (files-changed.md coverage complete?) and
 O5 (KQL cookbook updated for any new signals?).
-Report any new RED or YELLOW items.
-If RED: fix and commit before closing. If YELLOW: upsert a debt row in
-files-changed.md with step label "close-audit". If all GREEN or N/A: record
-"close-audit: GREEN" in files-changed.md and proceed.
+Append the output (re-checked pillars only) to docs/notes/Day-___/audit-log.md
+under "## Run: STEP 12 close-audit (YYYY-MM-DD)".
+If RED: fix and commit before closing; update RED items → fixes section in audit-log.md.
+If YELLOW: upsert a debt row in files-changed.md (step: close-audit) and record
+disposition in YELLOW items → fixes section in audit-log.md.
+If all GREEN or N/A: append "close-audit: GREEN" to audit-log.md and proceed.
 ```
 
 Done. Tomorrow → STEP 0.

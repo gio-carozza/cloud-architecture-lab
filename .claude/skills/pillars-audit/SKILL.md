@@ -11,20 +11,98 @@
 build and tests can't catch — design gaps, security holes, cost traps, and
 observability blind spots.
 
-**Output format:** One line per pillar with a RAG status and specific evidence.
-Finish with a block of any RED items that must be fixed before deploy.
+**Output format:** Per-check table for every pillar, then RED and YELLOW fix sections.
+Append the full block to `docs/notes/Day-NNN/audit-log.md` under a dated run header.
+Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 
-```
-RELIABILITY     [GREEN|YELLOW|RED] — <finding or "all checks pass">
-SECURITY        [GREEN|YELLOW|RED] — <finding>
-COST            [GREEN|YELLOW|RED] — <finding>
-PERFORMANCE     [GREEN|YELLOW|RED] — <finding>
-OPS EXCELLENCE  [GREEN|YELLOW|RED] — <finding>
-RESPONSIBLE AI  [GREEN|YELLOW|RED] — <finding>
+````markdown
+## Run: <STEP 8 pre-deploy | STEP 12 close-audit | deploy gate> (YYYY-MM-DD)
 
-RED ITEMS (fix before deploy):
-- <item> → <minimum fix>
-```
+### Reliability
+| Check | Status | Finding |
+|---|---|---|
+| R1 — HttpClient timeouts set | GREEN/YELLOW/RED/N/A | <finding or —> |
+| R2 — No retry on non-idempotent calls | | |
+| R3 — Circuit breaker not on batch/streaming | | |
+| R4 — ValidateOnStart() for IOptions<T> | | |
+| R5 — New exceptions caught by global handler | | |
+| R6 — CancellationToken threaded through async | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+### Security
+| Check | Status | Finding |
+|---|---|---|
+| S1 — No secrets in source files | | |
+| S2 — Error paths return ApiError only | | |
+| S3 — New endpoints validate input | | |
+| S4 — Paid LLM fanout has upper bound | | |
+| S5 — CorrelationId in all error responses | | |
+| S6 — System prompt not echo-able | | |
+| S7 — No internal details in response headers | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+### Cost Optimization
+| Check | Status | Finding |
+|---|---|---|
+| C1 — Prompt caching active on interactive path | | |
+| C2 — New endpoints have cost ceiling | | |
+| C3 — No retry loop multiplying token spend | | |
+| C4 — Streaming token usage captured from final chunk | | |
+| C5 — Cost savings logged for cost-control features | | |
+| C6 — Model ID is a valid current model | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+### Performance Efficiency
+| Check | Status | Finding |
+|---|---|---|
+| P1 — Streaming sets X-Accel-Buffering: no | | |
+| P2 — Streaming sets Cache-Control: no-cache | | |
+| P3 — Streaming calls FlushAsync() after each chunk | | |
+| P4 — No .Result or .Wait() blocking | | |
+| P5 — TTFT instrumented for new streaming paths | | |
+| P6 — Streaming HttpClient has InfiniteTimeSpan | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+### Operational Excellence
+| Check | Status | Finding |
+|---|---|---|
+| O1 — New paths log structured event with CorrelationId | | |
+| O2 — New metric names follow ai.provider.* convention | | |
+| O3 — New env vars in appsettings-template.md | | |
+| O4 — files-changed.md has row for every file touched | | |
+| O5 — KQL cookbook updated for new signals | | |
+| O6 — /health/ready reflects new required config | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+### Responsible AI
+| Check | Status | Finding |
+|---|---|---|
+| RA1 — Prompt/completion content NOT logged | | |
+| RA2 — Error responses don't expose provider errors | | |
+| RA3 — Content policy violations handled explicitly | | |
+| RA4 — Every AI call has audit trail | | |
+| RA5 — No PII in hardcoded system prompt | | |
+| RA6 — Streaming audit trail preserved | | |
+
+**Pillar: GREEN/YELLOW/RED**
+
+---
+
+### RED items → fixes
+- **<ID>** <finding>: <fix applied> → re-audit → **GREEN / still RED**
+
+### YELLOW items → fixes
+- **<ID>** <finding>: <fix applied or deferred reason> → **GREEN / still YELLOW — accepted debt**
+
+---
+````
+
+For STEP 12 (close-audit) runs, include only the re-checked pillars — not all six.
 
 **RAG definitions:**
 - GREEN — no issues found
@@ -127,11 +205,12 @@ Check all that apply to today's changes:
 ## Audit Execution Steps
 
 1. Read the inputs listed above.
-2. For each pillar, work through the checks. Skip checks that don't apply to today's changes (note them as N/A, not GREEN).
+2. For each pillar, work through every check. Mark N/A (not GREEN) for checks that don't apply to today's changes.
 3. Assign RAG per pillar based on the most severe finding in that pillar.
-4. List all RED items with the minimum fix required.
-5. If any RED items exist: stop. Fix them. Re-run only the affected pillar checks. Do not proceed to STEP 9 (deploy) with any open RED.
-6. YELLOW items: document in `docs/notes/Day-NNN/files-changed.md` as known debt with the step label `audit`.
+4. Populate the full per-check table and RED/YELLOW fix sections from the output format above.
+5. Append the completed block to `docs/notes/Day-NNN/audit-log.md` under the appropriate run header.
+6. If any RED items exist: stop. Fix them. Re-run only the affected pillar checks. Update the `### RED items → fixes` section with the fix applied and re-audit result. Do not proceed to STEP 9 (deploy) with any open RED.
+7. YELLOW items: record the finding and disposition in the `### YELLOW items → fixes` section. Also upsert a debt row in `docs/notes/Day-NNN/files-changed.md` with step label `audit`.
 
 ---
 

@@ -14,7 +14,8 @@ Given a day number and a kebab-case slug, create:
    - `completion-checklist.md` (concrete done criteria)
    - `architect-thinking.md` (tradeoffs & enterprise reasoning)
    - `posture-check.md` (the daily honesty audit)
-   - `files-changed.md` (running audit log of every file modified during the day)
+   - `files-changed.md` (running file-change registry — dedup key is file path)
+   - `audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)
@@ -77,7 +78,7 @@ See completion-checklist.md
 - AZ-900: <Primary | Secondary | None> — <concepts>
 - AZ-104: <Primary | Secondary | None> — <concepts>
 - AZ-305: <Primary | Secondary | None> — <concepts>
-- AI-102: <Primary | Secondary | None> — <concepts>
+- AI-103: <Primary | Secondary | None> — <concepts> (Beta — Phase 2; skip if Phase 1)
 
 ## Architect Posture Check
 See posture-check.md (filled at end of day, BEFORE marking complete)
@@ -166,9 +167,22 @@ every doc-update pass; dedup key is the file path.
 |---|---|---|
 ```
 
+## Required initial content for audit-log.md
+
+Scaffold with the header only. The pillars audit appends run sections during
+STEP 8 (pre-deploy), STEP 12 (close-audit), and any deploy-gate re-runs.
+Never pre-fill run sections — they are written by the audit, not the scaffold.
+
+```markdown
+# Audit Log — Day NNN
+
+> Append-only. Each run adds a dated section. Never edit or delete prior runs.
+```
+
 ## Reminders
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
 - Inside the day folder, no day prefix on filenames
 - In shared folders (architecture/, etc.), KEEP the day prefix
 - Posture check is filled at the END of the day, before commit
 - `files-changed.md` is scaffolded empty and populated progressively — never pre-fill it
+- `audit-log.md` is append-only — never overwrite or delete prior run sections

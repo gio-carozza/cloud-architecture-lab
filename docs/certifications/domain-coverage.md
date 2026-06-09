@@ -2,7 +2,7 @@
 
 Last updated: Day-007 cert-update (2026-06-06)
 
-> ⚠️ **AI-102 retires June 30, 2026.** Complete before that date or pivot to successor cert.
+> ⚠️ **AI-102 retired June 30, 2026.** Historical coverage preserved below. Successor: **AI-103** (Azure AI Apps and Agents Developer Associate) — scaffold at Phase 2 (~Day 21).
 
 ## Coverage matrix
 
@@ -45,7 +45,7 @@ Last updated: Day-007 cert-update (2026-06-06)
 | 3 | Design business continuity solutions | 15–20% | ✅ | Day 6 |
 | 4 | Design infrastructure solutions | 30–35% | ✅ | Day 6, 7, 8, 9 ✅ |
 
-### AI-102 (as of December 23, 2025) — ⚠️ retires June 30, 2026
+### AI-102 (as of December 23, 2025) — ⚠️ retired June 30, 2026 — historical record only
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
 | 1 | Plan and manage an Azure AI solution | 20–25% | ✅ | Day 5, 6, 7, 8 ✅ |
@@ -54,3 +54,12 @@ Last updated: Day-007 cert-update (2026-06-06)
 | 4 | Implement computer vision solutions | 10–15% | ✅ | — |
 | 5 | Implement natural language processing solutions | 15–20% | ✅ | — |
 | 6 | Implement knowledge mining and information extraction solutions | 15–20% | ✅ | — |
+
+### AI-103 — Azure AI Apps and Agents Developer Associate (Beta — scaffold at Phase 2 ~Day 21)
+> Domains not finalized. Run `/cert-scaffold AI-103` at Phase 2 start to build structure from the live study guide.
+> Cert page: https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/
+> Study guide: https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103
+
+| # | Domain | Weight | Scaffold | Content |
+|---|---|---|---|---|
+| — | Pending official study guide | — | ❌ pending Phase 2 | — |

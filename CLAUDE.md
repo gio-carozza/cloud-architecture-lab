@@ -58,7 +58,7 @@ Full career path: `docs/standards/career-path.md`
 - `docs/adr/`                   → Architecture Decision Records (ADR-NNN-*)
 - `docs/architecture/`          → System diagrams & sequence flows
 - `docs/notes/Day-NNN/`         → Daily roadmap artifacts (per day)
-- `docs/certifications/`        → Cert prep: AZ-900, AZ-104, AZ-305, AI-102
+- `docs/certifications/`        → Cert prep: AZ-900, AZ-104, AZ-305, AI-102 (retired), AI-103 (Phase 2)
 - `docs/standards/career-path.md` → Three-phase career progression detail
 - `Infra/Day-NNN/`              → IaC, app settings templates
 - `.claude/skills/`             → Reusable knowledge packs (auto-invoked)
@@ -172,7 +172,8 @@ Enterprise governance. Multi-provider. Compliance at scale.
 | Exam | Phase | Status |
 |---|---|---|
 | AZ-900 (Foundations) | Phase 1 | In progress |
-| AI-102 (AI Engineer Associate) | Phase 1–2 | In progress — ⚠️ retires June 30, 2026 |
+| AI-102 (AI Engineer Associate) | Phase 1–2 | Retired June 30, 2026 — superseded by AI-103 |
+| AI-103 (Azure AI Apps and Agents Developer) | Phase 2 | Beta — sequenced to Phase 2 (~Day 21+) |
 | AZ-104 (Administrator) | Phase 2–3 | Starts ~Day 10–15 |
 | AZ-305 (Solutions Architect Expert) | Phase 2–3 | Post AZ-104 |
 
@@ -222,7 +223,7 @@ This is RAG-by-discipline. Treat token cost as a first-class architectural const
 Primary tool: Claude Code in terminal. Chat used only for pre-build reasoning.
 Output style: short, direct, copy-paste-ready.
 
-**Study mode** — preparing for AZ-900, AZ-104, AZ-305, AI-102.
+**Study mode** — preparing for AZ-900, AZ-104, AZ-305, AI-103.
 Primary tool: chat. Cert prep notes pasted in per session.
 Output style: all four explanation levels. Include exam-domain mappings.
 

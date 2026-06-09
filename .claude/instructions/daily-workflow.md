@@ -386,7 +386,8 @@ Run once, early — ideally end of Day 7 — to build the cert study structure:
 /cert-scaffold AZ-900
 /cert-scaffold AZ-104
 /cert-scaffold AZ-305
-/cert-scaffold AI-102
+# AI-103 scaffold runs at Phase 2 start (~Day 21) — beta exam, domains not finalized
+# /cert-scaffold AI-103
 ```
 After this, /cert-update in STEP 10 populates domains as you touch them.
 

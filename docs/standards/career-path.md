@@ -172,7 +172,8 @@ The work shifts from building new capabilities to governing and scaling existing
 
 | Exam | Primary Phase | Why |
 |---|---|---|
-| AI-102 (Azure AI Engineer) | Phase 1–2 | Directly tests AI integration, generative AI, cost management |
+| AI-102 (Azure AI Engineer) | retired | Retired June 30, 2026 — superseded by AI-103 |
+| AI-103 (Azure AI Apps and Agents Developer) | Phase 2 | Tests Foundry, agents, RAG, Azure AI Search, eval, responsible AI — maps directly to Phase 2 workload |
 | AZ-305 (Solutions Architect) | Phase 2–3 | Tests architecture decisions, infrastructure design, governance |
 | AZ-104 (Administrator) | Phase 2–3 | Operations knowledge needed for Forward-Deployed work and platform ownership |
 | AZ-900 (Fundamentals) | Phase 1 | Foundation — complete early |
@@ -206,13 +207,13 @@ The work shifts from building new capabilities to governing and scaling existing
 ### Phase 1 (AI Engineer)
 - Every `architect-thinking.md`: explain the technical decision and the alternative you rejected
 - Posture check question 3: what model behavior surprised you today?
-- Cert reinforcement: map every day to AI-102 domains
+- Cert reinforcement: AZ-900 domains (AI-102 retired June 30, 2026; AI-103 sequenced to Phase 2)
 
 ### Phase 2 (Forward-Deployed)
 - Every `architect-thinking.md`: add a "CEO Framing" section — how would you present this to a CTO?
 - Posture check question 1: name the specific human role whose problem you solved
 - Daily: write one sentence explaining today's work to a non-technical stakeholder
-- Cert reinforcement: AI-102 + AZ-305 domains
+- Cert reinforcement: AI-103 + AZ-305 domains
 
 ### Phase 3 (LLM Architect)
 - Every `architect-thinking.md`: add a "Governance Implication" section — what policy does this decision require?

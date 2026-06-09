@@ -24,7 +24,7 @@ PRIMARY — the certification page (stable URLs, less likely to rotate):
 - AZ-900: https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/
 - AZ-104: https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/
 - AZ-305: https://learn.microsoft.com/en-us/credentials/certifications/azure-solutions-architect/
-- AI-102: https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/
+- AI-103: https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/
 
 These pages link to the current "Study guide for Exam <CODE>" page, which
 lists the measured skills (domains), sub-topics, and weightings. Follow that
@@ -34,7 +34,7 @@ FALLBACK — skills outline PDF (binary IDs rotate; verify before trusting):
 - AZ-900: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3VwUY
 - AZ-104: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4pCWy
 - AZ-305: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWut8G
-- AI-102: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4wbzt
+- AI-103: https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103
 These IDs change without notice. If a PDF URL 404s or returns unexpected
 content, do NOT use it — fall back to the study guide page above.
 

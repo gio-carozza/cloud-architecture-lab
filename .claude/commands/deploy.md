@@ -72,3 +72,12 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 Report each step's status. If any step fails, halt and surface the exact error.
 If the failure is a TLS reset on `management.azure.com`, state that explicitly
 and apply the SSL workaround before retrying.
+
+After a successful deploy, append a new dated section to
+`docs/notes/Day-NNN/deployment-log.md` covering:
+- Pre-deploy gate (commit SHA, audit-log.md STEP 8 status)
+- Commands used verbatim for build, publish, zip, WEBSITE_RUN_FROM_PACKAGE, Kudu POST
+- Every post-deploy test: request → raw response → PASSED/FAILED verdict
+- Issues & fixes table (empty if none)
+
+`deployment-log.md` is append-only — never edit prior sections.

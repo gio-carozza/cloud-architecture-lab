@@ -43,3 +43,4 @@
 | `docs/notes/Day-009/summary.md` | collab-lens | Collaboration Lens block inserted under "Whose Problem Am I Solving?" — primary: DevOps / SRE |
 | `docs/notes/Day-009/files-changed.md` | collab-lens | This file — collab-lens rows upserted |
 | `docs/notes/Day-009/audit-log.md` | audit | Created — full retroactive pillars audit; no RED items; R4/RA3/RA6 YELLOW accepted debt |
+| `docs/notes/Day-009/deployment-log.md` | deployment-log | Created — retroactive deployment record: 6 local tests (streaming incremental delivery, MaxPromptLength guard, mid-stream error frame, sync regression, TTFT log), 4 Azure tests (health, SSE not buffered with timestamps, sync regression, KQL Query 11 p50=1354ms), issues & fixes |

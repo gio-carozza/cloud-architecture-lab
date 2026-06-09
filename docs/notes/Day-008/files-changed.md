@@ -43,3 +43,4 @@
 | `docs/certifications/domain-coverage.md` | cert-update | AI-102 Domain 1 and Domain 2 marked Day 8; AZ-305 Domain 4 marked Day 8 |
 | `src/lab-observability-api/Controllers/AiBatchController.cs` | audit | Added MaxPromptLength guard on batch submit — S3/S4/C2 RED fix; 400 prompt_too_long returned if any prompt exceeds MaxPromptLength |
 | `docs/notes/Day-008/audit-log.md` | audit | Created — full retroactive pillars audit; S3/S4/C2 RED fixed → GREEN; R4/RA2/RA3/RA4 YELLOW accepted debt |
+| `docs/notes/Day-008/deployment-log.md` | deployment-log | Created — retroactive deployment record: 7 local tests (batch submit/poll/results/savings/MaxBatchSize guard/MaxPromptLength guard), 5 Azure tests (health, batch submit with real ID, status poll, App Insights batch counter, sync regression), issues & fixes |

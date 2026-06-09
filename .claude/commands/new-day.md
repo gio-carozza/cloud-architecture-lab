@@ -16,6 +16,7 @@ Given a day number and a kebab-case slug, create:
    - `posture-check.md` (the daily honesty audit)
    - `files-changed.md` (running file-change registry — dedup key is file path)
    - `audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
+   - `deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test from request to raw response to pass/fail verdict, issues & fixes)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)
@@ -179,6 +180,18 @@ Never pre-fill run sections — they are written by the audit, not the scaffold.
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 ```
 
+## Required initial content for deployment-log.md
+
+Scaffold with the header only. The deploy skill appends run sections during
+each `/deploy` execution. Never pre-fill run sections — they are written by
+the deploy, not the scaffold.
+
+```markdown
+# Deployment Log — Day NNN
+
+> Append-only. Each deploy run adds a dated section. Never edit prior runs.
+```
+
 ## Reminders
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
 - Inside the day folder, no day prefix on filenames
@@ -186,3 +199,4 @@ Never pre-fill run sections — they are written by the audit, not the scaffold.
 - Posture check is filled at the END of the day, before commit
 - `files-changed.md` is scaffolded empty and populated progressively — never pre-fill it
 - `audit-log.md` is append-only — never overwrite or delete prior run sections
+- `deployment-log.md` is append-only — each `/deploy` run appends one dated section

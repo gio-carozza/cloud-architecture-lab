@@ -31,3 +31,4 @@
 | `docs/certifications/az-305/domains/004-infrastructure/practice-q.md` | cert-update | Q16–Q20: caching solution recommendation, YAGNI principle, cache tier selection, operational toggle pattern, KQL savings query |
 | `docs/certifications/az-305/domains/004-infrastructure/day-mapping.md` | cert-update | Day-007 row added |
 | `docs/certifications/domain-coverage.md` | cert-update | AZ-305 Domain 4 updated to Day 6, 7, 8, 9; header updated to Day-007 cert-update |
+| `docs/notes/Day-007/deployment-log.md` | deployment-log | Created — retroactive deployment record: 3 local bugs found and fixed (wrong model, no TTL, nested cache format), 5 post-deploy tests (health, chat, App Insights cache creation, cache read, KQL Query 8 50% hit rate), issues & fixes |

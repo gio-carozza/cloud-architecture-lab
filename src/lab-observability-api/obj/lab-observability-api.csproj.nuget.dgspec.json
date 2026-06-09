@@ -43,9 +43,33 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "Microsoft.ApplicationInsights.AspNetCore": {
+            "Azure.Monitor.OpenTelemetry.AspNetCore": {
               "target": "Package",
-              "version": "[2.23.0, )"
+              "version": "[1.4.0, )"
+            },
+            "Microsoft.Extensions.Http.Resilience": {
+              "target": "Package",
+              "version": "[10.5.0, )"
+            },
+            "Microsoft.Extensions.Resilience": {
+              "target": "Package",
+              "version": "[10.5.0, )"
+            },
+            "OpenTelemetry.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[1.14.0, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            },
+            "Serilog.Settings.Configuration": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
+            "Serilog.Sinks.Console": {
+              "target": "Package",
+              "version": "[6.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

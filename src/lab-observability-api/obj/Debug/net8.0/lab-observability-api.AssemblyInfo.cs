@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b09422048a6d34314edb1cad1740192641873e4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25d8aea3dd75fc6b98df412caee0c19e3456a032")]
 [assembly: System.Reflection.AssemblyProductAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("lab-observability-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

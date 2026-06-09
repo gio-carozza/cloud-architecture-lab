@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Read:**/*.cs",
+      "Read:**/*.csproj",
+      "Read:**/*.sln",
+      "Read:**/*.json",
+      "Read:**/*.md",
+      "Read:**/*.yml",
+      "Read:**/*.yaml",
+      "Read:**/*.bicep",
+      "Read:**/*.tf",
+      "Write:**/*.md",
+      "Write:**/*.cs",
+      "Write:**/*.csproj",
+      "Write:docs/**/*",
+      "Write:Infra/**/*",
+      "Write:src/**/*",
+      "Bash:dotnet build *",
+      "Bash:dotnet run *",
+      "Bash:dotnet test *",
+      "Bash:dotnet publish *",
+      "Bash:dotnet user-secrets *",
+      "Bash:git status",
+      "Bash:git diff *",
+      "Bash:git log *",
+      "Bash:git add *",
+      "Bash:git commit *",
+      "Bash:az account show",
+      "Bash:az webapp config appsettings list *",
+      "Bash:az webapp log *"
+    ],
+    "deny": [
+      "Read:**/.env",
+      "Read:**/.env.*",
+      "Read:**/secrets.json",
+      "Read:**/*.pfx",
+      "Read:**/appsettings.Production.json",
+      "Bash:rm -rf *",
+      "Bash:az group delete *",
+      "Bash:az * delete --yes",
+      "Bash:git push --force *",
+      "Bash:git reset --hard *"
+    ]
+  }
+}

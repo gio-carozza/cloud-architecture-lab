@@ -1,0 +1,7 @@
+
+# Build artifacts
+*.zip
+publish/
+bin/
+obj/
+.claude/cert-tags-today.txt

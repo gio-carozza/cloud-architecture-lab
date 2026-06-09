@@ -1,10 +1,12 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lab-observability-api", "src\lab-observability-api\lab-observability-api.csproj", "{51F3C748-BBEF-5F7D-2186-1347A71268C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lab-observability-api.Tests", "src\lab-observability-api.Tests\lab-observability-api.Tests.csproj", "{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,12 +18,17 @@ Global
 		{51F3C748-BBEF-5F7D-2186-1347A71268C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51F3C748-BBEF-5F7D-2186-1347A71268C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51F3C748-BBEF-5F7D-2186-1347A71268C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{51F3C748-BBEF-5F7D-2186-1347A71268C5} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{C1C53B6D-2831-406C-9D29-A2D9DECC1DA4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {293C7663-BB89-4BB4-8E5B-9A9D156B97FC}

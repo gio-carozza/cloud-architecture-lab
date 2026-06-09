@@ -1,88 +1,168 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Options;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Lab.Observability.Api.Models.AI;
 using Lab.Observability.Api.Options;
+using Lab.Observability.Api.Services.Claude;
+using Lab.Observability.Api.Telemetry;
+using Microsoft.Extensions.Options;
 
 namespace Lab.Observability.Api.Services.AI;
 
-public class ClaudeChatModelProvider : IChatModelProvider
+public sealed class ClaudeChatModelProvider : IChatModelProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly AnthropicOptions _options;
+    private readonly ClaudeApiClient _claudeApiClient;
     private readonly ILogger<ClaudeChatModelProvider> _logger;
+    private readonly AnthropicOptions _options;
 
     public ClaudeChatModelProvider(
-        HttpClient httpClient,
+        ClaudeApiClient claudeApiClient,
         IOptions<AnthropicOptions> options,
         ILogger<ClaudeChatModelProvider> logger)
     {
-        _httpClient = httpClient;
-        _options = options.Value;
+        _claudeApiClient = claudeApiClient;
         _logger = logger;
+        _options = options.Value;
     }
 
     public async Task<ChatResponse> SendAsync(ChatRequest request, CancellationToken cancellationToken = default)
     {
-        var endpoint = $"{_options.BaseUrl.TrimEnd('/')}/v1/messages";
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
 
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        if (string.IsNullOrWhiteSpace(request.Prompt))
+        {
+            throw new ArgumentException("Prompt is required.", nameof(request));
+        }
 
-        httpRequest.Headers.Add("x-api-key", _options.ApiKey);
-        httpRequest.Headers.Add("anthropic-version", "2023-06-01");
-        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        using var activity = GatewayTelemetry.ActivitySource.StartActivity("ai.chat.complete");
+        activity?.SetTag("llm.provider", "anthropic");
+        activity?.SetTag("llm.model", _options.Model);
+
+        _logger.LogInformation(
+            "Sending Claude chat request. Model={Model} PromptLength={PromptLength}",
+            _options.Model,
+            request.Prompt.Length);
+
+        try
+        {
+            var payload = new
+            {
+                model = _options.Model,
+                max_tokens = _options.MaxTokens,
+                messages = new object[]
+                {
+                    new { role = "user", content = request.Prompt }
+                }
+            };
+
+            var responseText = await _claudeApiClient.SendChatAsync(payload, cancellationToken);
+
+            _logger.LogInformation(
+                "Claude chat request completed. Model={Model} ResponseLength={ResponseLength}",
+                _options.Model,
+                responseText.Length);
+
+            return new ChatResponse
+            {
+                Provider = "anthropic",
+                Model = _options.Model,
+                Response = responseText
+            };
+        }
+        catch (Exception ex)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw;
+        }
+    }
+
+    public async IAsyncEnumerable<ChatChunk> StreamAsync(
+        ChatRequest request,
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Prompt))
+            throw new ArgumentException("Prompt is required.", nameof(request));
+
+        using var activity = GatewayTelemetry.ActivitySource.StartActivity("ai.chat.stream");
+        activity?.SetTag("llm.provider", "anthropic");
+        activity?.SetTag("llm.model", _options.Model);
+
+        _logger.LogInformation(
+            "Sending Claude streaming chat request. Model={Model} PromptLength={PromptLength}",
+            _options.Model,
+            request.Prompt.Length);
 
         var payload = new
         {
             model = _options.Model,
             max_tokens = _options.MaxTokens,
+            stream = true,
             messages = new object[]
             {
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new
-                        {
-                            type = "text",
-                            text = request.Prompt
-                        }
-                    }
-                }
+                new { role = "user", content = request.Prompt }
             }
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        var ttftStopwatch = Stopwatch.StartNew();
+        bool firstChunk = true;
+        bool usageLogged = false;
 
-        _logger.LogInformation("Sending prompt to Claude model {Model}", _options.Model);
-
-        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        // try/finally (no catch) is allowed in async iterators — CS1626 only blocks yield
+        // inside try blocks that have a catch clause. The finally here ensures the audit
+        // trail is closed even when the client disconnects (OperationCanceledException)
+        // before message_delta arrives.
+        try
         {
-            _logger.LogError("Claude call failed. Status: {StatusCode}. Body: {Body}",
-                response.StatusCode, responseBody);
+            await foreach (var chunk in _claudeApiClient.StreamChatAsync(payload, ct))
+            {
+                if (firstChunk)
+                {
+                    GatewayTelemetry.StreamTtftMs.Record(
+                        ttftStopwatch.Elapsed.TotalMilliseconds,
+                        new KeyValuePair<string, object?>("ai.provider", "anthropic"),
+                        new KeyValuePair<string, object?>("ai.model", _options.Model));
 
-            throw new ApplicationException(
-                $"Claude API call failed with status {(int)response.StatusCode}. Response body: {responseBody}");
+                    _logger.LogInformation(
+                        "Claude streaming first token received. Model={Model} TtftMs={TtftMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
+
+                    firstChunk = false;
+                }
+
+                if (chunk.Usage is not null)
+                {
+                    _logger.LogInformation(
+                        "Claude streaming completed. Model={Model} InputTokens={InputTokens} OutputTokens={OutputTokens} CacheReadTokens={CacheReadTokens}",
+                        _options.Model,
+                        chunk.Usage.InputTokens,
+                        chunk.Usage.OutputTokens,
+                        chunk.Usage.CacheReadTokens);
+
+                    usageLogged = true;
+                }
+
+                yield return chunk;
+            }
         }
-
-        using var document = JsonDocument.Parse(responseBody);
-
-        var outputText = document.RootElement
-            .GetProperty("content")[0]
-            .GetProperty("text")
-            .GetString() ?? string.Empty;
-
-        return new ChatResponse
+        finally
         {
-            Provider = "Anthropic",
-            Model = _options.Model,
-            Output = outputText
-        };
+            if (!usageLogged)
+            {
+                if (ct.IsCancellationRequested)
+                    _logger.LogDebug(
+                        "Streaming session cancelled by client before usage data arrived. Model={Model} DurationMs={DurationMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
+                else
+                    _logger.LogWarning(
+                        "Streaming session ended before final usage data was received. Model={Model} DurationMs={DurationMs}",
+                        _options.Model,
+                        ttftStopwatch.Elapsed.TotalMilliseconds);
+            }
+        }
     }
 }

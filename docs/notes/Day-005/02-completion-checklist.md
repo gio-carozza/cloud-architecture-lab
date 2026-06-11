@@ -1,4 +1,4 @@
-# Day-005 — Completion Checklist
+﻿# Day-005 — Completion Checklist
 
 ## Goal
 

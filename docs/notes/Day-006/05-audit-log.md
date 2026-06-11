@@ -1,4 +1,4 @@
-# Audit Log — Day 006
+﻿# Audit Log — Day 006
 
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 

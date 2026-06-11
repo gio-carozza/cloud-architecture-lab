@@ -1,4 +1,4 @@
-# Day 6 — Architect Thinking
+﻿# Day 6 — Architect Thinking
 
 ## 1. The OTel-vs-classic-AI-SDK fork: why ADR-008 exists
 

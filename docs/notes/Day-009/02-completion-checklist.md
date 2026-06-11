@@ -1,4 +1,4 @@
-# Day 9 — Completion Checklist
+﻿# Day 9 — Completion Checklist
 
 ## Contracts (Phase A)
 
@@ -60,6 +60,6 @@
 ## Documentation
 
 - [x] `docs/architecture/day-009-streaming-responses-on-interactive-path.md` written
-- [x] `docs/notes/Day-009/architect-thinking.md` written
-- [x] `docs/notes/Day-009/posture-check.md` filled (STEP 11 — before marking complete)
+- [x] `docs/notes/Day-009/03-architect-thinking.md` written
+- [x] `docs/notes/Day-009/04-posture-check.md` filled (STEP 11 — before marking complete)
 - [x] Git commit: `feat(day-009): streaming responses on interactive path`

@@ -1,4 +1,4 @@
-# ADR-008: Adopt OpenTelemetry-First Observability with Serilog for Request Logging
+﻿# ADR-008: Adopt OpenTelemetry-First Observability with Serilog for Request Logging
 
 ## Status
 Accepted
@@ -115,7 +115,7 @@ NOT installed (explicitly avoided to prevent pipeline duplication):
 
 - ADR-006 (AI Gateway resilience and observability hardening — this ADR refines its implementation)
 - ADR-005 (Provider abstraction)
-- `docs/notes/Day-006/summary.md`
+- `docs/notes/Day-006/01-summary.md`
 - `.claude/skills/observability-net/SKILL.md` (must be updated to reflect
   this decision; the original guidance assumed classic AI SDK)
 - OpenTelemetry .NET docs: https://opentelemetry.io/docs/languages/net/

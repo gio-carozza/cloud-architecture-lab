@@ -1,4 +1,4 @@
-# Daily Workflow
+﻿# Daily Workflow
 
 > Follow top to bottom every day. Fill the blanks marked ___.
 > When you see STOP, close the chat before continuing.
@@ -65,9 +65,9 @@ To activate it, the last line of each Claude Code prompt below already says:
 Before starting any new day, verify the previous day is frozen. Paste:
 ```
 Verify Day ___ is fully closed out:
-1. Check docs/notes/Day-___/completion-checklist.md — all items [x]?
-2. Check docs/notes/Day-___/posture-check.md — all five questions answered?
-3. Check docs/notes/Day-___/files-changed.md — no duplicate rows, no stale text?
+1. Check docs/notes/Day-___/02-completion-checklist.md — all items [x]?
+2. Check docs/notes/Day-___/04-posture-check.md — all five questions answered?
+3. Check docs/notes/Day-___/07-files-changed.md — no duplicate rows, no stale text?
 4. Check docs/standards/_principles.md — graveyard entries added?
 5. Check docs/notes/_index.md — Day ___ status = Complete?
 6. Run git status — working tree clean?
@@ -84,7 +84,7 @@ day's number filled in.
 Before opening Claude Code for the new day, update your **project knowledge**
 (in claude.ai) manually:
 
-- Move `docs/notes/Day-___/` working files (summary, checklist, posture-check)
+- Move `docs/notes/Day-___/` working files (`01-summary.md`, `02-completion-checklist.md`, `04-posture-check.md`)
   **OUT** of project knowledge — the day is frozen; Claude Code reads them on demand.
 - Keep only the current day's working files in hot context.
 - ADR rotation: keep the 2 most recent ADRs in project knowledge; move older ones out.
@@ -153,7 +153,7 @@ TODAY'S FOCUS: ___  (from STEP 2 DECIDE)
 CAREER PHASE: ___ (AI Engineer | Forward-Deployed Engineer | LLM Architect)
 CONSTRAINTS: ___
 
-Produce the Day ___ summary.md using the 13-section daily roadmap format
+Produce the Day ___ 01-summary.md using the 13-section daily roadmap format
 from CLAUDE.md. One response. No code.
 ```
 Blanks: previous day = what you shipped. Focus = from STEP 2. Constraints =
@@ -195,10 +195,10 @@ The skeleton from STEP 3 already exists. Now fill it.
 
 Paste the approved summary into the stub:
 ```
-Replace the template content in docs/notes/Day-___/summary.md with:
+Replace the template content in docs/notes/Day-___/01-summary.md with:
 <PASTE APPROVED SUMMARY FROM STEP 4>
 Then extract the completion checklist into
-docs/notes/Day-___/completion-checklist.md.
+docs/notes/Day-___/02-completion-checklist.md.
 ```
 
 Then create and fill the ADR (skip if no ADR today):
@@ -216,7 +216,7 @@ first phase's "Changes needed" bullets (from the summary) and "DO NOT modify"
 list (from the ADR) filled in.
 ```
 
-Then run `/collab-lens ___` to enrich the "Whose Problem Am I Solving?" section of summary.md.
+Then run `/collab-lens ___` to enrich the "Whose Problem Am I Solving?" section of 01-summary.md.
 
 ---
 
@@ -225,7 +225,7 @@ Then run `/collab-lens ___` to enrich the "Whose Problem Am I Solving?" section 
 For each phase in the summary's Step-by-Step Execution, paste:
 ```
 Implement Phase ___ of Day ___.
-Read first: docs/notes/Day-___/summary.md (Phase ___ section),
+Read first: docs/notes/Day-___/01-summary.md (Phase ___ section),
 the ADR if referenced, and relevant SKILL.md files.
 Then read the files you'll modify before editing.
 Changes needed:
@@ -269,7 +269,7 @@ Run `dotnet test` before leaving STEP 7. All tests must pass before STEP 8.
 Paste:
 ```
 Local verification for Day ___.
-Run the app, execute the tests in docs/notes/Day-___/completion-checklist.md.
+Run the app, execute the tests in docs/notes/Day-___/02-completion-checklist.md.
 Report pass/fail for each. Fix failures and re-test.
 ```
 → Fix all failures before continuing.
@@ -277,14 +277,14 @@ Report pass/fail for each. Fix failures and re-test.
 Then, once local tests pass, run the pre-deploy pillars audit:
 ```
 Pillars audit for Day ___.
-Read: docs/notes/Day-___/summary.md, docs/notes/Day-___/files-changed.md,
+Read: docs/notes/Day-___/01-summary.md, docs/notes/Day-___/07-files-changed.md,
 src/lab-observability-api/Program.cs, and every source file listed in
-files-changed.md that was added or modified this day.
+07-files-changed.md that was added or modified this day.
 Run all 6-pillar checks from .claude/skills/pillars-audit/SKILL.md.
 Append the full per-check output (all checks, RAG per pillar, RED/YELLOW fix
-sections) to docs/notes/Day-___/audit-log.md under "## Run: STEP 8 pre-deploy (YYYY-MM-DD)".
+sections) to docs/notes/Day-___/05-audit-log.md under "## Run: STEP 8 pre-deploy (YYYY-MM-DD)".
 Fix any RED items, update the RED items → fixes section, re-audit.
-Upsert YELLOW items as debt rows in files-changed.md (step: audit).
+Upsert YELLOW items as debt rows in 07-files-changed.md (step: audit).
 When the audit is complete with no open RED items, print the STEP 9 DEPLOY prompt
 with the day number filled in.
 ```
@@ -321,12 +321,12 @@ Paste:
 Day ___ documentation pass.
 1. Update docs/standards/kql-cookbook.md with new queries
 2. Update docs/standards/azure-environment.md if resources/settings changed
-3. Finalize docs/notes/Day-___/completion-checklist.md (mark [x])
-4. Write docs/notes/Day-___/architect-thinking.md with key insights
+3. Finalize docs/notes/Day-___/02-completion-checklist.md (mark [x])
+4. Write docs/notes/Day-___/03-architect-thinking.md with key insights
    — include a "CEO Framing" subsection: one sentence on the business value of today's change
    — include a "Phase Note" subsection: which career phase did this day reinforce and why
 5. Update CLAUDE.md (day status, new ADRs, new conventions)
-6. Update docs/notes/Day-___/files-changed.md — upsert one row per file touched
+6. Update docs/notes/Day-___/07-files-changed.md — upsert one row per file touched
    this pass; dedup on file path; label Step column "docs pass"
 7. git add -A && git commit -m "feat(day-___): ___"
 Report what changed.
@@ -371,7 +371,7 @@ Copy the result. → STOP. Close chat.
 
 Paste:
 ```
-Update docs/notes/Day-___/posture-check.md:
+Update docs/notes/Day-___/04-posture-check.md:
 <PASTE POSTURE CHECK>
 Add graveyard entries to docs/standards/_principles.md:
 <PASTE ENTRIES>
@@ -384,18 +384,18 @@ is frozen, then begin Day ___+1."
 Then run a final pillars audit pass to catch anything introduced since STEP 8:
 ```
 Close-of-day audit for Day ___.
-Read docs/notes/Day-___/files-changed.md and identify any files edited AFTER
+Read docs/notes/Day-___/07-files-changed.md and identify any files edited AFTER
 the "audit" step row was written (docs pass edits, posture-gap fixes, graveyard
 additions that touched source files).
 Re-run only the pillar checks relevant to those files. If no source files
-changed after STEP 8, run only O4 (files-changed.md coverage complete?) and
+changed after STEP 8, run only O4 (07-files-changed.md coverage complete?) and
 O5 (KQL cookbook updated for any new signals?).
-Append the output (re-checked pillars only) to docs/notes/Day-___/audit-log.md
+Append the output (re-checked pillars only) to docs/notes/Day-___/05-audit-log.md
 under "## Run: STEP 12 close-audit (YYYY-MM-DD)".
-If RED: fix and commit before closing; update RED items → fixes section in audit-log.md.
-If YELLOW: upsert a debt row in files-changed.md (step: close-audit) and record
-disposition in YELLOW items → fixes section in audit-log.md.
-If all GREEN or N/A: append "close-audit: GREEN" to audit-log.md and proceed.
+If RED: fix and commit before closing; update RED items → fixes section in 05-audit-log.md.
+If YELLOW: upsert a debt row in 07-files-changed.md (step: close-audit) and record
+disposition in YELLOW items → fixes section in 05-audit-log.md.
+If all GREEN or N/A: append "close-audit: GREEN" to 05-audit-log.md and proceed.
 ```
 
 Done. Tomorrow → STEP 0.
@@ -418,13 +418,13 @@ After this, /cert-update in STEP 10 populates domains as you touch them.
 
 ## IF YOU GET STUCK
 
-- Don't know a blank? It's in your summary.md from STEP 4.
+- Don't know a blank? It's in your 01-summary.md from STEP 4.
 - Build won't pass? Stay in Claude Code, paste the error, let it fix.
 - Need to reason mid-build? New short chat (Sonnet), ask, close it, return.
 - Chat feels long (>6 messages)? Close it, open a new one.
 - About to type "give me the code" in chat? Stop — that's Claude Code.
 - A slash command does nothing? Check it exists: "Show me .claude/commands/<name>.md"
-- summary.md missing when BUILD needs it? You skipped STEP 6 — populate it first.
+- 01-summary.md missing when BUILD needs it? You skipped STEP 6 — populate it first.
 - Handoff didn't print? Just open daily-workflow.md to the next step yourself —
   the printed prompt is a convenience, not a dependency.
 
@@ -439,7 +439,7 @@ After this, /cert-update in STEP 10 populates domains as you touch them.
 | /deploy | 9 | Kudu zip deploy + post-deploy verification |
 | /cert-update N | 10 | Populates cert domains touched that day |
 | /cert-scaffold EXAM | one-time | Builds cert domain structure from MS skills outline |
-| /collab-lens N | 6 | Inserts collaborator lens block into summary.md |
+| /collab-lens N | 6 | Inserts collaborator lens block into 01-summary.md |
 
 ---
 

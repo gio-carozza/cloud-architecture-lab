@@ -1,4 +1,4 @@
-# Day 6 — Observability & Resilience for the AI Gateway
+﻿# Day 6 — Observability & Resilience for the AI Gateway
 
 ## Track
 Hybrid (Build primary, Cert reinforcement secondary)
@@ -154,7 +154,7 @@ Use `/deploy` slash command. Then:
 ### Phase J — Document (30 min)
 - Write `ADR-006-adopt-serilog-with-application-insights-sink.md`
 - Update `docs/architecture/day-006-observability-and-resilience.md` with new sequence diagram
-- Fill out `completion-checklist.md`
+- Fill out `02-completion-checklist.md`
 
 ## Architect Thinking
 
@@ -207,9 +207,9 @@ the abstraction is wrong.
 ### Docs
 - `docs/adr/ADR-006-adopt-serilog-with-application-insights-sink.md`
 - `docs/architecture/day-006-observability-and-resilience.md`
-- `docs/notes/Day-006/summary.md` (this file)
-- `docs/notes/Day-006/completion-checklist.md`
-- `docs/notes/Day-006/architect-thinking.md`
+- `docs/notes/Day-006/01-summary.md` (this file)
+- `docs/notes/Day-006/02-completion-checklist.md`
+- `docs/notes/Day-006/03-architect-thinking.md`
 - `docs/notes/Day-006/kql.md`
 
 ### Infra
@@ -230,7 +230,7 @@ This is interview gold. You can speak to:
 - How circuit breakers protect upstream
 
 ## Completion Checklist
-See `completion-checklist.md`.
+See `02-completion-checklist.md`.
 
 ## Certification Reinforcement
 
@@ -267,7 +267,7 @@ PATTERNS are identical. When we add Azure OpenAI as a second provider (future
 day), this same telemetry layer covers AI-102 monitoring objectives directly.
 
 ## Architect Posture Check
-Fill `posture-check.md` at the END of the day, BEFORE marking complete.
+Fill `04-posture-check.md` at the END of the day, BEFORE marking complete.
 Four questions:
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship if I were the only one in the room?

@@ -1,4 +1,4 @@
-# Day 7 — Completion Checklist
+﻿# Day 7 — Completion Checklist
 
 ## Code
 
@@ -36,12 +36,12 @@
 >
 > | File | Change |
 > |---|---|
-> | `completion-checklist.md` | All 6 local verification items marked `[x]`; bug fixes footnoted |
-> | `posture-check.md` | All 4 posture questions answered — graveyard entry for `claude-opus-4-6` included |
-> | `architect-thinking.md` | New section 8 documents all three Claude 4 API format discoveries with the "silent failure" failure mode explained |
+> | `02-completion-checklist.md` | All 6 local verification items marked `[x]`; bug fixes footnoted |
+> | `04-posture-check.md` | All 4 posture questions answered — graveyard entry for `claude-opus-4-6` included |
+> | `03-architect-thinking.md` | New section 8 documents all three Claude 4 API format discoveries with the "silent failure" failure mode explained |
 > | `CLAUDE.md` | Three new Gotchas bullets: TTL requirement, wrong model ID = silent 0, new nested usage format |
 > | `Infra/Day-007/appsettings-template.md` | `cache_control` description updated to include TTL; model row updated from `claude-opus-4-6` to `claude-sonnet-4-6` |
-> | `docs/notes/Day-007/summary.md` | `BuildAnthropicRequest` description updated to reflect `ttl:"1h"` and the nested fallback |
+> | `docs/notes/Day-007/01-summary.md` | `BuildAnthropicRequest` description updated to reflect `ttl:"1h"` and the nested fallback |
 > | `src/.../ClaudeApiClient.cs` | `cache_control` TTL added; `TryExtractUsage` extended with nested format fallback |
 
 ## Infra & Config
@@ -68,6 +68,6 @@
 
 - [x] `docs/adr/ADR-009-implement-prompt-caching-inside-provider-boundary.md` — Accepted (pre-written)
 - [x] `docs/architecture/day-007-prompt-caching-and-cost-observability.md` written
-- [x] `docs/notes/Day-007/architect-thinking.md` written
-- [x] `docs/notes/Day-007/posture-check.md` filled (end of day, before commit)
+- [x] `docs/notes/Day-007/03-architect-thinking.md` written
+- [x] `docs/notes/Day-007/04-posture-check.md` filled (end of day, before commit)
 - [x] Git commit: `feat(day-007): prompt caching and cost observability` — `d5e4982`

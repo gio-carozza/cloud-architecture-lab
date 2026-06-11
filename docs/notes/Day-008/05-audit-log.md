@@ -1,4 +1,4 @@
-# Audit Log — Day 008
+﻿# Audit Log — Day 008
 
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 
@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 008 snapshot. Code has progressed through Day 009.
 > Sources read: AiBatchController.cs, ClaudeBatchApiClient.cs, ClaudeBatchChatModelProvider.cs,
 > IBatchChatModelProvider.cs, AnthropicOptions.cs, GatewayTelemetry.cs, Program.cs,
-> Infra/Day-008/appsettings-template.md, docs/notes/Day-008/files-changed.md
+> Infra/Day-008/appsettings-template.md, docs/notes/Day-008/07-files-changed.md
 
 ### Reliability
 | Check | Status | Finding |

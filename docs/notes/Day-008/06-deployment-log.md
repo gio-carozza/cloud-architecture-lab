@@ -1,4 +1,4 @@
-# Deployment Log — Day 008
+﻿# Deployment Log — Day 008
 
 > Append-only. Each deploy run adds a dated section. Never edit prior runs.
 

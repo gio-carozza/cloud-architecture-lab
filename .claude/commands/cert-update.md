@@ -1,8 +1,8 @@
----
+﻿---
 name: cert-update
 description: Populate or update certification study content for domains
   touched during today's roadmap work. Run at end of each day session.
-  Reads the day's summary.md to determine which cert domains were touched,
+  Reads the day's 01-summary.md to determine which cert domains were touched,
   then generates/updates concepts.md, practice-q.md, and resources.md
   for the affected domains. Processes ONE domain per run for token control.
   Usage: /cert-update 007        (process the next un-updated domain)
@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Write
 # cert-update
 
 ## What this does
-1. Reads docs/notes/Day-NNN/summary.md for the given day number
+1. Reads docs/notes/Day-NNN/01-summary.md for the given day number
 2. Extracts the Certification Reinforcement section to identify which exams
    and domains were touched (Primary + Secondary)
 3. Builds the list of touched domains, then processes them ONE AT A TIME:
@@ -120,7 +120,7 @@ Curated links only. No scraped content. Format:
 - Do not process more than one domain per run unless `all` is passed
 
 ## Token discipline
-- Read ONLY the day's summary.md — not the full day folder
+- Read ONLY the day's 01-summary.md — not the full day folder
 - Generate content only for domains marked Primary or Secondary
   in that day's cert reinforcement section
 - One domain per run by default; the `all` flag is the explicit opt-in

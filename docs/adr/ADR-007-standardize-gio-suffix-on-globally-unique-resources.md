@@ -1,4 +1,4 @@
-# ADR-007: Standardize `-gio` Suffix on Globally-Unique Azure Resources
+﻿# ADR-007: Standardize `-gio` Suffix on Globally-Unique Azure Resources
 
 ## Status
 Accepted
@@ -80,8 +80,8 @@ same region. Conflates two different concepts (location vs. ownership).
 Files updated:
 - `docs/standards/naming-conventions.md` (rules + change log)
 - `docs/notes/Day-004/deployment.md` (drift fix)
-- `docs/notes/Day-006/summary.md` (Phase A variable names)
-- `docs/notes/Day-006/completion-checklist.md` (resource names)
+- `docs/notes/Day-006/01-summary.md` (Phase A variable names)
+- `docs/notes/Day-006/02-completion-checklist.md` (resource names)
 - `CLAUDE.md` (Azure Environment block + convention summary)
 
 Live Azure resources created/updated this day:

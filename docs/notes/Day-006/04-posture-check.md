@@ -1,4 +1,4 @@
-# Day 6 — Posture Check
+﻿# Day 6 — Posture Check
 
 > Fill this at the END of Day 6, BEFORE marking the day complete.
 > Honest answers only. The graveyard is more valuable than the trophy case.

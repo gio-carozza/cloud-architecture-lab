@@ -1,4 +1,4 @@
-# Day 8 — Completion Checklist
+﻿# Day 8 — Completion Checklist
 
 ## Code
 
@@ -56,6 +56,6 @@
 
 - [x] `docs/architecture/day-008-batch-api-cost-controls.md` written
 - [x] `docs/standards/kql-cookbook.md` — Query 10 added
-- [x] `docs/notes/Day-008/architect-thinking.md` written
-- [x] `docs/notes/Day-008/posture-check.md` filled (STEP 12 — committed `docs(day-008): posture check and graveyard`)
+- [x] `docs/notes/Day-008/03-architect-thinking.md` written
+- [x] `docs/notes/Day-008/04-posture-check.md` filled (STEP 12 — committed `docs(day-008): posture check and graveyard`)
 - [x] Git commit: `feat(day-008): batch api cost controls` + `feat(day-008): hard cap on batch submit size` + `docs(day-008): posture check and graveyard`

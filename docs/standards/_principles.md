@@ -1,4 +1,4 @@
-# Architect Posture — The North Star
+﻿# Architect Posture — The North Star
 
 > Read this when you're stuck, demoralized, tempted to cut corners, or
 > about to ship something you know isn't quite right. This document is
@@ -166,7 +166,7 @@ graveyard is where the wisdom comes from.**
 ## Daily Posture Check
 
 At the end of each roadmap day, answer these five questions in
-`Day-NNN/posture-check.md`. Answer Q4 at all four levels.
+`Day-NNN/04-posture-check.md`. Answer Q4 at all four levels.
 
 1. **Whose problem did I actually solve today?**
    (Name a specific human role. "The platform" is not an answer.)

@@ -1,4 +1,4 @@
-# Day 9 — Architect Thinking
+﻿# Day 9 — Architect Thinking
 
 ## 1. The core decision: extend IChatModelProvider vs a new IStreamingChatModelProvider
 

@@ -1,4 +1,4 @@
-# Day 8 — Batch API Cost Controls
+﻿# Day 8 — Batch API Cost Controls
 
 ## Change Summary
 
@@ -79,7 +79,7 @@ applied to batch spans. `InProgress` polling responses are HTTP 200 successes.
 ## Related
 
 - `docs/adr/ADR-010-introduce-parallel-batch-provider-abstraction.md`
-- `docs/notes/Day-008/summary.md`
+- `docs/notes/Day-008/01-summary.md`
 - `docs/notes/Day-008/architect-thinking.md`
 - `docs/standards/kql-cookbook.md` — Query 10
 - `Infra/Day-008/appsettings-template.md` — no new settings

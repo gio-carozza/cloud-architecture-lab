@@ -1,4 +1,4 @@
-# /deploy
+﻿# /deploy
 
 Deploy `lab-observability-api` to Azure App Service using the proven Kudu zip path.
 
@@ -20,7 +20,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
 
    **b. Pillars audit gate:**
    - Determine the current day number from the most recent `docs/notes/Day-NNN/` folder.
-   - Check `docs/notes/Day-NNN/audit-log.md` for a STEP 8 pre-deploy run with no open
+   - Check `docs/notes/Day-NNN/05-audit-log.md` for a STEP 8 pre-deploy run with no open
      RED items (all RED items → fixes entries show re-audit → GREEN).
    - If a passing STEP 8 run exists **and** no source files (`src/`) have been modified
      since that run was appended, proceed to step 1.
@@ -28,7 +28,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
      `.claude/skills/pillars-audit/SKILL.md` now and append the output before continuing.
    - If the audit contains **any open RED items**, HALT immediately. List the RED items and
      the minimum fix for each. Do not proceed to step 1 until all RED items are resolved,
-     the fixes are recorded in audit-log.md, and the re-audit confirms GREEN.
+     the fixes are recorded in 05-audit-log.md, and the re-audit confirms GREEN.
 
 1. Verify pre-flight (subscription, RG, app exists)
 
@@ -83,7 +83,7 @@ If the failure is a TLS reset on `management.azure.com`, state that explicitly
 and apply the SSL workaround before retrying.
 
 After a successful deploy, append a new dated section to
-`docs/notes/Day-NNN/deployment-log.md` using this structure:
+`docs/notes/Day-NNN/06-deployment-log.md` using this structure:
 
 ```markdown
 ## Deploy: YYYY-MM-DD (<slug>)
@@ -91,7 +91,7 @@ After a successful deploy, append a new dated section to
 ### Pre-deploy gate
 - Commit: `<sha> <message>`
 - **dotnet test**: Passed — NN/NN (0 failed, 0 skipped)  ← or FAILED ✗ with fix trail below
-- audit-log.md STEP 8: passed / no open REDs
+- 05-audit-log.md STEP 8: passed / no open REDs
 
 ### 1. Build / 2. Publish / 3. Zip / 4. WEBSITE_RUN_FROM_PACKAGE / 5. Kudu deploy
 (verbatim commands + result line for each)
@@ -126,4 +126,4 @@ bad zip layout, missing env vars. Empty table if none.)
 - "Fix applied" goes between the failed attempt and the retry, inside the test block
 - The "Issues & fixes" table is for deployment-level problems (SSL reset, Kudu 401,
   bad zip layout) — not for test failures, which belong inline
-- `deployment-log.md` is append-only — never edit prior sections
+- `06-deployment-log.md` is append-only — never edit prior sections

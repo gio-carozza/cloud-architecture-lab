@@ -1,4 +1,4 @@
-# Day 8 — Architect Thinking
+﻿# Day 8 — Architect Thinking
 
 ## The central decision: parallel seam, not extended seam
 

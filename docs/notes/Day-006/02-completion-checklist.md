@@ -1,4 +1,4 @@
-# Day 6 — Completion Checklist
+﻿# Day 6 — Completion Checklist
 
 ## Infrastructure
 
@@ -47,7 +47,7 @@
 - [x] `ADR-006-adopt-serilog-with-application-insights-sink.md` written and Accepted — exists as `ADR-006-harden-ai-gateway-with-resilience-and-observability.md`; Status: Accepted
 - [x] `docs/architecture/day-006-observability-and-resilience.md` includes updated sequence diagram — exists as `day-006-ai-gateway-v2-hardening.md` + `day-006-sequence-flow.md`
 - [x] `docs/notes/Day-006/kql.md` contains at least 5 starter KQL queries — promoted to `docs/standards/kql-cookbook.md`
-- [x] `docs/notes/Day-006/architect-thinking.md` written
+- [x] `docs/notes/Day-006/03-architect-thinking.md` written
 - [x] `Infra/Day-006/appsettings-template.md` includes APPLICATIONINSIGHTS_CONNECTION_STRING
 - [x] Root `CLAUDE.md` "What I'm Building Toward" section reflects Day 6 completion — updated: "Days 1–6 complete. Day 7 next." and "Observability & resilience (done — Day 6)"
 - [x] Git commit: `feat(day-006): observability and resilience for AI gateway` — `04f4931` on `feature/day-006-gateway-hardening`

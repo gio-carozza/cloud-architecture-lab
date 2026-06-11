@@ -1,4 +1,4 @@
-# Audit Log — Day 009
+﻿# Audit Log — Day 009
 
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 
@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 009 snapshot. Code is at Day 009 completion.
 > Sources read: AiController.cs, ClaudeApiClient.cs (StreamChatAsync), ClaudeChatModelProvider.cs
 > (StreamAsync + try/finally posture fix), IChatModelProvider.cs, ChatChunk.cs,
-> GatewayTelemetry.cs, Infra/Day-009/appsettings-template.md, docs/notes/Day-009/files-changed.md
+> GatewayTelemetry.cs, Infra/Day-009/appsettings-template.md, docs/notes/Day-009/07-files-changed.md
 
 ### Reliability
 | Check | Status | Finding |

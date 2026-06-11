@@ -1,4 +1,4 @@
-# Audit Log — Day 007
+﻿# Audit Log — Day 007
 
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 
@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 007 snapshot. Code has progressed through Day 009.
 > Sources read: ClaudeApiClient.cs, AnthropicOptions.cs, GatewayTelemetry.cs, Program.cs,
 > AiController.cs, ClaudeChatModelProvider.cs, Infra/Day-007/appsettings-template.md,
-> docs/notes/Day-007/files-changed.md, docs/standards/kql-cookbook.md (queries 8–9)
+> docs/notes/Day-007/07-files-changed.md, docs/standards/kql-cookbook.md (queries 8–9)
 
 ### Reliability
 | Check | Status | Finding |

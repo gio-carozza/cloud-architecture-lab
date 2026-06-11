@@ -1,4 +1,4 @@
-# Day 7 — Architect Thinking
+﻿# Day 7 — Architect Thinking
 
 ## 1. The placement decision: inside vs. outside the provider boundary
 

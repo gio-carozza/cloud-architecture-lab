@@ -1,4 +1,4 @@
-Before starting ANY work, follow `.claude/instructions/daily-workflow.md`
+﻿Before starting ANY work, follow `.claude/instructions/daily-workflow.md`
 
 # cloud-architecture-lab
 
@@ -50,7 +50,7 @@ Full career path: `docs/standards/career-path.md`
 - New ADR:  `/adr <kebab-title>` slash command
 - Cert scaffold: `/cert-scaffold <EXAM>` (one-time per exam)
 - Cert update:   `/cert-update <N>` (end of each day)
-- Collab lens:   `/collab-lens <N>` (daily collaborator focus — run after STEP 6 populates summary.md)
+- Collab lens:   `/collab-lens <N>` (daily collaborator focus — run after STEP 6 populates 01-summary.md)
 - Full daily loop: `.claude/instructions/daily-workflow.md`
 
 ## Architecture (top-level map)
@@ -66,16 +66,17 @@ Full career path: `docs/standards/career-path.md`
 
 ## Conventions (DO NOT violate without an ADR)
 - Day folders: `Day-NNN` (3-digit zero-padded; supports >100 days)
-- Inside day folders: NO day prefix on filenames (e.g., `completion-checklist.md`)
+- Inside day folders: numeric reading-order prefix, NO day prefix (e.g., `01-summary.md`, `02-completion-checklist.md`)
 - In shared folders: KEEP day prefix (e.g., `day-006-observability.md`)
 - ADRs: `ADR-NNN-kebab-case-title.md`. Never edit accepted ADRs — supersede instead.
+  Exception: factual corrections to implementation notes (broken file paths, renamed files, typos) are exempt — the decision itself must not change.
 - Namespaces: `Lab.Observability.Api.*`
 - Secrets:
   - Local: `dotnet user-secrets`
   - Azure: App Service environment variables (double underscore: `Anthropic__ApiKey`)
   - NEVER commit secrets, NEVER put them in `appsettings.json`
-- **`files-changed.md` — per-day file change audit log:**
-  Every day folder contains `docs/notes/Day-NNN/files-changed.md`. Whenever docs are
+- **`07-files-changed.md` — per-day file change audit log:**
+  Every day folder contains `docs/notes/Day-NNN/07-files-changed.md`. Whenever docs are
   updated in response to any step completion ("update all necessary docs", "update docs",
   "update the checklist", or equivalent), upsert rows in this file. **Dedup key is the
   file path** — if the file already has a row for that path, update it in place; never
@@ -203,7 +204,7 @@ The project knowledge holds ONLY:
 - `collaboration-map.md` (collaborator matrix across all three phases — reviewed at phase transitions)
 - `naming-conventions.md`, `azure-environment.md` (live environment facts)
 - The SKILL.md files (`.claude/skills/*/SKILL.md`)
-- The CURRENT day's working artifacts (summary.md, completion-checklist.md, posture-check.md)
+- The CURRENT day's working artifacts (01-summary.md, 02-completion-checklist.md, 04-posture-check.md)
 - The most recent 1-2 ADRs
 - NOT in hot context (read on demand): `.claude/instructions/*`,
   `.claude/commands/*`, `.claude/hooks/*` — these are operational, not reasoning context
@@ -260,7 +261,7 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 ### Lifecycle: pruning the project as days complete
 
 **When a roadmap day completes:**
-1. Move that day's `summary.md`, `completion-checklist.md`, `posture-check.md`
+1. Move that day's `01-summary.md`, `02-completion-checklist.md`, `04-posture-check.md`
    OUT of project knowledge
 2. Files remain in the repo at `docs/notes/Day-NNN/` (Claude Code reads on demand)
 3. Bring next day's working files IN to project knowledge
@@ -287,7 +288,7 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 ## Certification Tooling
 - `/cert-scaffold <exam>` — run once per exam to build domain structure
 - `/cert-update <day>` — run at end of each day session to populate
-  domains touched that day (reads summary.md cert section automatically)
+  domains touched that day (reads 01-summary.md cert section automatically)
 - Hook: `.claude/hooks/cert-tag.json` auto-tags domains as you work
 - Coverage matrix: `docs/certifications/domain-coverage.md`
 - Content: 10yo + CEO + Engineer + Architect explanations, synthesized practice questions,
@@ -295,8 +296,8 @@ which use Opus. If this file and the workflow ever disagree, the workflow wins.
 - Do NOT reproduce paid exam bank content
 
 ## Collaboration Tooling
-- `/collab-lens <N>` — run in STEP 6 after summary.md is populated; inserts a bounded
-  `### Collaboration Lens` block into summary.md under "Whose Problem Am I Solving?"
+- `/collab-lens <N>` — run in STEP 6 after 01-summary.md is populated; inserts a bounded
+  `### Collaboration Lens` block into 01-summary.md under "Whose Problem Am I Solving?"
 - Skill procedure: `.claude/skills/collaboration-lens/SKILL.md`
 - Reference map: `docs/standards/collaboration-map.md` — one block per collaborator, one row per phase
 - Output cap: 1 PRIMARY (posture + question + 4-level compression) + at most 2 secondary = ≤ 12 lines

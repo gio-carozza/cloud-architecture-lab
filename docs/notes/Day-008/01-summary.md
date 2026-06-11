@@ -1,4 +1,4 @@
-# Day 008 — Batch API Cost Controls
+﻿# Day 008 — Batch API Cost Controls
 
 ## Track
 Build (primary) — Hybrid (AI-102, AZ-305 cert reinforcement secondary)
@@ -138,7 +138,7 @@ This proves:
 - You make cost reduction visible, not just present
 
 ## Completion Checklist
-See `completion-checklist.md`
+See `02-completion-checklist.md`
 
 ## Certification Reinforcement
 
@@ -157,4 +157,4 @@ No new infrastructure provisioned; no App Service configuration changes.
 - Optimize and operationalize a generative AI solution: batch vs. synchronous routing decision; cost-per-token attribution for batch path
 
 ## Architect Posture Check
-See `posture-check.md` (filled at end of day, BEFORE marking complete)
+See `04-posture-check.md` (filled at end of day, BEFORE marking complete)

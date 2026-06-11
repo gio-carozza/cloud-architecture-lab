@@ -1,9 +1,9 @@
-# Pillars Audit Skill
+﻿# Pillars Audit Skill
 
 **TRIGGER when:**
 - User says "pillars audit", "security review", "architecture review", "is this ready to ship", or "audit the changes"
 - **STEP 8 gate** — pre-deploy audit in the daily workflow (full audit against all changed files)
-- **`/deploy` gate** — Step 0 of `.claude/commands/deploy.md`; if no passing audit row exists in `files-changed.md`, this runs automatically before any build step (RED items halt the deploy)
+- **`/deploy` gate** — Step 0 of `.claude/commands/deploy.md`; if no passing audit row exists in `07-files-changed.md`, this runs automatically before any build step (RED items halt the deploy)
 - **STEP 12 close gate** — targeted re-audit covering only files changed after STEP 8 (docs pass edits, posture-gap fixes); focuses on O4, O5, and any newly touched source files
 
 **Purpose:** Before every deploy, check the day's changes against 6 pillars:
@@ -12,7 +12,7 @@ build and tests can't catch — design gaps, security holes, cost traps, and
 observability blind spots.
 
 **Output format:** Per-check table for every pillar, then RED and YELLOW fix sections.
-Append the full block to `docs/notes/Day-NNN/audit-log.md` under a dated run header.
+Append the full block to `docs/notes/Day-NNN/05-audit-log.md` under a dated run header.
 Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 
 ````markdown
@@ -73,7 +73,7 @@ Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 | O1 — New paths log structured event with CorrelationId | | |
 | O2 — New metric names follow ai.provider.* convention | | |
 | O3 — New env vars in appsettings-template.md | | |
-| O4 — files-changed.md has row for every file touched | | |
+| O4 — 07-files-changed.md has row for every file touched | | |
 | O5 — KQL cookbook updated for new signals | | |
 | O6 — /health/ready reflects new required config | | |
 
@@ -123,9 +123,9 @@ For STEP 12 (close-audit) runs, include only the re-checked pillars — not all 
 
 ## Inputs to read before running checks
 
-1. `docs/notes/Day-NNN/summary.md` — what was built and the contract
-2. `docs/notes/Day-NNN/files-changed.md` — every file touched this day
-3. The actual changed source files (read each one listed in files-changed.md)
+1. `docs/notes/Day-NNN/01-summary.md` — what was built and the contract
+2. `docs/notes/Day-NNN/07-files-changed.md` — every file touched this day
+3. The actual changed source files (read each one listed in 07-files-changed.md)
 4. `src/lab-observability-api/Program.cs` — DI registrations and pipeline
 5. `src/lab-observability-api/Options/AnthropicOptions.cs` — config contract
 
@@ -193,7 +193,7 @@ Check all that apply to today's changes:
 | O1 | Every new code path logs at least one structured event with `CorrelationId` | Read new controller and service methods; `_logger.LogInformation(...)` with correlation ID via Serilog enrichment (automatic via middleware, but verify nothing swallows it) |
 | O2 | New telemetry metric names follow `ai.provider.*` convention | Grep new `Meter.CreateCounter` / `CreateHistogram` calls in `GatewayTelemetry.cs` |
 | O3 | New App Service environment variables documented in `Infra/Day-NNN/appsettings-template.md` | Read the template; "No new settings" is correct only if genuinely true |
-| O4 | `files-changed.md` has a row for every file touched | Cross-check files-changed.md against git diff |
+| O4 | `07-files-changed.md` has a row for every file touched | Cross-check 07-files-changed.md against git diff |
 | O5 | KQL cookbook updated if new observable signals were added | If new telemetry metrics added → kql-cookbook.md should have a query or a note |
 | O6 | `/health/ready` still correctly reflects readiness (new required config not missing from the check) | Read `/health/ready` handler in `Program.cs`; if a new required option was added, the readiness check must test it |
 
@@ -218,9 +218,9 @@ Check all that apply to today's changes:
 2. For each pillar, work through every check. Mark N/A (not GREEN) for checks that don't apply to today's changes.
 3. Assign RAG per pillar based on the most severe finding in that pillar.
 4. Populate the full per-check table and RED/YELLOW fix sections from the output format above.
-5. Append the completed block to `docs/notes/Day-NNN/audit-log.md` under the appropriate run header.
+5. Append the completed block to `docs/notes/Day-NNN/05-audit-log.md` under the appropriate run header.
 6. If any RED items exist: stop. Fix them. Re-run only the affected pillar checks. Update the `### RED items → fixes` section with the fix applied and re-audit result. Do not proceed to STEP 9 (deploy) with any open RED.
-7. YELLOW items: record the finding and disposition in the `### YELLOW items → fixes` section. Also upsert a debt row in `docs/notes/Day-NNN/files-changed.md` with step label `audit`.
+7. YELLOW items: record the finding and disposition in the `### YELLOW items → fixes` section. Also upsert a debt row in `docs/notes/Day-NNN/07-files-changed.md` with step label `audit`.
 
 ---
 

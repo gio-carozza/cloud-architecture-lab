@@ -1,4 +1,4 @@
-# Day 009 — Streaming Responses on the Interactive Path
+﻿# Day 009 — Streaming Responses on the Interactive Path
 
 ## Track
 Build
@@ -180,7 +180,7 @@ the prior one. That last point is what separates "follows patterns" from "owns t
 reasoning behind them."
 
 ## Completion Checklist
-See completion-checklist.md.
+See 02-completion-checklist.md.
 
 ## Certification Reinforcement
 - AZ-900: Secondary — Azure Monitor custom metrics/histograms; App Service as the
@@ -193,4 +193,4 @@ See completion-checklist.md.
   June 30, 2026 — keep this track moving.
 
 ## Architect Posture Check
-See posture-check.md (filled at end of day, BEFORE marking complete).
+See 04-posture-check.md (filled at end of day, BEFORE marking complete).

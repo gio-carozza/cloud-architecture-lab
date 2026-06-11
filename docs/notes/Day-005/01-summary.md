@@ -1,4 +1,4 @@
-# Day-005 Summary
+﻿# Day-005 Summary
 
 ## Overview
 
@@ -201,10 +201,10 @@ Day-005 documentation includes:
 - `docs/adr/ADR-005-introduce-provider-abstraction-for-claude-integration.md`
 - `docs/architecture/day-005-ai-gateway-v1.md`
 - `docs/architecture/day-005-sequence-flow.md`
-- `docs/notes/Day-005/completion-checklist.md`
+- `docs/notes/Day-005/02-completion-checklist.md`
 - `docs/notes/Day-005/kql.md`
 - `docs/notes/Day-005/deployment-guide.md`
-- `docs/notes/Day-005/summary.md`
+- `docs/notes/Day-005/01-summary.md`
 - `Infra/Day-005/appsettings-template.md`
 
 ---

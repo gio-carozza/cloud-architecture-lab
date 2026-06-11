@@ -1,6 +1,6 @@
----
+﻿---
 name: collaboration-lens
-description: Daily lens connecting current day's work to the relevant collaborators from collaboration-map.md; inserts a bounded block into summary.md under "Whose Problem Am I Solving?"
+description: Daily lens connecting current day's work to the relevant collaborators from collaboration-map.md; inserts a bounded block into 01-summary.md under "Whose Problem Am I Solving?"
 allowed-tools: Read, Write
 ---
 
@@ -8,7 +8,7 @@ allowed-tools: Read, Write
 
 ## STEP 0 — Precondition (STOP here if not met)
 
-Read `docs/notes/Day-NNN/summary.md`.
+Read `docs/notes/Day-NNN/01-summary.md`.
 
 Confirm:
 1. The file exists.
@@ -16,7 +16,7 @@ Confirm:
 
 If either condition fails, STOP. Print exactly:
 
-> `Day-NNN summary.md missing or does not yet contain "## Whose Problem Am I Solving?" — run /collab-lens only after STEP 6 populates summary.md.`
+> `Day-NNN 01-summary.md missing or does not yet contain "## Whose Problem Am I Solving?" — run /collab-lens only after STEP 6 populates 01-summary.md.`
 
 Do not proceed. Do not attempt to create or populate the section yourself.
 
@@ -30,11 +30,11 @@ Read `CLAUDE.md`. Find the line beginning `**Current phase:`. Extract the phase 
 
 ## STEP 2 — Read today's context
 
-Read `docs/notes/Day-NNN/summary.md`. Extract:
+Read `docs/notes/Day-NNN/01-summary.md`. Extract:
 - The body of the `## Whose Problem Am I Solving?` section.
 - The primary ADR decision line if present in the day's artifact list.
 
-Do NOT read any other section of summary.md.
+Do NOT read any other section of 01-summary.md.
 
 ---
 
@@ -87,11 +87,11 @@ Omit the `**Also in frame:**` heading if no secondaries were selected.
 
 ## STEP 6 — Insert and audit
 
-**Insert** the block into `docs/notes/Day-NNN/summary.md` immediately after the `## Whose Problem Am I Solving?` heading line, before any existing body text. If a `### Collaboration Lens` subsection already exists, replace it in place — do not duplicate.
+**Insert** the block into `docs/notes/Day-NNN/01-summary.md` immediately after the `## Whose Problem Am I Solving?` heading line, before any existing body text. If a `### Collaboration Lens` subsection already exists, replace it in place — do not duplicate.
 
-**Upsert** `docs/notes/Day-NNN/files-changed.md`. Dedup key is the file path. If a row for `docs/notes/Day-NNN/summary.md` already exists, update the Change cell in place. Add a row for `files-changed.md` itself as the final action.
+**Upsert** `docs/notes/Day-NNN/07-files-changed.md`. Dedup key is the file path. If a row for `docs/notes/Day-NNN/01-summary.md` already exists, update the Change cell in place. Add a row for `07-files-changed.md` itself as the final action.
 
 | File | Step | Change |
 |---|---|---|
-| `docs/notes/Day-NNN/summary.md` | collab-lens | Collaboration Lens block inserted under "Whose Problem Am I Solving?" — primary: [Collaborator Name] |
-| `docs/notes/Day-NNN/files-changed.md` | collab-lens | This file — collab-lens rows upserted |
+| `docs/notes/Day-NNN/01-summary.md` | collab-lens | Collaboration Lens block inserted under "Whose Problem Am I Solving?" — primary: [Collaborator Name] |
+| `docs/notes/Day-NNN/07-files-changed.md` | collab-lens | This file — collab-lens rows upserted |

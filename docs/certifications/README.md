@@ -1,4 +1,4 @@
-# Certifications
+﻿# Certifications
 
 Parallel certification track for the Azure Cloud AI / LLM Architect path.
 
@@ -23,7 +23,7 @@ Each cert folder has:
 - `labs/` — hands-on labs that map to roadmap days
 
 ## Day → Cert Mapping
-The roadmap day in `docs/notes/Day-NNN/summary.md` includes a "Certification
+The roadmap day in `docs/notes/Day-NNN/01-summary.md` includes a "Certification
 Reinforcement" section. After completing a day, add a one-liner to the
 relevant cert's `study-notes/day-NNN-mapping.md` so the cert can reference
 back to the build work.

@@ -1,4 +1,4 @@
-# Day 7 — Prompt Caching & Cost Observability
+﻿# Day 7 — Prompt Caching & Cost Observability
 
 ## Track
 Hybrid (Build primary, Cert reinforcement secondary)
@@ -139,7 +139,7 @@ Then `/deploy`. After deploy:
 Write `docs/architecture/day-007-prompt-caching-and-cost-observability.md`.
 
 ## Architect Thinking
-See `architect-thinking.md`.
+See `03-architect-thinking.md`.
 
 ## Artifacts
 
@@ -152,9 +152,9 @@ See `architect-thinking.md`.
 - `docs/adr/ADR-009-implement-prompt-caching-inside-provider-boundary.md` (pre-written)
 - `docs/architecture/day-007-prompt-caching-and-cost-observability.md`
 - `docs/standards/kql-cookbook.md` — Query 8 and Query 9 (cache metrics)
-- `docs/notes/Day-007/summary.md` (this file)
-- `docs/notes/Day-007/completion-checklist.md`
-- `docs/notes/Day-007/architect-thinking.md`
+- `docs/notes/Day-007/01-summary.md` (this file)
+- `docs/notes/Day-007/02-completion-checklist.md`
+- `docs/notes/Day-007/03-architect-thinking.md`
 
 ### Infra
 - `Infra/Day-007/appsettings-template.md`
@@ -173,7 +173,7 @@ This proves:
 - You can speak to the forward-compatibility path if an interviewer pushes on it.
 
 ## Completion Checklist
-See `completion-checklist.md`.
+See `02-completion-checklist.md`.
 
 ## Certification Reinforcement
 
@@ -203,7 +203,7 @@ to Azure OpenAI's prompt caching. Today's implementation IS the AI-102 cost
 optimization pattern applied to the Anthropic provider.
 
 ## Architect Posture Check
-Fill `posture-check.md` at END of day, BEFORE marking complete.
+Fill `04-posture-check.md` at END of day, BEFORE marking complete.
 Four questions:
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship if I were the only one in the room?

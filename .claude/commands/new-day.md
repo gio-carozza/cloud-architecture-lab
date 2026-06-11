@@ -1,4 +1,4 @@
-# /new-day
+﻿# /new-day
 
 Scaffold a new day in the AI Engineer → Forward-Deployed Engineer → LLM Architect roadmap.
 
@@ -10,13 +10,13 @@ Scaffold a new day in the AI Engineer → Forward-Deployed Engineer → LLM Arch
 Given a day number and a kebab-case slug, create:
 
 1. `docs/notes/Day-NNN/` directory with:
-   - `summary.md` (Day overview)
-   - `completion-checklist.md` (concrete done criteria)
-   - `architect-thinking.md` (tradeoffs & enterprise reasoning)
-   - `posture-check.md` (the daily honesty audit)
-   - `files-changed.md` (running file-change registry — dedup key is file path)
-   - `audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
-   - `deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test with full attempt trail — Attempt 1 result, fix applied if failed, Attempt 2, until PASSED; deployment-level issues & fixes table)
+   - `01-summary.md` (Day overview)
+   - `02-completion-checklist.md` (concrete done criteria)
+   - `03-architect-thinking.md` (tradeoffs & enterprise reasoning)
+   - `04-posture-check.md` (the daily honesty audit)
+   - `07-files-changed.md` (running file-change registry — dedup key is file path)
+   - `05-audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
+   - `06-deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test with full attempt trail — Attempt 1 result, fix applied if failed, Attempt 2, until PASSED; deployment-level issues & fixes table)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
 
 2. `docs/architecture/day-NNN-<slug>.md` (architecture changes for the day)
@@ -28,7 +28,7 @@ Given a day number and a kebab-case slug, create:
 
 4. Append a "## Day NNN" entry to `docs/notes/_index.md`
 
-## Required sections in summary.md
+## Required sections in 01-summary.md
 
 ```markdown
 # Day NNN — <Title>
@@ -73,7 +73,7 @@ Given a day number and a kebab-case slug, create:
 <what this proves to a hiring panel>
 
 ## Completion Checklist
-See completion-checklist.md
+See 02-completion-checklist.md
 
 ## Certification Reinforcement
 - AZ-900: <Primary | Secondary | None> — <concepts>
@@ -82,10 +82,10 @@ See completion-checklist.md
 - AI-103: <Primary | Secondary | None> — <concepts> (Beta — Phase 2; skip if Phase 1)
 
 ## Architect Posture Check
-See posture-check.md (filled at end of day, BEFORE marking complete)
+See 04-posture-check.md (filled at end of day, BEFORE marking complete)
 ```
 
-## Required sections in posture-check.md
+## Required sections in 04-posture-check.md
 
 ```markdown
 # Day NNN — Posture Check
@@ -123,7 +123,7 @@ See posture-check.md (filled at end of day, BEFORE marking complete)
 *A day with all GREENs is either a great day or a shallow audit — be honest about which.*
 ```
 
-## Required sections in architect-thinking.md
+## Required sections in 03-architect-thinking.md
 
 ```markdown
 # Day NNN — Architect Thinking
@@ -139,10 +139,10 @@ See posture-check.md (filled at end of day, BEFORE marking complete)
 What would break, cost more, or be riskier if the wrong choice had been made?>
 ```
 
-`architect-thinking.md` is the reasoning trail, not a summary. Write what you would
+`03-architect-thinking.md` is the reasoning trail, not a summary. Write what you would
 say to defend the design in a senior design review. The CEO Framing section translates
 the architectural decision into business consequence — not "what the day built" (that's
-in summary.md), but "what this specific design choice protects against or enables."
+in 01-summary.md), but "what this specific design choice protects against or enables."
 
 ## Required initial content for appsettings-template.md
 
@@ -156,7 +156,7 @@ the day introduces. `/deploy` reads this file at step 1b — it must exist.
 No new app settings this day.
 ```
 
-## Required initial content for files-changed.md
+## Required initial content for 07-files-changed.md
 
 Scaffold with the header and an empty table. Claude Code populates rows during
 every doc-update pass; dedup key is the file path.
@@ -168,7 +168,7 @@ every doc-update pass; dedup key is the file path.
 |---|---|---|
 ```
 
-## Required initial content for audit-log.md
+## Required initial content for 05-audit-log.md
 
 Scaffold with the header only. The pillars audit appends run sections during
 STEP 8 (pre-deploy), STEP 12 (close-audit), and any deploy-gate re-runs.
@@ -180,7 +180,7 @@ Never pre-fill run sections — they are written by the audit, not the scaffold.
 > Append-only. Each run adds a dated section. Never edit or delete prior runs.
 ```
 
-## Required initial content for deployment-log.md
+## Required initial content for 06-deployment-log.md
 
 Scaffold with the header only. The deploy skill appends run sections during
 each `/deploy` execution. Never pre-fill run sections — they are written by
@@ -192,7 +192,7 @@ the deploy, not the scaffold.
 > Append-only. Each deploy run adds a dated section. Never edit prior runs.
 ```
 
-## Test coverage — required items in completion-checklist.md
+## Test coverage — required items in 02-completion-checklist.md
 
 Every completion checklist must include a test gate section. Scaffold it as:
 
@@ -215,9 +215,9 @@ fake providers, collection fixture, SSE headers, correlation ID round-trip).
 
 ## Reminders
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
-- Inside the day folder, no day prefix on filenames
+- Inside the day folder, use numeric reading-order prefix (01-summary.md, 02-completion-checklist.md, …); no day prefix
 - In shared folders (architecture/, etc.), KEEP the day prefix
 - Posture check is filled at the END of the day, before commit
-- `files-changed.md` is scaffolded empty and populated progressively — never pre-fill it
-- `audit-log.md` is append-only — never overwrite or delete prior run sections
-- `deployment-log.md` is append-only — each `/deploy` run appends one dated section
+- `07-files-changed.md` is scaffolded empty and populated progressively — never pre-fill it
+- `05-audit-log.md` is append-only — never overwrite or delete prior run sections
+- `06-deployment-log.md` is append-only — each `/deploy` run appends one dated section

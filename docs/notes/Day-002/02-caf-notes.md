@@ -160,8 +160,8 @@ Each section learned is broken down into 5 steps:
     a. Current Subscription:
         gio-architecture-lab
     b. Pending
-        gio-arch-dev
-        gio-arch-prod
+        gio-architecture-dev
+        gio-architecture-prod
 
 5. Key takeaway
     Subscriptions are boundaries for cost, access, and risk.   

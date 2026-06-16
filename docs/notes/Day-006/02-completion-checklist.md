@@ -58,9 +58,9 @@
 
 ## Certification
 
-- [ ] Read AI-102 "Monitor and optimize AI solutions" objective list (15 min)
-- [ ] Read AZ-104 "Monitor and back up Azure resources" objective list (15 min)
-- [ ] Note 3 questions from each that today's work directly answers
+- [x] ~~Read AI-102 "Monitor and optimize AI solutions" objective list~~ — superseded: AI-102 retired June 2026; cert track now AZ-900 + AI-103 (Phase 2)
+- [x] ~~Read AZ-104 "Monitor and back up Azure resources" objective list~~ — deferred: AZ-104 track restructured to start Day 035 per 200-day roadmap
+- [x] ~~Note 3 questions from each that today's work directly answers~~ — deferred: cert track restructured; Day 6 domain mapping filed at `docs/certifications/ai-102/study-notes/day-006-mapping.md`
 - [x] File notes in `docs/certifications/ai-102/study-notes/day-006-mapping.md` — AI-102 mapping confirmed
 
 ## Stretch (optional, only if base is complete)

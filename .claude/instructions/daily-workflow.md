@@ -83,6 +83,9 @@ To activate it, the last line of each Claude Code prompt already says:
 | `/cert-scaffold EXAM` | one-time | Builds cert domain structure from MS skills outline |
 | `/collab-lens N` | 6 | Inserts collaborator lens block into `01-summary.md` |
 | `/repo-audit N` | 12 | End-of-day repo health check + auto-fix |
+| /devil gate | STEP 5 | Strongest counterargument to the ADR before accepting — active Day 010+ |
+| /pitch gate | STEP 4 | 30-second CFO pitch validating CEO Framing — active Day 010+ |
+| /10x gate | STEP 11 | Scale ceiling audit — optional Day 010–050, mandatory Day 051+ |
 
 ---
 

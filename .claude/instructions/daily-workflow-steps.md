@@ -118,6 +118,25 @@ Blanks: previous day = what you shipped. Focus = from STEP 2. Constraints =
 anything broken/deferred. Don't know the focus? Replace CONSTRAINTS with:
 "Recommend today's focus from CLAUDE.md north star and yesterday's parking lot."
 
+Before copying the summary, validate the CEO Framing section:
+
+  /pitch gate — paste this exactly:
+  "Give me the 30-second version of today's CEO Framing for a CFO
+   who does not care about technology. It must contain:
+
+- A specific dollar amount or quantified risk (not 'improves efficiency')
+- The business consequence of NOT doing this today
+- One sentence a CFO would repeat to their board"
+
+  If the pitch does not land — if it is generic, vague, or jargon-heavy —
+  rewrite the CEO Framing section before copying the summary.
+  Required format for CEO Framing from Day 010 onward:
+  "A tenant running [N] cases/month at current token prices pays $X
+   without this feature and $Y with it. That delta is [consequence]."
+  Generic CEO Framing ("this improves cost efficiency") is a failed gate.
+  Claude will push back on it at every posture check.
+  Active from: Day 010 onward.
+
 Copy the summary. → STOP. Close chat.
 → Next: STEP 5 (ADR) if the summary lists one, else STEP 6 (POPULATE) in Claude Code.
 
@@ -143,6 +162,22 @@ Implementation notes naming the exact files affected.
 ```
 
 Blanks come from the Architect Thinking section of your summary.
+
+Before copying the ADR, run one final reasoning pass in the same chat:
+
+  /devil gate — paste this exactly:
+  "What is the strongest argument AGAINST this decision?
+   What would a senior architect at AWS, Google, or Anthropic push back on?
+   What assumption am I making that could be wrong in 18 months?
+   If this ADR were wrong, what would be the first symptom and when
+   would we see it?"
+
+  If the pushback surfaces a material gap, revise the ADR before copying.
+  If the pushback is addressed by existing content in the ADR, note that
+  explicitly and proceed.
+  A /devil gate that produces no revision is either a very strong ADR
+  or a shallow challenge — be honest about which.
+  Active from: Day 010 onward.
 
 Copy the ADR content. → STOP. Close chat.
 → Next: STEP 6 — POPULATE, back in Claude Code.
@@ -339,6 +374,30 @@ Ask me the five posture questions from _principles.md and then provide the answe
 If the day's collaboration lens named a primary collaborator, confirm posture Q1 names that same specific role.
 Push back hard if my answers are weak or self-congratulatory.
 ```
+
+Phase 3 onward (Day 051+), add a sixth posture question:
+
+  /10x gate — paste this exactly:
+  "This platform currently targets [N] tenants. What are the first
+   three architectural decisions that break or become expensive at
+   1,000 tenants? For each:
+
+- Name the specific component or seam that fails
+- Estimate the order-of-magnitude cost or latency impact
+- State whether it requires a redesign or a configuration change
+   This is not hypothetical — name real components from the codebase."
+
+  A /10x gate answer that says "everything scales fine" is a red flag,
+  not a green light. Every architecture has a ceiling. Name it honestly.
+  Document findings in architect-thinking.md under a "Scale Ceiling"
+  subsection. This becomes the Phase 3 refactoring backlog.
+
+  Activation:
+
+- Phase 1 and 2 (Days 001–050): OPTIONAL — run only when the day
+    introduces a new seam, a new data store, or a new tenant-facing surface
+- Phase 3 and Platform Build (Days 051–200): MANDATORY every day
+  Active from: Day 010 (optional) / Day 051 (mandatory).
 
 Copy the result. → STOP. Close chat.
 → Next: STEP 12 — CLOSE, back in Claude Code.

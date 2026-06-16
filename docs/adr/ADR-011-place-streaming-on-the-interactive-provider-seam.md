@@ -1,12 +1,15 @@
 # ADR-011: Extend IChatModelProvider with Streaming Rather Than Add a Parallel Seam
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-06-04
 
 ## Related
+
 - ADR-005-introduce-provider-abstraction-for-claude-integration.md (the interactive seam this decision extends)
 - ADR-010-introduce-parallel-batch-provider-abstraction.md (the inverse case — same seam test, opposite verdict)
 - ADR-009-implement-prompt-caching-inside-provider-boundary.md (restraint precedent: don't manufacture abstraction one example can't justify)
@@ -17,35 +20,39 @@ Accepted
 Day 5 (ADR-005) established IChatModelProvider as the single seam for the
 interactive LLM path, with one synchronous operation:
 
+    ```csharp
     public interface IChatModelProvider
     {
         Task<ChatResponse> SendAsync(ChatRequest request, CancellationToken cancellationToken = default);
     }
+    ```
 
 One request in, one completion out, interactive latency. ChatRequest and ChatResponse
 are provider-agnostic and have been protected from provider-specific leakage since
 Day 5.
 
 Day 8 (ADR-010) added the Message Batches API as a parallel seam,
-IBatchChatModelProvider, on Interface-Segregation + Liskov grounds: batch introduced
+`IBatchChatModelProvider`, on Interface-Segregation + Liskov grounds: batch introduced
 a genuinely new lifecycle (submit -> poll -> retrieve), returned no synchronous
-ChatResponse, and could not be implemented by a non-batch provider without throwing
-NotSupportedException. Forcing those methods onto the interactive seam would have
+`ChatResponse`, and could not be implemented by a non-batch provider without throwing
+`NotSupportedException`. Forcing those methods onto the interactive seam would have
 broken substitutability and burdened interactive callers with operations they never
 invoke. So batch split out.
 
 Day 9 adds Server-Sent-Events streaming to the interactive path: incremental token
-delivery via POST /api/ai/chat/stream, so time-to-first-token becomes the governing
+delivery via `POST /api/ai/chat/stream`, so time-to-first-token becomes the governing
 latency metric. The new operation:
 
+    ```csharp
     IAsyncEnumerable<ChatChunk> StreamAsync(ChatRequest request, CancellationToken ct);
+    ```
 
-where ChatChunk is a new provider-agnostic delta contract (text delta, nullable stop
+where `ChatChunk` is a new provider-agnostic delta contract (text delta, nullable stop
 reason, nullable end-of-stream usage).
 
 The question Day 9 must answer is NOT how to stream — it is where the streaming
-operation lives: extended onto IChatModelProvider, or split into a third sibling seam
-(IStreamingChatModelProvider) mirroring IBatchChatModelProvider. The parallel to
+operation lives: extended onto `IChatModelProvider`, or split into a third sibling seam
+`(IStreamingChatModelProvider)` mirroring `IBatchChatModelProvider`. The parallel to
 ADR-010 is superficially obvious — "we split batch, so split streaming too, for
 consistency." That reflex is the trap. ADR-010's split was principled because of what
 the test found, not because splitting is inherently tidy. The same test must be re-run
@@ -59,14 +66,14 @@ substitutability contract — concretely, when extending the existing interface 
 force a Liskov violation (a provider lacking the feature must throw) or an
 Interface-Segregation violation (consumers depend on operations they never call).
 
-| Change | New lifecycle / operation? | Returns synchronous ChatResponse? | Substitutable for a provider lacking it? | Verdict |
+| Change | New lifecycle / operation? | Returns synchronous `ChatResponse`? | Substitutable for a provider lacking it? | Verdict |
 |---|---|---|---|---|
 | Caching (Day 7, ADR-009) | No | Yes | Yes | Inside the seam |
 | Batch (Day 8, ADR-010) | Yes (submit/poll/retrieve) | No | No — must throw NotSupportedException | New seam |
-| Streaming (Day 9) | No — same request->completion, delivered incrementally | No (IAsyncEnumerable) | Yes — degrades to a single terminal chunk | Extend the seam |
+| Streaming (Day 9) | No — same request->completion, delivered incrementally | No (`IAsyncEnumerable`) | Yes — degrades to a single terminal chunk | Extend the seam |
 
 The middle column is a decoy. Both batch and streaming return something other than a
-synchronous ChatResponse, so "doesn't return ChatResponse" cannot be the deciding
+synchronous `ChatResponse`, so "doesn't return `ChatResponse`" cannot be the deciding
 factor — if it were, streaming would split too. The load-bearing column is the last
 one: substitutability. That is where batch and streaming diverge, and it is the entire
 reason the verdicts differ.
@@ -106,7 +113,8 @@ We will extend IChatModelProvider with StreamAsync:
     }
 
 Specifically:
-- StreamAsync returns IAsyncEnumerable<ChatChunk>. ChatRequest is reused unchanged as
+
+- StreamAsync returns `IAsyncEnumerable<ChatChunk>`. ChatRequest is reused unchanged as
   input — a request authored for the buffered path streams without modification.
 - ChatChunk is a new provider-agnostic contract in Models/AI/: text delta, nullable stop
   reason, nullable end-of-stream Usage. No Anthropic SSE event types leak into it.
@@ -138,7 +146,7 @@ independent style calls.
 **Side-by-side reconciliation — batch (ADR-010) vs streaming (ADR-011):**
 
 | Decision variable | Batch (ADR-010) | Streaming (ADR-011) |
-|---|---|---|
+| --- | --- | --- |
 | New lifecycle? | Yes — submit → poll → retrieve | No — one request, one completion |
 | Breaks Liskov? | Yes — non-batch provider must throw | No — degrade to single terminal chunk |
 | ISP pressure? | Yes — interactive controller must not depend on submit/poll/retrieve | No — same controller serves buffered and streamed chat |
@@ -152,6 +160,7 @@ somewhere in the implementation — which is irrelevant to the seam decision.
 ## Alternatives Considered
 
 ### Alternative 1 — Extend IChatModelProvider with StreamAsync
+
 This is the chosen alternative. See Decision above.
 
 Why chosen: Streaming is the interactive chat operation with incremental delivery. It
@@ -164,10 +173,12 @@ non-streaming provider carries a trivial degrade implementation; existing test d
 must add StreamAsync.
 
 ### Alternative 2 — New IStreamingChatModelProvider parallel seam (mirror IBatchChatModelProvider)
+
 A third sibling interface, registered separately in DI, ClaudeStreamingChatModelProvider
 implementing it, mirroring the batch pattern exactly.
 
 Why rejected:
+
 - The parallelism to batch is cosmetic, not structural. Batch earned its seam by
   failing the substitutability test; streaming passes it. Copying the form of ADR-010
   while ignoring why ADR-010 reached its verdict is cargo-culting the conclusion
@@ -187,13 +198,15 @@ the single-ChatChunk degrade path, and would re-open the split on the same test 
 closes it today.
 
 ### Alternative 3 — Content negotiation on the existing POST /api/ai/chat (no interface change)
+
 One endpoint; the Accept header (application/json vs text/event-stream) selects
 buffered or streamed response. Argued to need no interface change at all.
 
 Why rejected:
+
 - It does not actually answer the seam question — it relocates it. The provider still
-  must expose some way to produce an IAsyncEnumerable<ChatChunk> distinct from
-  Task<ChatResponse>; you cannot unify the two return shapes without either buffering
+  must expose some way to produce an `IAsyncEnumerable<ChatChunk>` distinct from
+  `Task<ChatResponse>;` you cannot unify the two return shapes without either buffering
   the stream (defeating streaming) or making the buffered path an async enumerable
   (complicating the common case for the rare one). Content negotiation is an HTTP-layer
   concern layered on top of a seam decision, not a substitute for it.
@@ -211,6 +224,7 @@ for, extending the seam.
 ## Consequences
 
 ### Positive
+
 - One seam for the interactive operation; callers reason about "chat" in a single
   place, buffered or streamed.
 - Substitutability is preserved and made explicit via the degrade-to-single-chunk
@@ -223,6 +237,7 @@ for, extending the seam.
   streamed paths.
 
 ### Negative
+
 - IChatModelProvider grows from one operation to two. A hypothetical future provider
   that cannot stream still must supply a StreamAsync (the degrade wrapper). The cost is
   small — the wrapper is trivial and correct — but it is a non-zero ISP pressure that
@@ -234,6 +249,7 @@ for, extending the seam.
   SSE-type leakage, the same vigilance ChatResponse already requires.
 
 ### Neutral / Tradeoffs
+
 - The explicit-endpoint-vs-content-negotiation choice (Alternative 3) is decided in
   favor of an explicit route, but that is an HTTP-surface decision orthogonal to the
   seam; it could be revisited without reopening this ADR.
@@ -253,6 +269,7 @@ for, extending the seam.
 ## Implementation Notes
 
 ### Files affected
+
 - `src/lab-observability-api/Services/AI/IChatModelProvider.cs`
   - Add `IAsyncEnumerable<ChatChunk> StreamAsync(ChatRequest request, CancellationToken ct);`
   - Optionally add a default interface implementation wrapping SendAsync for the
@@ -277,15 +294,17 @@ for, extending the seam.
 - `src/lab-observability-api/Telemetry/GatewayTelemetry.cs`
   - Add `Histogram<double> StreamTtftMs` (`ai.provider.stream.ttft_ms`); add ai.chat.stream /
     claude.chat.stream.api ActivitySource spans; tags llm.stream.ttft_ms,
-    llm.stream.chunks, and end-of-stream llm.tokens.* and llm.cache.*.
+    llm.stream.chunks, and end-of-stream llm.tokens.*and llm.cache.*.
 
 ### Files explicitly NOT affected
+
 - `src/lab-observability-api/Models/AI/ChatRequest.cs` — reused as stream input, unmodified.
 - `src/lab-observability-api/Models/AI/ChatResponse.cs` — buffered contract, unchanged.
 - `src/lab-observability-api/Services/AI/IBatchChatModelProvider.cs` and the batch
   provider — orthogonal; batch does not learn about streaming.
 
 ### Migration steps
+
 - Interface change is compile-breaking for all IChatModelProvider implementers and
   mocks. Real implementers: ClaudeChatModelProvider (one). Update it plus any test
   doubles in the same change. If using a default interface method for the degrade path,
@@ -296,17 +315,19 @@ for, extending the seam.
   Infra/Day-009/appsettings-template.md ("No new app settings this day").
 
 ### Rollback strategy
+
 - Purely additive at the HTTP surface: the /chat/stream endpoint can be removed without
   touching SendAsync or the buffered /chat path. Removing StreamAsync from the interface
   is a larger revert (touches the interface + implementer + mocks); prefer disabling the
   endpoint over reverting the seam if a fast rollback is needed.
 
 ## References
+
 - ADR-005 (the interactive seam this extends)
 - ADR-009 (restraint precedent: don't over-abstract one example) and ADR-010 (the
   inverse seam decision — same test, opposite verdict)
 - ADR-006 / ADR-008 (telemetry foundations reused with stream-specific span names)
-- Anthropic streaming Messages documentation: https://docs.anthropic.com/en/docs/build-with-claude/streaming
+- Anthropic streaming Messages documentation: <https://docs.anthropic.com/en/docs/build-with-claude/streaming>
   (verify current SSE event names and the message_start/message_delta usage fields
   during Build mode)
 - docs/standards/kql-cookbook.md — TTFT percentile query to be added on Day 9

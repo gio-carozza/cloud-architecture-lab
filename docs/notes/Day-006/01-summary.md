@@ -1,13 +1,16 @@
 ﻿# Day 6 — Observability & Resilience for the AI Gateway
 
 ## Track
+
 Hybrid (Build primary, Cert reinforcement secondary)
 
 ## Focus
+
 Transform the Day-5 Claude-backed AI Gateway from "it works" to
 "it works under failure, at scale, with full visibility."
 
 ## Why This Matters (enterprise context)
+
 Day 5 proved the gateway can call Claude. That's table stakes. In production,
 the questions an architect must answer are:
 
@@ -36,6 +39,7 @@ Today's question: what would help you tell "correlation ID missing" from "servic
 **Architect:** Observability is the contract the SRE signs off on before anything deploys; without it, every future feature ships a black box into production regardless of its own quality.
 
 **Also in frame:**
+
 - Security/AppSec/CISO — redaction and the no-stack-trace contract are P1 self-audit items that address the question they'd ask in review
 - Eng Manager/Tech Lead — two ADRs accepted in one day (006, 008) is a scope signal worth communicating proactively
 
@@ -86,6 +90,7 @@ $CS = az monitor app-insights component show -g $RG -a $AI --query connectionStr
 az webapp config appsettings set -g $RG -n $APP `
   --settings APPLICATIONINSIGHTS_CONNECTION_STRING="$CS"
 ```
+
 **Note:** Day 4 already provisioned `appi-ai-lab-api-dev-eastus-gio`. Day 6
 verifies it is workspace-based and reuses it instead of creating a duplicate.
 A Log Analytics workspace `law-ai-lab-dev-eastus-gio` is created if one does
@@ -117,41 +122,52 @@ same log stream — not two pipelines.
 See `.claude/skills/observability-net/SKILL.md` for the exact wiring snippet.
 
 ### Phase D — Correlation middleware (15 min)
+
 Create `Middleware/CorrelationIdMiddleware.cs`. Register before request logging
 so the correlation ID is enriched into every log line.
 
 ### Phase E — Exception handling middleware (15 min)
+
 Create `Middleware/ExceptionHandlingMiddleware.cs`. Returns:
+
 ```json
 { "error": "An unexpected error occurred.", "correlationId": "0HN..." }
 ```
+
 No stack traces. Log the full exception with correlation ID server-side.
 
 ### Phase F — LLM telemetry in ClaudeChatModelProvider (30 min)
+
 - Wrap the HTTP call in an `Activity` (distributed tracing)
 - Tag with `llm.provider`, `llm.model`, `llm.tokens.input`, `llm.tokens.output`, `llm.latency_ms`
 - Log structured event on success and failure
 - Classify errors: 4xx (client), 5xx (transient), timeout, throttle
 
 ### Phase G — Resilience pipeline (20 min)
+
 Replace ad-hoc HttpClient with named/typed client + standard resilience:
+
 - 3 retries with jitter
 - 30s attempt timeout
 - Circuit breaker at 50% failure ratio over 30s
 - Do NOT retry on 401/403
 
 ### Phase H — Local verification (15 min)
+
 - `dotnet run`
 - Hit `/api/ai/chat` 5x; check console logs for structured output + correlation IDs
 - Force a failure (bad API key) → verify safe error response, full detail in logs
 
 ### Phase I — Deploy and verify (15 min)
+
 Use `/deploy` slash command. Then:
+
 - `GET /health` → 200
 - `POST /api/ai/chat` → 200 with completion
 - App Insights → Logs → run starter KQL queries (see kql.md)
 
 ### Phase J — Document (30 min)
+
 - Write `ADR-006-adopt-serilog-with-application-insights-sink.md`
 - Update `docs/architecture/day-006-observability-and-resilience.md` with new sequence diagram
 - Fill out `02-completion-checklist.md`
@@ -179,6 +195,7 @@ concern → middleware. If a controller has to know about correlation IDs to log
 the abstraction is wrong.
 
 ### Alternatives rejected
+
 - **OpenTelemetry-first instead of Serilog+AppInsights:** OTel is the future and
   the right answer at scale. But for a single .NET service hitting one Azure
   backend, the App Insights SDK gives us 90% of the value with 20% of the wiring.
@@ -189,6 +206,7 @@ the abstraction is wrong.
   disclosure risk + brittle client code that depends on internal text.
 
 ### What elite architects do differently
+
 - They treat **token counts as a metric**, not a log field. (Metrics aggregate
   cheaply; logs do not.)
 - They define **error CLASSES**, not error messages. "Provider transient",
@@ -199,12 +217,14 @@ the abstraction is wrong.
 ## Artifacts
 
 ### Code
+
 - `src/lab-observability-api/Program.cs` (Serilog + App Insights + resilience)
 - `src/lab-observability-api/Middleware/CorrelationIdMiddleware.cs`
 - `src/lab-observability-api/Middleware/ExceptionHandlingMiddleware.cs`
 - `src/lab-observability-api/Providers/ClaudeChatModelProvider.cs` (telemetry tags)
 
 ### Docs
+
 - `docs/adr/ADR-006-adopt-serilog-with-application-insights-sink.md`
 - `docs/architecture/day-006-observability-and-resilience.md`
 - `docs/notes/Day-006/01-summary.md` (this file)
@@ -213,10 +233,12 @@ the abstraction is wrong.
 - `docs/notes/Day-006/kql.md`
 
 ### Infra
+
 - `Infra/Day-006/appinsights.bicep` (optional but recommended for portfolio)
 - `Infra/Day-006/appsettings-template.md` (updated with App Insights connection string)
 
 ## Portfolio Value
+
 "Designed and implemented production observability for an enterprise AI gateway:
 structured logging via Serilog, distributed tracing with W3C correlation,
 LLM-specific cost telemetry (tokens, latency, model), and a Polly-based resilience
@@ -224,23 +246,28 @@ pipeline (retry with jitter, attempt timeout, circuit breaker). Wired to
 workspace-based Application Insights with KQL dashboards for SLO tracking."
 
 This is interview gold. You can speak to:
+
 - Why workspace-based AI vs classic
 - How retry jitter prevents thundering herd
 - Why token cost is a metric, not a log
 - How circuit breakers protect upstream
 
 ## Completion Checklist
+
 See `02-completion-checklist.md`.
 
 ## Certification Reinforcement
 
 ### AZ-900 — **Secondary**
+
 Concepts surfaced: Azure Monitor service family, Log Analytics, App Insights as
 a category of Azure monitoring. Worth a 10-min review of the "Manage and govern
 Azure resources" domain section on monitoring tools.
 
 ### AZ-104 — **Primary** (good entry point as the parallel track begins ~Day 10–15)
+
 Concepts directly exercised:
+
 - Configuring Application Insights for App Service (Monitor & maintain Azure resources domain)
 - Diagnostic settings and Log Analytics workspaces
 - App Service application settings and connection strings
@@ -249,7 +276,9 @@ Concepts directly exercised:
 CLI, AND ARM/Bicep. We do CLI today; do the portal walkthrough as a study session.
 
 ### AZ-305 — **Secondary**
+
 Concepts touched:
+
 - Designing for monitoring and alerting (Design infrastructure solutions domain)
 - Reliability patterns: retry, circuit breaker, timeout (Design business continuity)
 - Cost optimization through telemetry (Design data storage / governance)
@@ -257,7 +286,9 @@ Concepts touched:
 asks you to choose the pattern. Today's work IS the chosen pattern.
 
 ### AI-102 — **Primary**
+
 Concepts directly exercised:
+
 - Monitoring Azure AI services (Monitor and optimize AI solutions domain)
 - Implementing logging and diagnostics for AI workloads
 - Managing costs of AI solutions (token telemetry maps directly)
@@ -267,14 +298,17 @@ PATTERNS are identical. When we add Azure OpenAI as a second provider (future
 day), this same telemetry layer covers AI-102 monitoring objectives directly.
 
 ## Architect Posture Check
+
 Fill `04-posture-check.md` at the END of the day, BEFORE marking complete.
 Four questions:
+
 1. Whose problem did I actually solve today?
 2. What would I refuse to ship if I were the only one in the room?
 3. What did I try, fail at, and learn? (Add to the Graveyard.)
 4. Can I explain this at both a 10-year-old level AND a doctorate level?
 
 ## Parking Lot (do not do today)
+
 - Migrate to OpenTelemetry (future ADR when we add service #2)
 - Add prompt caching to ClaudeChatModelProvider (separate day)
 - Bicep-ify App Insights provisioning (do once IaC track starts)

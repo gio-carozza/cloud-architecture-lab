@@ -9,21 +9,23 @@
 > NOTE: audits current file state, not Day 008 snapshot. Code has progressed through Day 009.
 > Sources read: AiBatchController.cs, ClaudeBatchApiClient.cs, ClaudeBatchChatModelProvider.cs,
 > IBatchChatModelProvider.cs, AnthropicOptions.cs, GatewayTelemetry.cs, Program.cs,
-> Infra/Day-008/appsettings-template.md, docs/notes/Day-008/07-files-changed.md
+> `n`, `o`
 
 ### Reliability
+
 | Check | Status | Finding |
 |---|---|---|
 | R1 — HttpClient timeouts set | GREEN | ClaudeBatchApiClient registered with `Timeout = TimeSpan.FromSeconds(30)`; MaxBatchSize=100 keeps result payload bounded within that window |
 | R2 — No retry on non-idempotent calls | GREEN | `SubmitAsync` uses `PostAsync` with no resilience pipeline — intentional, documented in code comment ("NO retry — a network error on submit may have succeeded server-side") |
 | R3 — Circuit breaker not on batch/streaming | GREEN | No `AddStandardResilienceHandler` on `ClaudeBatchApiClient`; circuit breaker applies to interactive `ClaudeApiClient` only |
-| R4 — ValidateOnStart() for IOptions<T> | YELLOW | `MaxBatchSize` added to `AnthropicOptions` without `ValidateOnStart` — carry-forward from Day 006 |
+| R4 — ValidateOnStart() for `IOptions<T>` | YELLOW | `MaxBatchSize` added to `AnthropicOptions` without `ValidateOnStart` — carry-forward from Day 006 |
 | R5 — New exceptions caught by global handler | GREEN | `ClaudeProviderException` thrown with codes `batch_submit_failed`, `batch_status_failed`, `batch_results_failed`; all caught by existing global `ClaudeProviderException` handler in Program.cs |
 | R6 — CancellationToken threaded through async | GREEN | All three `ClaudeBatchApiClient` methods accept and thread `CancellationToken`; `AiBatchController` passes `CancellationToken` through all three actions |
 
 **Pillar: YELLOW**
 
 ### Security
+
 | Check | Status | Finding |
 |---|---|---|
 | S1 — No secrets in source files | GREEN | No hardcoded API keys or secrets; `ApiKey` bound from configuration |
@@ -37,6 +39,7 @@
 **Pillar: ~~RED~~ → GREEN** (S3/S4 fixed — see RED items below)
 
 ### Cost Optimization
+
 | Check | Status | Finding |
 |---|---|---|
 | C1 — Prompt caching active on interactive path | N/A | Batch path does not use `BuildAnthropicRequest`; caching is interactive path scope only |
@@ -49,6 +52,7 @@
 **Pillar: ~~RED~~ → GREEN** (C2 fixed — same fix as S3/S4)
 
 ### Performance Efficiency
+
 | Check | Status | Finding |
 |---|---|---|
 | P1 — Streaming sets X-Accel-Buffering: no | N/A | Day 009 scope |
@@ -61,6 +65,7 @@
 **Pillar: GREEN**
 
 ### Operational Excellence
+
 | Check | Status | Finding |
 |---|---|---|
 | O1 — New paths log structured event with CorrelationId | GREEN | All three batch endpoints log `CorrelationId` + `BatchJobId`; `CorrelationId` flows via Serilog enrichment |
@@ -68,11 +73,12 @@
 | O3 — New env vars in appsettings-template.md | GREEN | `Infra/Day-008/appsettings-template.md` correctly states "No new app settings this day" — `MaxBatchSize` has a default; no Azure env var required |
 | O4 — files-changed.md has row for every file touched | GREEN | 43 rows covering all phases from populate through cert-update |
 | O5 — KQL cookbook updated for new signals | GREEN | Query 10 (batch activity + cost vs sync equivalent) added per files-changed.md |
-| O6 — /health/ready reflects new required config | GREEN | `MaxBatchSize` has a default value; `/health/ready` unchanged |
+| O6 — `h`/ready reflects new required config | GREEN | `MaxBatchSize` has a default value; `/health/ready` unchanged |
 
 **Pillar: GREEN**
 
 ### Responsible AI
+
 | Check | Status | Finding |
 |---|---|---|
 | RA1 — Prompt/completion content NOT logged | GREEN | Batch logs `RequestCount`, `BatchJobId`, `ResultCount`, `EstimatedSavingsUsd` only; no prompt or completion text anywhere |
@@ -87,6 +93,7 @@
 ---
 
 ### Summary
+
 | Pillar | Result | Key finding |
 |---|---|---|
 | Reliability | YELLOW | R4: ValidateOnStart() carry-forward from Day 006 |
@@ -97,9 +104,11 @@
 | Responsible AI | YELLOW | RA2: raw provider per-request error text in BatchResult; RA3: content policy carry-forward; RA4: token counts unavailable in batch JSONL |
 
 ### RED items → fixes
+
 - **S3/S4/C2** `AiBatchController.Submit` had no `MaxPromptLength` check on individual prompts — `MaxBatchSize` capped request count but not per-prompt size, leaving cost ceiling incomplete. Added guard after the whitespace check: `requests.Any(r => r.Prompt.Length > _options.MaxPromptLength)` returns 400 `prompt_too_long`. Build clean. → **GREEN**
 
 ### YELLOW items → fixes
+
 - **R4** ValidateOnStart() not wired: carry-forward from Day 006 — **accepted debt — tracked for Day 010+**
 - **RA2** `BatchResult.ErrorMessage` exposes raw Anthropic per-request error text: minimum fix = normalize per-request errors to a gateway-controlled enum (`"content_filtered"`, `"provider_error"`, `"invalid_request"`) before returning in results — **accepted debt — tracked for Day 010+**
 - **RA3** Content policy 400 → no explicit mapping on batch path: carry-forward from Day 006 — **accepted debt — tracked for Day 010+**

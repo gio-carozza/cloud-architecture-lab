@@ -144,9 +144,11 @@ Early implementation required fixing:
 A `401` error occurred initially.
 
 Root cause:
+
 - Anthropic API key was not configured correctly yet
 
 Resolution:
+
 - configure the key through `.NET User Secrets`
 
 ### 3. Request validation and external provider troubleshooting
@@ -154,12 +156,15 @@ Resolution:
 A later `400` error occurred.
 
 Root cause:
+
 - Anthropic account credit balance was too low
 
 Resolution:
+
 - external billing/credit issue was corrected
 
 This proved that:
+
 - the route worked
 - the config binding worked
 - the outbound provider call worked

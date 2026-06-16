@@ -1,9 +1,11 @@
 ﻿# Day 008 — Batch API Cost Controls
 
 ## Track
+
 Build (primary) — Hybrid (AI-102, AZ-305 cert reinforcement secondary)
 
 ## Focus
+
 Implement the Anthropic Messages Batch API as a standalone async job abstraction — a second cost lever alongside prompt caching, serving an offline evaluation pipeline that stress-tests the gateway at 50% of interactive token cost.
 
 ## Why This Matters
@@ -30,6 +32,7 @@ Today's question: if you'd known a single batch submit could fan out to 10,000 p
 **Architect:** Any ingress that fans out to paid calls requires a blast-radius ceiling as a Phase A invariant — same tier as authn and input validation; ADR-010 names this so future contributors know it's a contract, not a suggestion.
 
 **Also in frame:**
+
 - DevOps / SRE — batch job lifecycle adds a new telemetry surface; status and result-count histograms are the operational signal when a batch stalls
 - Cloud & Model-Vendor Support — Anthropic batch has no-retry submit semantics and JSONL results streaming; these are vendor-specific constraints requiring doc verification, not assumption
 
@@ -50,29 +53,35 @@ Secondary: the **FinOps lead** who asks "what fraction of our AI spend could be 
 ## Step-by-Step Execution
 
 ### Phase A — ADR and contracts
+
 Define the interface and contracts before any implementation:
+
 - Write ADR-010: *Implement batch API as a separate IBatchJobProvider seam*
 - Create `IBatchJobProvider.cs`, `BatchJobRequest.cs`, `BatchJobStatus.cs`, `BatchJobResult.cs`
 - No implementation yet — interface-first so the boundary is clean before writing code
 
 ### Phase B — Anthropic implementation
+
 - `ClaudeBatchApiClient.cs`: submit, status, results methods
 - JSONL result parsing (`results` endpoint streams one result object per line)
 - `ClaudeBatchJobProvider.cs`: wires `ClaudeBatchApiClient` behind `IBatchJobProvider`
 - Register in DI with a named key `"claude-batch"`
 
 ### Phase C — API surface
+
 - `BatchController.cs`: three endpoints with proper error contracts (`ApiError`, correlation IDs)
 - No auth on Day 8 (gateway is internal); noted as Day 9–10 hardening item
 - Response shape: submit returns `{ batchId, submittedAt, requestCount }`, status returns `{ batchId, status, requestCount, completedCount }`, results returns JSONL or a structured list
 
 ### Phase D — Telemetry
+
 - `GatewayTelemetry` gains `BatchJobsSubmitted`, `BatchJobsCompleted` counters
 - `batch.job.result_count` histogram on completion
 - Log: savings calculation at retrieval time (`resultCount * avgInputTokens * 0.50 * pricePerToken`)
 - KQL Query 10 in `kql-cookbook.md`
 
 ### Phase E — Local verification
+
 - Submit a 3-request batch via `POST /api/ai/batch`
 - Poll `GET /api/ai/batch/{id}` until `status == Ended`
 - Retrieve results via `GET /api/ai/batch/{id}/results`
@@ -133,28 +142,35 @@ They name the computation model explicitly before writing an interface. "Batch" 
 "Extended an AI gateway with an async batch processing path, making a principled architectural decision to introduce a separate `IBatchJobProvider` seam rather than polluting the interactive contract. Reduced token cost by 50% on all offline workloads. Kept the gateway stateless by proxying Anthropic's job ID directly to callers. Made savings visible as telemetry from day one. Documented the decision in ADR-010 as the explicit inverse of ADR-009 — demonstrating that YAGNI is not a blanket rule but a judgment call made per-case with the tradeoffs named."
 
 This proves:
+
 - You know when *not* to reuse an abstraction, not just when to reuse one
 - You understand that different computation models need different contracts
 - You make cost reduction visible, not just present
 
 ## Completion Checklist
+
 See `02-completion-checklist.md`
 
 ## Certification Reinforcement
 
 ### AZ-900 — None
+
 No direct mapping this day.
 
 ### AZ-104 — None
+
 No new infrastructure provisioned; no App Service configuration changes.
 
 ### AZ-305 — **Secondary**
+
 - Design application architecture: async/job-shaped workload pattern (batch processing vs. request-response); recommend a compute solution for batch processing (WAF decision point)
 - Cost optimization as a design principle: unconditional 50% reduction on batch-eligible workloads; when to route to batch vs. synchronous path based on latency SLA
 
 ### AI-102 — **Primary**
+
 - Implement generative AI solutions: Azure OpenAI Batch API pattern (same semantic model as Anthropic Batch — submit/poll/retrieve); cost optimization on offline AI workloads
 - Optimize and operationalize a generative AI solution: batch vs. synchronous routing decision; cost-per-token attribution for batch path
 
 ## Architect Posture Check
+
 See `04-posture-check.md` (filled at end of day, BEFORE marking complete)

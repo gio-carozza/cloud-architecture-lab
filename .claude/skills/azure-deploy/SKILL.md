@@ -7,12 +7,15 @@ allowed-tools: Bash, Read, Write
 # Azure App Service Deploy — Kudu Zip Path
 
 ## When to use
+
 - Deploying `lab-observability-api` to App Service
 - `az webapp deploy` is failing with "remote host forcibly closed"
 - Need a deterministic, repeatable deploy
 - Day 5+ deployment work
+- Before advising on App Service deployment specifics (settings, RUN_FROM_PACKAGE behavior, Kudu endpoints), verify current behavior against Microsoft Learn via the MCP. This is an Azure-surface check only — it does not cover Anthropic API behavior.
 
 ## Why this path
+
 `az webapp deploy` wraps multiple deploy strategies and chooses one
 heuristically. On constrained networks or larger payloads it can fail
 silently mid-stream with TLS resets. The Kudu publish API is the
@@ -26,6 +29,7 @@ reliably.
 they can reason about over heuristic wrappers, especially in CI/CD.
 
 ## Pre-flight
+
 - Confirm logged-in subscription: `az account show`
 - Confirm RG exists: `rg-ai-lab-dev-eastus`
 - Confirm App Service exists: `app-ai-lab-api-dev-eastus-gio`
@@ -63,29 +67,34 @@ Invoke-RestMethod `
 ```
 
 ## Verification (must all pass)
-   - `GET /health` returns 200
-   - `GET /health/live` returns 200 (Day 6+)
-   - `GET /health/ready` returns 200 with config-presence check (Day 6+)
-   - `GET /swagger` loads UI
-   - `POST /api/ai/chat` returns a Claude completion within ~3s
-   - Response includes `X-Correlation-Id` header (Day 6+)
-   - Application Insights begins receiving requests/dependencies/traces (Day 6+)
+
+- `GET /health` returns 200
+- `GET /health/live` returns 200 (Day 6+)
+- `GET /health/ready` returns 200 with config-presence check (Day 6+)
+- `GET /swagger` loads UI
+- `POST /api/ai/chat` returns a Claude completion within ~3s
+- Response includes `X-Correlation-Id` header (Day 6+)
+- Application Insights begins receiving requests/dependencies/traces (Day 6+)
 
 ## Rollback
+
 - `az webapp deployment list-publishing-profiles` to inspect history
 - Re-deploy a previous zip artifact via the same Kudu endpoint
 - Or: toggle `WEBSITE_RUN_FROM_PACKAGE` off and use slot swap (future enhancement)
 
 ## Gotchas
+
 - **Step 3 SSL reset (`az webapp config appsettings set`):** `management.azure.com`
   hits TLS reset on this network. Fix before running step 3:
+
   ```powershell
   az config set core.disable_ssl_certificate_verification=true
   # ... run step 3 ...
   az config set core.disable_ssl_certificate_verification=false
   ```
+
   If it still resets, use `Invoke-RestMethod` with an ARM bearer token instead
-  (see CLAUDE.md Gotchas for the full pattern).
+  (see `L` Gotchas for the full pattern).
 - **502 Bad Gateway after deploy:** check log stream
   (`az webapp log tail -g rg-ai-lab-dev-eastus -n app-ai-lab-api-dev-eastus-gio`) —
   usually a startup binding issue or missing env var.
@@ -97,6 +106,7 @@ Invoke-RestMethod `
 - **Don't deploy from `bin/` — always `publish/`.** They are not the same.
 
 ## Architect-level extension (future)
+
 - Move this to GitHub Actions with OIDC federated credentials (no secrets)
 - Add deployment slots (staging/production swap) for zero-downtime
 - Add a smoke test step between deploy and traffic swap

@@ -1,16 +1,24 @@
 # ADR-006: Harden AI Gateway with Resilience and Observability
 
-- Status: Accepted
-- Date: 2026-04-15
-- Related:
-  - ADR-004-first-workload-on-app-service-with-app-insights.md
-  - ADR-005-introduce-provider-abstraction-for-claude-integration.md
+## Status
+
+Accepted
+
+## Date
+
+2026-04-15
+
+## Related
+
+- ADR-004-first-workload-on-app-service-with-app-insights.md
+- ADR-005-introduce-provider-abstraction-for-claude-integration.md
 
 ## Context
 
 Day 5 introduced the first functional AI Gateway version by exposing a Claude-backed chat endpoint through the `Lab.Observability.Api` application.
 
 The Day 5 implementation proved:
+
 - provider abstraction works
 - Anthropic configuration binding works
 - local secrets and Azure App Service configuration work
@@ -21,6 +29,7 @@ However, the Day 5 implementation was still closer to a functional prototype tha
 The next architectural concern is operational maturity.
 
 The gateway must now support:
+
 - request tracing and correlation
 - structured failure handling
 - basic health modeling
@@ -54,6 +63,7 @@ The application must behave predictably when the provider is slow, unavailable, 
 
 A production-grade AI service must be diagnosable.
 It is not enough for a request to succeed or fail; operators must be able to answer:
+
 - which request failed
 - which provider failed
 - what the latency was
@@ -70,6 +80,7 @@ Endpoint concerns belong in controllers.
 ### 4. Enterprise readiness
 
 A cloud architect should design for:
+
 - supportability
 - diagnosability
 - operational review
@@ -101,6 +112,7 @@ Day 6 shifts the project from a “working demo” toward a supportable AI platf
 ### 1. Keep all Claude logic inside the provider class
 
 Rejected because it mixes:
+
 - HTTP transport
 - provider orchestration
 - error classification
@@ -111,6 +123,7 @@ This would make the provider harder to test, reason about, and extend.
 ### 2. Add retries to Claude chat calls
 
 Rejected for Day 6 because chat generation is a `POST` operation and automatic retries may:
+
 - duplicate requests
 - increase cost
 - create confusing user-facing behavior
@@ -118,6 +131,7 @@ Rejected for Day 6 because chat generation is a `POST` operation and automatic r
 ### 3. Use only controller-level try/catch
 
 Rejected because global exception handling provides:
+
 - more consistent API error responses
 - a cleaner controller
 - better centralization of failure mapping
@@ -154,6 +168,7 @@ Day 6 introduces or standardizes these files and responsibilities:
 ## Follow-up
 
 Potential Day 7+ extensions:
+
 - centralized prompt/response redaction policy
 - request/response size limits
 - authentication and authorization

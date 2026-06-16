@@ -68,17 +68,21 @@ Day 005 introduces the first proper architectural seam for model integration.
 The following components were added:
 
 ### Options
+
 - `AnthropicOptions`
 
 ### Models
+
 - `ChatRequest`
 - `ChatResponse`
 
 ### Services
+
 - `IChatModelProvider`
 - `ClaudeChatModelProvider`
 
 ### Controller
+
 - `AiController`
 
 ---

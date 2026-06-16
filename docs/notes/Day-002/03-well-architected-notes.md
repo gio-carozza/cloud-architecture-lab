@@ -23,5 +23,3 @@ Systems should be easy to monitor, operate, and improve.
 ## Performance Efficiency
 
 Systems should scale and perform efficiently under varying workloads.
-
-

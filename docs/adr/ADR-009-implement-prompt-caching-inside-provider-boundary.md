@@ -1,12 +1,15 @@
 # ADR-009: Implement Prompt Caching Inside the Provider Boundary
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-05-06
 
 ## Related
+
 - ADR-005-introduce-provider-abstraction-for-claude-integration.md
 - ADR-006-harden-ai-gateway-with-resilience-and-observability.md
 - ADR-008-adopt-opentelemetry-first-observability-with-serilog-request-logging.md
@@ -54,6 +57,7 @@ how much abstraction is justified by *one* example?
 We will implement prompt caching inside the provider boundary on Day 7.
 
 Specifically:
+
 - `ClaudeApiClient` constructs the system prompt as a content array with a
   `cache_control: {"type":"ephemeral"}` annotation on the system prompt block.
 - `AnthropicOptions` gains an `EnablePromptCaching` boolean (default `true`)
@@ -82,6 +86,7 @@ scope.
 This is the chosen alternative. See Decision above.
 
 **Why chosen:**
+
 - Anthropic's `cache_control` is a payload annotation specific to Anthropic's
   API shape. Other providers (Azure OpenAI, Bedrock, Foundry) use different
   mechanisms — cache keys, automatic caching by content hash, model-specific
@@ -97,6 +102,7 @@ This is the chosen alternative. See Decision above.
   that turn out to be wrong.
 
 **Consequences accepted:**
+
 - When a second provider lands, we will rewrite caching logic in two places
   before extracting the decorator. This is a known cost.
 - The caching strategy ("which content is cacheable, for how long, under what
@@ -111,6 +117,7 @@ cache; the wrapped provider performs the actual annotation via a new method
 on `IChatModelProvider` or a sibling `ICacheAnnotator` interface.
 
 **Why rejected:**
+
 - The decorator can only decide *what* to cache (e.g., "the system prompt is
   cacheable"). It cannot decide *how* to annotate without provider-specific
   knowledge — `cache_control` blocks are not portable to Azure OpenAI's API
@@ -138,6 +145,7 @@ that providers may or may not honor. Callers express intent; providers
 translate it to provider-specific annotations.
 
 **Why rejected:**
+
 - This pollutes the provider-agnostic contract with provider-operational
   concerns. `ChatRequest` is the public-facing API shape, intended to be
   stable across providers and across time. Cache hints are an internal
@@ -155,6 +163,7 @@ on the grounds that the cleanest design will only be visible with two
 examples to learn from.
 
 **Why rejected:**
+
 - The cost case for caching is immediate and quantifiable. Deferring caching
   in order to design a better abstraction in some future quarter trades
   measurable savings against speculative architectural elegance. That is
@@ -166,6 +175,7 @@ examples to learn from.
 ## Consequences
 
 ### Positive
+
 - Substantial input token cost reduction (~90% on the cached portion) for
   any workload with a stable system prompt.
 - Cache economics are observable as first-class telemetry: cache hit rate
@@ -176,6 +186,7 @@ examples to learn from.
   the refactoring boundary is small.
 
 ### Negative
+
 - Anthropic-specific caching logic lives inside the provider rather than at
   a higher abstraction layer. When a second cacheable provider lands, the
   code shape will need refactoring (decorator extraction).
@@ -188,6 +199,7 @@ examples to learn from.
   policy. If the gateway grows providers, each will need its own toggle.
 
 ### Neutral / Tradeoffs
+
 - Cache observability uses the same Activity tag pattern as the existing
   `llm.tokens.*` tags (Day 6). This is consistent but means cache telemetry
   is queried via the dependencies table, not a dedicated cache table.
@@ -199,6 +211,7 @@ examples to learn from.
 ## Implementation Notes
 
 ### Files affected
+
 - `src/lab-observability-api/Options/AnthropicOptions.cs`
   - Add `bool EnablePromptCaching { get; init; } = true;`
 - `src/lab-observability-api/Services/Claude/ClaudeApiClient.cs`
@@ -217,16 +230,18 @@ examples to learn from.
   - Document `Anthropic__EnablePromptCaching` as a new app setting.
 
 ### Files NOT affected
-- `src/lab-observability-api/Models/ChatRequest.cs` — provider-agnostic
+
+- `src/lab-observability-api/Models/AI/ChatRequest.cs` — provider-agnostic
   contract is unchanged.
-- `src/lab-observability-api/Models/ChatResponse.cs` — provider-agnostic
+- `src/lab-observability-api/Models/AI/ChatResponse.cs` — provider-agnostic
   contract is unchanged.
-- `src/lab-observability-api/Providers/IChatModelProvider.cs` — abstraction
+- `src/lab-observability-api/Services/AI/IChatModelProvider.cs` — abstraction
   seam is unchanged.
-- `src/lab-observability-api/Providers/ClaudeChatModelProvider.cs` —
+- `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` —
   orchestration layer does not need to know caching is happening.
 
 ### Operational requirements
+
 - The `Anthropic__EnablePromptCaching` app setting must exist on the deployed
   App Service. Default `true` if absent (caching is the desired production
   state; the toggle exists for debugging).
@@ -236,12 +251,15 @@ examples to learn from.
   prompt of at least 1100 tokens to confirm the mechanism is working.
 
 ### Rollback strategy
+
 - Set `Anthropic__EnablePromptCaching=false` on the App Service. The
   `ClaudeApiClient` will emit the legacy payload shape (system prompt as a
   string, no `cache_control` block). No code redeploy required.
 
 ### Migration path (when forward-compatibility triggers)
+
 When a second provider with caching semantics is added:
+
 1. Extract an `ICacheAnnotator` interface with one method (shape TBD by the
    second provider's needs, not pre-designed here).
 2. Implement `ICacheAnnotator` on `ClaudeChatModelProvider` and on the new
@@ -253,8 +271,9 @@ When a second provider with caching semantics is added:
 5. Telemetry tags do not change — they are already provider-agnostic.
 
 ## References
+
 - Anthropic prompt caching documentation:
-  https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+  <https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching>
 - ADR-005 (provider abstraction this layer wraps)
 - ADR-006 (observability foundation this extends)
 - `docs/architecture/observability-architecture.md` — telemetry pillars

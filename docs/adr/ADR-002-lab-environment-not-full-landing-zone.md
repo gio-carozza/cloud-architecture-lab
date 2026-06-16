@@ -1,9 +1,11 @@
 # ADR-002: Current Lab Environment Is Not a Full Landing Zone
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-03-16
 
 ## Context

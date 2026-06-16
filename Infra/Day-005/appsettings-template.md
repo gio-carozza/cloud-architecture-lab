@@ -19,6 +19,7 @@ No real secret should be committed into source control.
 ## Required settings
 
 ### Anthropic__ApiKey
+
 The Anthropic API key used by the application to authenticate outbound requests.
 
 Example:

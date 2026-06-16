@@ -10,6 +10,7 @@
 - [x] `Anthropic__Model` updated to `claude-opus-4-7` on App Service — confirmed in appsettings and in live response: `"model":"claude-opus-4-7"`
 
 ## Code — Packages
+
 - [x] `Serilog.AspNetCore` added to .csproj — v8.0.3
 - [x] ~~`Serilog.Sinks.ApplicationInsights` added~~ — SUPERSEDED: ADR-008 chose OTel as sole export pipeline; this package must not be installed (would duplicate every signal to App Insights)
 - [x] ~~`Microsoft.ApplicationInsights.AspNetCore` added~~ — SUPERSEDED: `Azure.Monitor.OpenTelemetry.AspNetCore` v1.4.0 covers this path
@@ -17,6 +18,7 @@
 - [x] `dotnet restore` succeeds — implied by clean build (0 errors, 0 warnings)
 
 ## Code — Wiring
+
 - [x] Serilog configured in `Program.cs` with Console + AppInsights sinks — Console sink confirmed; App Insights export via OTel per ADR-008, not a Serilog sink
 - [x] `UseSerilogRequestLogging` enabled with correlation ID enrichment — `Program.cs:135–160`
 - [x] `CorrelationIdMiddleware` created and registered (before request logging) — `Middleware/CorrelationIdMiddleware.cs`; registered at `Program.cs:130`
@@ -26,6 +28,7 @@
 - [x] `Activity` instrumentation in provider with `llm.*` tags — outer span `ai.chat.complete` in `ClaudeChatModelProvider`; inner span `claude.chat.api` in `ClaudeApiClient` with `llm.tokens.input`, `llm.tokens.output`, `llm.latency_ms`, `llm.endpoint`
 
 ## Behavior — Local
+
 - [x] `dotnet run` starts without errors — ready in < 2s after resilience config fix
 - [x] `POST /api/ai/chat` returns 200 with completion — `{"provider":"anthropic","model":"claude-opus-4-6","response":"Hello to you!"}`
 - [x] Console shows structured log lines with `CorrelationId` — every log line carried matching correlation ID through controller → provider → client
@@ -44,6 +47,7 @@
 - [x] KQL query for token usage returns results — `llm.tokens.input=12`, `llm.tokens.output=7`, `llm.latency_ms=1794ms` visible in `dependencies` table on `claude.chat.api` span; data from local run (local and Azure share the same App Insights resource); redeploy needed to get token spans from the live app itself
 
 ## Documentation
+
 - [x] `ADR-006-adopt-serilog-with-application-insights-sink.md` written and Accepted — exists as `ADR-006-harden-ai-gateway-with-resilience-and-observability.md`; Status: Accepted
 - [x] `docs/architecture/day-006-observability-and-resilience.md` includes updated sequence diagram — exists as `day-006-ai-gateway-v2-hardening.md` + `day-006-sequence-flow.md`
 - [x] `docs/notes/Day-006/kql.md` contains at least 5 starter KQL queries — promoted to `docs/standards/kql-cookbook.md`
@@ -53,12 +57,14 @@
 - [x] Git commit: `feat(day-006): observability and resilience for AI gateway` — `04f4931` on `feature/day-006-gateway-hardening`
 
 ## Certification
+
 - [ ] Read AI-102 "Monitor and optimize AI solutions" objective list (15 min)
 - [ ] Read AZ-104 "Monitor and back up Azure resources" objective list (15 min)
 - [ ] Note 3 questions from each that today's work directly answers
 - [x] File notes in `docs/certifications/ai-102/study-notes/day-006-mapping.md` — AI-102 mapping confirmed
 
 ## Stretch (optional, only if base is complete)
+
 - [x] Add Bicep template for App Insights in `Infra/Day-006/appinsights.bicep` — created; codifies Log Analytics workspace, App Insights component (workspace-based), Action Group, and 5xx Scheduled Query Alert Rule; outputs `ConnectionString`, `InstrumentationKey`, `workspaceId`, `appInsightsId` for downstream consumption
 - [x] Define an Azure Monitor alert rule for 5xx rate > 5% over 5 min — `alert-ai-gateway-5xx-rate-dev-eastus-gio` created via ARM REST (Invoke-RestMethod); KQL computes `failureRate = failures/total*100`; avg > 5 fires severity-2 alert to Action Group `ag-ai-lab-dev-eastus-gio` → `gio.carozza@outlook.com`; zero-traffic guard: `failureRate=0` when `total=0`, no false positives
 - [ ] Add a Workbook or pinned Dashboard with the starter KQL queries

@@ -25,6 +25,7 @@ The three signal types this subsystem produces, and what each is for.
   *where* time is spent within a request.
 
 Plus the LLM-specific signals this gateway adds:
+
 - **Tokens in / out per request** — first-class cost telemetry
 - **Provider latency vs gateway latency** — where time is actually spent
 - **Failure classification** — timeout vs 4xx vs 5xx vs throttle
@@ -71,6 +72,7 @@ Operator: KQL queries, dashboards, alerts
 ## Components
 
 ### CorrelationIdMiddleware
+
 **Location:** `src/lab-observability-api/Middleware/CorrelationIdMiddleware.cs`
 **Responsibility:** Ensures every request has a correlation ID. Accepts
 client-provided `X-Correlation-Id`, falls back to `HttpContext.TraceIdentifier`.
@@ -82,6 +84,7 @@ correlation.
 falls back. If push fails, the request still proceeds.
 
 ### Serilog (logging library)
+
 **Configured in:** `Program.cs`
 **Sinks:** Console (local dev) only. **No** ApplicationInsights sink — see ADR-008.
 **Enrichers:** `FromLogContext`, static property `Service=lab-observability-api`.
@@ -93,6 +96,7 @@ correlation IDs cleanly through async boundaries. Raw ILogger requires
 manual scope management at every async hop.
 
 ### OpenTelemetry (telemetry pipeline)
+
 **Configured in:** `Program.cs` via `AddOpenTelemetry().UseAzureMonitor()`.
 **Captures:** Logs (via the OTel ILogger provider), traces (ASP.NET Core +
 HttpClient instrumentation built into the Azure Monitor distro), metrics
@@ -105,8 +109,10 @@ resource produces duplicate request telemetry, conflicting Activity
 propagation, and doubled ingestion cost. ADR-008 is the full reasoning.
 
 ### GatewayTelemetry (custom signals)
+
 **Location:** `src/lab-observability-api/Telemetry/GatewayTelemetry.cs`
 **Provides:**
+
 - `ActivitySource("Lab.Observability.Api")` for custom spans
 - `Meter("Lab.Observability.Api")` for custom metrics:
   - `ai.provider.requests` (counter)
@@ -121,9 +127,11 @@ semantics — token counts, model names, provider identity. Those are
 gateway-specific business metrics that need explicit emission.
 
 ### Resilience pipeline (Polly via Microsoft.Extensions.Http.Resilience)
+
 **Configured in:** `Program.cs` via `AddStandardResilienceHandler` on
 the `ClaudeApiClient` HttpClient.
 **Behaviors:**
+
 - Per-attempt timeout: 45 seconds
 - Total request timeout: 60 seconds
 - Circuit breaker: 20% failure ratio over 120s sampling window; minimum 5 requests; breaks for 15s
@@ -137,6 +145,7 @@ the `ClaudeApiClient` HttpClient.
 to HTTP 503 with a stable `ApiError` shape and the correlation ID.
 
 ### Global exception handling
+
 **Location:** `Program.cs` — `UseExceptionHandler`
 **Responsibility:** Catches any unhandled exception, logs it with the
 correlation ID, returns a stable `ApiError` JSON shape. Never returns
@@ -177,6 +186,7 @@ for prompt regressions. If input tokens spike, look for context bloat.
 ### Starter KQL queries
 
 **Top 10 slowest chat requests in the last hour:**
+
 ```kql
 requests
 | where timestamp > ago(1h)
@@ -186,6 +196,7 @@ requests
 ```
 
 **Token usage per hour:**
+
 ```kql
 // Activity spans land in dependencies, NOT traces
 dependencies
@@ -199,6 +210,7 @@ dependencies
 ```
 
 **Correlate a single request end-to-end:**
+
 ```kql
 union requests, dependencies, traces, exceptions
 | where customDimensions.CorrelationId == "<id-from-response-header>"
@@ -206,11 +218,13 @@ union requests, dependencies, traces, exceptions
 ```
 
 ### Dashboards (planned, not yet built)
+
 - Gateway health: request rate, error rate, p50/p95/p99 latency
 - Provider health: claude.chat span latency, failure rate, circuit state
 - Cost: tokens in/out per hour, projected monthly burn
 
 ### Alerts
+
 - **[LIVE]** Error rate > 5% for 5 min — `alert-ai-gateway-5xx-rate-dev-eastus-gio`;
   KQL on `requests` table; severity 2; routes to `ag-ai-lab-dev-eastus-gio` → email.
   Bicep: `Infra/Day-006/appinsights.bicep`
@@ -255,5 +269,5 @@ For *what* this architecture is, this document is the source of truth.
 - `.claude/skills/observability-net/SKILL.md` — implementation patterns
 - `docs/architecture/day-006-sequence-flow.md` — request flow diagram
 - ADR-005 — provider abstraction this layer wraps
-- OpenTelemetry .NET docs: https://opentelemetry.io/docs/languages/net/
-- Azure Monitor OpenTelemetry distro: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
+- OpenTelemetry .NET docs: <https://opentelemetry.io/docs/languages/net/>
+- Azure Monitor OpenTelemetry distro: <https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable>

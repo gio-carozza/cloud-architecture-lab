@@ -27,6 +27,7 @@ Budgets help control spending by providing alerts when cost thresholds are reach
 This lab uses a monthly budget for cost control.
 
 ## Topics to Learn
+
 - Compute
 - Storage
 - Networking
@@ -35,4 +36,5 @@ This lab uses a monthly budget for cost control.
 - Security
 
 ## Notes
+
 This file will store my foundational Azure service knowledge.

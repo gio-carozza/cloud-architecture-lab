@@ -13,7 +13,7 @@ Full career path: `docs/standards/career-path.md`
 - Backend developer (.NET, APIs, SQL), MIS master's
 - **Current phase: AI Engineer** — building the gateway, learning the APIs, owning cost and observability
 - **Next phase: Forward-Deployed Engineer** (~Day 21) — applying AI to real business problems, rapid prototyping, CEO-level communication
-- **Target phase: LLM Architect** (~Day 51+) — enterprise governance, multi-provider, compliance, $200k–$250k tier
+- **Target phase: LLM Architect** (~Day 051+) — enterprise governance, multi-provider, compliance, $250k–$500k+
 - Build-first learner; wants architect-level reasoning, not tutorials
 - Current day: see `docs/notes/_index.md`
 
@@ -339,8 +339,8 @@ Phase 2 is not complete until:
 | AZ-900 (Foundations) | Phase 1 | In progress |
 | AI-102 (AI Engineer Associate) | Phase 1–2 | Retired June 30, 2026 — superseded by AI-103 |
 | AI-103 (Azure AI Apps and Agents Developer) | Phase 2 | Beta — sequenced to Phase 2 (~Day 21+) |
-| AZ-104 (Administrator) | Phase 2–3 | Starts ~Day 10–15 |
-| AZ-305 (Solutions Architect Expert) | Phase 2–3 | Post AZ-104 |
+| AZ-104 (Administrator) | Phase 2–3 | Starts ~Day 035 — target Day 070 |
+| AZ-305 (Solutions Architect Expert) | Phase 2–3 | Starts ~Day 070 — target Day 091 |
 
 Each daily roadmap day MUST include a Certification Reinforcement section
 mapping that day's activities to specific cert domains (Primary / Secondary).

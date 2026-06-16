@@ -7,13 +7,16 @@ allowed-tools: Read, Write
 # Observability for .NET 8 AI Gateway
 
 ## When to use
+
 - Day 6 work (observability & resilience)
 - Adding logging, tracing, or metrics
 - Wiring up Application Insights
 - Implementing correlation IDs
 - KQL query questions
+- Before advising on Azure Monitor / Application Insights / OpenTelemetry package versions or wiring, verify against Microsoft Learn via the MCP. Package version transitivity is a known failure class (see graveyard, Day 6 OTel 1.14.0). MS Learn covers the Azure exporter side; it does NOT cover Anthropic SDK behavior.
 
 ## The Three Pillars
+
 1. **Logs** — discrete events, structured (Serilog → App Insights)
 2. **Metrics** — aggregated numbers (latency, throughput, error rate)
 3. **Traces** — causal chains across components (W3C Trace Context)
@@ -23,6 +26,7 @@ allowed-tools: Read, Write
 **LLM Architect:** knows how to *govern* it — retention policies, cost attribution by workload class, alert rules that page before the bill arrives
 
 For an LLM gateway, you ALSO care about:
+
 - **Tokens in / out** per request (cost telemetry)
 - **Provider latency** vs **gateway latency** (where time is spent)
 - **Cache hit rate** (when prompt caching lands)
@@ -39,9 +43,12 @@ used only as a logging library (NOT as a telemetry export sink).
 <PackageReference Include="Serilog.AspNetCore" Version="8.0.*" />
 <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.*" />
 ```
+
 ## DO NOT INSTALL these packages
+
 Per ADR-006, these would create a parallel telemetry pipeline and
 duplicate every signal:
+
 - `Microsoft.ApplicationInsights.AspNetCore`
 - `Serilog.Sinks.ApplicationInsights`
 
@@ -106,6 +113,7 @@ finally
 ```
 
 **Why this works as one pipeline:**
+
 - Serilog writes to its own sinks (Console).
 - The default ASP.NET Core `ILoggerFactory` is replaced by Serilog via `UseSerilog`.
 - `AddOpenTelemetry()` registers OTel's `ILoggerProvider`, which captures
@@ -142,6 +150,7 @@ Pass it through to provider calls so Anthropic logs can be correlated to your ga
 Use two nested spans — tag where the data naturally lives:
 
 **Outer span** (`ai.chat.complete`) in `ClaudeChatModelProvider` — orchestration data only:
+
 ```csharp
 using var activity = GatewayTelemetry.ActivitySource.StartActivity("ai.chat.complete");
 activity?.SetTag("llm.provider", "anthropic");
@@ -159,6 +168,7 @@ catch (Exception ex)
 ```
 
 **Inner span** (`claude.chat.api`) in `ClaudeApiClient` — transport data (token counts, latency, endpoint):
+
 ```csharp
 using var activity = GatewayTelemetry.ActivitySource.StartActivity("claude.chat.api");
 activity?.SetTag("llm.provider", "anthropic");
@@ -168,9 +178,11 @@ var sw = Stopwatch.StartNew();
 try
 {
     // ... HTTP call, parse response ...
-    var (inputTokens, outputTokens) = TryExtractUsage(responseBody);
+    var (inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens) = TryExtractUsage(responseBody);
     if (inputTokens.HasValue) activity?.SetTag("llm.tokens.input", inputTokens.Value);
     if (outputTokens.HasValue) activity?.SetTag("llm.tokens.output", outputTokens.Value);
+    if (cacheReadTokens.HasValue) activity?.SetTag("llm.cache.read_tokens", cacheReadTokens.Value);
+    if (cacheCreationTokens.HasValue) activity?.SetTag("llm.cache.creation_tokens", cacheCreationTokens.Value);
     activity?.SetTag("llm.latency_ms", sw.Elapsed.TotalMilliseconds);
 }
 catch (Exception ex)
@@ -212,55 +224,41 @@ builder.Services.AddHttpClient<ClaudeApiClient>()
 ```
 
 **v10 validator rules (startup will throw if violated):**
+
 - `SamplingDuration >= 2 × AttemptTimeout` — mathematical invariant enforced at startup
 - `MaxRetryAttempts >= 1` — use `ShouldHandle = _ => false` to express "no retries"
 
 **Design rules:**
+
 - Never retry on chat POST — non-idempotent, paid call; caller may have already shown an error
 - Never retry 401/403 — auth failures are not transient; retrying burns quota
 - Timeout + circuit breaker are the right resilience shape for LLM calls without retry classification
 
-## KQL Starter Queries (App Insights → Logs)
+## KQL Starter Queries
 
-```kql
-// Top 10 slowest /api/ai/chat requests in last hour
-requests
-| where timestamp > ago(1h)
-| where url contains "/api/ai/chat"
-| top 10 by duration desc
-| project timestamp, duration, resultCode, customDimensions.CorrelationId
-```
+See `docs/standards/kql-cookbook.md` — all gateway queries live there.
+Key note: Activity spans land in the `dependencies` table, NOT `requests` or `traces`.
 
-```kql
-// Token usage per hour — Activity spans land in dependencies, NOT traces
-dependencies
-| where timestamp > ago(24h)
-| where name == "claude.chat.api"
-| extend inputTokens  = toint(customDimensions["llm.tokens.input"])
-| extend outputTokens = toint(customDimensions["llm.tokens.output"])
-| summarize
-    total_input  = sum(inputTokens),
-    total_output = sum(outputTokens)
-  by bin(timestamp, 1h)
-| render timechart
-```
 ## Logging Field Conventions
 
    Standard structured fields used across the gateway:
-   - `provider` — name of the LLM provider (e.g., "anthropic")
-   - `model` — model identifier
-   - `endpoint` — relative API path
-   - `statusCode` — HTTP status code
-   - `durationMs` — operation duration in milliseconds
-   - `requestId` / `correlationId` — request correlation identifier
-   - `environment` — deployment environment (dev/test/prod)
 
-   ## What NOT to log
-   - Raw API keys or secrets
-   - Full prompt bodies (PII risk, cost)
-   - Full response bodies in production
-   
+- `provider` — name of the LLM provider (e.g., "anthropic")
+- `model` — model identifier
+- `endpoint` — relative API path
+- `statusCode` — HTTP status code
+- `durationMs` — operation duration in milliseconds
+- `requestId` / `correlationId` — request correlation identifier
+- `environment` — deployment environment (dev/test/prod)
+
+## What NOT to log
+
+- Raw API keys or secrets
+- Full prompt bodies (PII risk, cost)
+- Full response bodies in production
+
 ## Common mistakes (avoid)
+
 - Logging full prompt bodies (PII, secrets, cost)
 - Retrying 401s (waste, alarms)
 - Forgetting jitter on retries (synchronized retry storms)

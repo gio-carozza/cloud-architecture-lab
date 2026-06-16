@@ -1,12 +1,15 @@
 # ADR-010: Introduce a Parallel Batch Provider Abstraction Rather Than Extend the Chat Seam
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-06-03
 
 ## Related
+
 - ADR-005-introduce-provider-abstraction-for-claude-integration.md (the interactive seam this decision deliberately does *not* extend)
 - ADR-009-implement-prompt-caching-inside-provider-boundary.md (the inverse case — same test, opposite answer)
 - ADR-006-harden-ai-gateway-with-resilience-and-observability.md (why batch needs its own resilience/alerting profile)
@@ -126,9 +129,11 @@ needs unattended, durable batch execution, not before.
 ## Alternatives Considered
 
 ### Alternative 1 — Parallel batch provider abstraction, provider-seam-scoped
+
 **This is the chosen alternative. See Decision above.**
 
 **Why chosen:**
+
 - The operation set and substitutability contract both change (see the test table
   in Context). A sibling interface is the honest shape: interactive and batch are
   *siblings*, not variants of one interface.
@@ -141,6 +146,7 @@ needs unattended, durable batch execution, not before.
 and telemetry wirings. The orchestration gap is deferred (see Scope discipline).
 
 ### Alternative 2 — Extend `IChatModelProvider` with batch methods (`SubmitBatchAsync`, etc.)
+
 One interface, two interaction models.
 
 **The real point in its favor (conceded):** *cohesion.* A single Claude provider
@@ -149,6 +155,7 @@ and interactive paths building subtly different per-message payloads, diverging 
 auth or model ID.
 
 **Why rejected anyway:**
+
 - That concern is about **implementation reuse**, not **interface unification**,
   and this alternative conflates the two. The cohesion concern is fully satisfied
   under Alternative 1 by sharing internals (one `ClaudeApiClient`/payload builder
@@ -165,10 +172,12 @@ auth or model ID.
 better served by shared internals under Alternative 1.
 
 ### Alternative 3 — Overload `ChatRequest`/`ChatResponse` with batch semantics
+
 Add a mode flag and a nullable job ID so the existing contracts carry both
 interactive and batch meaning.
 
 **Why rejected:**
+
 - This is the identical anti-pattern ADR-009 rejected in *its* Alternative 3:
   polluting the provider-agnostic contract with operational concerns. `ChatRequest`
   and `ChatResponse` are the stable public shape, meant to be invariant across
@@ -183,10 +192,12 @@ interactive and batch meaning.
 **Revisit conditions:** none.
 
 ### Alternative 4 — Build the full batch orchestration layer now
+
 Provider seam **plus** durable job persistence, a polling scheduler, a result
 store, and per-item retry — all on Day 8.
 
 **Why rejected:**
+
 - YAGNI, and inconsistent with the restraint ADR-009 exercised on the decorator.
   The first batch workload needs the transport seam; it does not yet need
   unattended, durable, multi-tenant batch execution.
@@ -202,6 +213,7 @@ completion). At that point orchestration is designed against real requirements.
 ## Consequences
 
 ### Positive
+
 - The interactive contract protected since Day 5 is untouched. `IChatModelProvider`,
   `ChatRequest`, `ChatResponse` are unchanged.
 - Batch gets a contract that fits its actual shape (job-oriented, asynchronous)
@@ -212,6 +224,7 @@ completion). At that point orchestration is designed against real requirements.
   inheriting interactive thresholds that are wrong for it.
 
 ### Negative
+
 - Two provider interfaces to maintain.
 - Risk of implementation drift between interactive and batch payload construction.
   **Mitigation (mandatory):** both providers route per-message payload construction
@@ -223,6 +236,7 @@ completion). At that point orchestration is designed against real requirements.
   to be production batch infrastructure.
 
 ### Neutral / Tradeoffs
+
 - `ChatRequest` is intentionally coupled across interactive and batch (shared element
   type). If the two ever need to diverge (e.g., batch-only metadata), that is a
   future ADR, not a reason to fork the type now.
@@ -235,8 +249,9 @@ completion). At that point orchestration is designed against real requirements.
 ## Implementation Notes
 
 ### New files
-- `src/lab-observability-api/Providers/IBatchChatModelProvider.cs` — the sibling seam.
-- `src/lab-observability-api/Providers/ClaudeBatchChatModelProvider.cs` — implementation;
+
+- `src/lab-observability-api/Services/AI/IBatchChatModelProvider.cs` — the sibling seam.
+- `src/lab-observability-api/Services/AI/ClaudeBatchChatModelProvider.cs` — implementation;
   shares payload construction with `ClaudeChatModelProvider`.
 - `src/lab-observability-api/Models/BatchJob.cs` — job id, status, created/expires timestamps.
 - `src/lab-observability-api/Models/BatchJobStatus.cs` — enum (validating / in_progress /
@@ -252,6 +267,7 @@ completion). At that point orchestration is designed against real requirements.
   Thin controller, delegates to `IBatchChatModelProvider`, accepts `CancellationToken`.
 
 ### Modified files
+
 - `Program.cs`
   - `services.AddKeyedSingleton<IBatchChatModelProvider, ClaudeBatchChatModelProvider>("claude");`
   - A **separate** typed `HttpClient` + resilience config for the batch client. Do NOT
@@ -273,6 +289,7 @@ completion). At that point orchestration is designed against real requirements.
     latency must not be alarmed against interactive SLOs.
 
 ### Files explicitly NOT affected
+
 - `src/lab-observability-api/Providers/IChatModelProvider.cs` — interactive seam unchanged.
 - `src/lab-observability-api/Models/ChatRequest.cs` — reused as batch element, **not modified**.
 - `src/lab-observability-api/Models/ChatResponse.cs` — unchanged.
@@ -280,19 +297,23 @@ completion). At that point orchestration is designed against real requirements.
   orchestration does not learn about batch.
 
 ### Resilience / alerting note
+
 Batch must not inherit interactive resilience or alerting. Key invariants:
+
 - `in_progress` polling responses are HTTP 200 successes — never failures.
 - The `alert-ai-gateway-5xx-rate-dev-eastus-gio` rule and interactive latency
   percentiles do not apply to batch spans.
 - Batch "slowness" (minutes to hours) is expected behavior, not a degradation signal.
 
 ### Rollback strategy
+
 Batch is purely additive: new interface, new provider, new controller, new DI
 registration. To disable, do not register `ClaudeBatchChatModelProvider` and remove
 `AiBatchController`. Zero impact on the interactive path. No redeploy of interactive
 behavior required.
 
 ### Forward work (named, not built)
+
 1. Job orchestration layer: durable persistence of batch job IDs, polling scheduler,
    result storage, per-item retry of failed requests.
 2. Second batch provider (OpenAI Batch / Bedrock) implements `IBatchChatModelProvider`
@@ -301,11 +322,12 @@ behavior required.
    workload class (informs routing decisions in north-star item #4).
 
 ## References
+
 - ADR-005 (interactive provider abstraction this deliberately does not extend)
 - ADR-009 (caching inside the seam — the inverse case; same test, opposite answer)
 - ADR-006 / ADR-008 (resilience and observability foundations that batch must NOT
   inherit verbatim)
 - Anthropic Message Batches API documentation:
-  https://docs.anthropic.com/en/docs/build-with-claude/batch-processing
+  <https://docs.anthropic.com/en/docs/build-with-claude/batch-processing>
   (verify current endpoints, limits, and result mechanics during Build mode)
 - `docs/standards/kql-cookbook.md` — batch queries to be added on Day 8

@@ -11,6 +11,7 @@ The purpose of this flow is to show how the controller, service abstraction, pro
 ## Primary flow
 
 ### Step 1 — Client sends request
+
 The client sends an HTTP POST request to:
 
 `/api/ai/chat`

@@ -13,7 +13,7 @@
 | `src/lab-observability-api/Services/Claude/ClaudeApiClient.cs` | build (Phase B) | StreamChatAsync added — POST stream:true, ResponseHeadersRead, SSE parse (message_start/content_block_delta/message_delta/message_stop), nested Claude 4 cache_creation format, CancellationToken propagated, response disposed in finally |
 | `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` | build (Phase B) | StreamAsync override — ai.chat.stream outer span, TTFT stopwatch, StreamTtftMs recorded on first chunk, usage logged on final chunk |
 | `src/lab-observability-api/Telemetry/GatewayTelemetry.cs` | build (Phase D) | StreamTtftMs histogram added (ai.provider.stream.ttft_ms) |
-| `src/lab-observability-api/Controllers/AiController.cs` | build (Phase C) | POST /api/ai/chat/stream added — validation before SSE headers, IHttpResponseBodyFeature.DisableBuffering, X-Accel-Buffering:no, per-chunk FlushAsync, mid-stream error event, client disconnect swallowed |
+| `src/lab-observability-api/Controllers/AiController.cs` | build (Phase C) | `O` added — validation before SSE headers, IHttpResponseBodyFeature.DisableBuffering, X-Accel-Buffering:no, per-chunk FlushAsync, mid-stream error event, client disconnect swallowed |
 | `docs/standards/kql-cookbook.md` | audit | Queries 11 (TTFT p50/p95/p99) and 12 (TTFT by model) added; Day 9+ dimension added to conventions |
 | `docs/notes/Day-009/07-files-changed.md` | audit | This file — Phase A–D code rows and audit rows upserted |
 | `CLAUDE.md` | docs pass | Day status updated (1–8 → 1–9 complete, Day 10 next); streaming added to Phase 1 completed items with ADR-011 |
@@ -44,22 +44,22 @@
 | `docs/notes/Day-009/07-files-changed.md` | collab-lens | This file — collab-lens rows upserted |
 | `docs/notes/Day-009/05-audit-log.md` | audit | Created — full retroactive pillars audit; no RED items; R4/RA3/RA6 YELLOW accepted debt |
 | `docs/notes/Day-009/06-deployment-log.md` | deployment-log | Created — retroactive deployment record: 6 local tests (streaming incremental delivery, MaxPromptLength guard, mid-stream error frame, sync regression, TTFT log), 4 Azure tests (health, SSE not buffered with timestamps, sync regression, KQL Query 11 p50=1354ms), issues & fixes |
-| `src/lab-observability-api/Program.cs` | post-close | Added `public partial class Program { }` at bottom — required for WebApplicationFactory<Program> in test project |
+| `src/lab-observability-api/Program.cs` | post-close | Added `public partial class Program { }` at bottom — required for `WebApplicationFactory<Program>` in test project |
 | `cloud-architecture-lab.sln` | post-close | Test project added via `dotnet sln add` |
 | `src/lab-observability-api.Tests/lab-observability-api.Tests.csproj` | post-close | New test project — xUnit + Microsoft.AspNetCore.Mvc.Testing 8.0.0, ProjectReference to main API |
-| `src/lab-observability-api.Tests/GatewayWebApplicationFactory.cs` | post-close | New — WebApplicationFactory<Program> with ConfigureTestServices; virtual TestApiKey property; EmptyApiKeyWebApplicationFactory subclass |
-| `src/lab-observability-api.Tests/IntegrationTestCollection.cs` | post-close | New — [CollectionDefinition("Integration")] + ICollectionFixture<GatewayWebApplicationFactory>; shared factory across all integration tests |
+| `src/lab-observability-api.Tests/GatewayWebApplicationFactory.cs` | post-close | New — `WebApplicationFactory<Program>` with ConfigureTestServices; virtual TestApiKey property; EmptyApiKeyWebApplicationFactory subclass |
+| `src/lab-observability-api.Tests/IntegrationTestCollection.cs` | post-close | New — [CollectionDefinition("Integration")] + `ICollectionFixture<GatewayWebApplicationFactory>`; shared factory across all integration tests |
 | `src/lab-observability-api.Tests/AssemblyInfo.cs` | post-close | New — [assembly: CollectionBehavior(DisableTestParallelization = true)]; prevents factory race between Integration collection and HealthReadyMisconfiguredTests |
 | `src/lab-observability-api.Tests/Fakes/FakeChatModelProvider.cs` | post-close | New — IChatModelProvider fake with ExceptionToThrow property, StreamAsync support, Reset() |
 | `src/lab-observability-api.Tests/Fakes/FakeBatchChatModelProvider.cs` | post-close | New — IBatchChatModelProvider fake with canned responses for SubmitAsync, GetStatusAsync, GetResultsAsync |
-| `src/lab-observability-api.Tests/Controllers/HealthTests.cs` | post-close | New — 3 tests: /health, /health/live, /health/ready (200 when configured) |
+| `src/lab-observability-api.Tests/Controllers/HealthTests.cs` | post-close | New — 3 tests: `h`, `h`/live, `h`/ready (200 when configured) |
 | `src/lab-observability-api.Tests/Controllers/AiControllerTests.cs` | post-close | New — 13 tests: input validation (empty/whitespace/too-long), happy path, ClaudeProviderException → 502/503, generic exception → 500 no stack trace, SSE headers, SSE chunk JSON shape |
 | `src/lab-observability-api.Tests/Controllers/AiBatchControllerTests.cs` | post-close | New — 7 tests: batch input validation and happy paths for submit/status/results endpoints |
 | `src/lab-observability-api.Tests/Controllers/MiddlewareTests.cs` | post-close | New — 2 tests: x-correlation-id auto-set, correlation ID round-trip echo |
-| `src/lab-observability-api.Tests/Controllers/HealthReadyMisconfiguredTests.cs` | post-close | New — 1 test: /health/ready → 503 when ApiKey is empty (uses EmptyApiKeyWebApplicationFactory) |
+| `src/lab-observability-api.Tests/Controllers/HealthReadyMisconfiguredTests.cs` | post-close | New — 1 test: `h`/ready → 503 when ApiKey is empty (uses EmptyApiKeyWebApplicationFactory) |
 | `.claude/instructions/daily-workflow.md` | post-close | STEP 7: added test coverage requirement table (CEO/Architect/AI Engineer lenses); added `dotnet test` gate before STEP 8 |
 | `.claude/commands/new-day.md` | post-close | Added Test Gate section in completion-checklist scaffold template; skip condition for pure-docs days |
-| `.claude/commands/deploy.md` | post-close | Step 0 renamed to "Pre-deploy gates"; added 0a: `dotnet test` must pass before pillars audit; deployment-log.md template updated with dotnet test result line |
+| `.claude/commands/deploy.md` | post-close | Step 0 renamed to "Pre-deploy gates"; added 0a: `dotnet test` must pass before pillars audit; deployment-log.md template updated with `o` |
 | `docs/certifications/az-104/objectives.md` | post-close | Expanded stub to full domain map with sub-objectives across all 5 domains |
 | `CLAUDE.md` | post-close | Test count updated from 19 → 25; then hardcoded count removed entirely (self-maintaining) |
 | `src/lab-observability-api.Tests/Fakes/FakeBatchChatModelProvider.cs` | regression-tests | Added ExceptionToThrow/Reset()/ThrowIfSet() matching FakeChatModelProvider pattern |
@@ -82,5 +82,5 @@
 | `src/lab-observability-api/Services/Claude/ClaudeApiClient.cs` | bug-fix | JsonException in SSE loop silently swallowed — now logs warning before continuing |
 | `src/lab-observability-api/Services/Claude/ClaudeBatchApiClient.cs` | bug-fix | GetStatusAsync and GetResultsAsync hardcode isTransient:false even for 429/503 — fixed to correct transient detection |
 | `.claude/hooks/cert-tag.json` | cert-cleanup | Removed retired AI-102 tags; updated to AZ-104/AZ-305 only |
-| `.gitignore` | cert-cleanup | Added .claude/cert-tags-today.txt (hook-generated, machine-local) |
+| `.gitignore` | cert-cleanup | Added `c` (hook-generated, machine-local) |
 | `docs/certifications/az-104/objectives.md` | cert-expansion | Expanded stub to full domain map with sub-objectives across all 5 domains |

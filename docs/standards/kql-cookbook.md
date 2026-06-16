@@ -7,6 +7,7 @@ or its underlying Log Analytics workspace `law-ai-lab-dev-eastus-gio`.
 Save each query as a Query Pack entry in the workspace for one-click reuse.
 
 ## Conventions
+
 - Replace `0HN...` placeholders with real correlation IDs from response headers
 - All queries assume W3C Trace Context propagation (active since Day 6)
 - Custom dimensions used: `CorrelationId`, `llm.tokens.input`, `llm.tokens.output`,
@@ -18,6 +19,7 @@ Save each query as a Query Pack entry in the workspace for one-click reuse.
 ---
 
 ## 1. Latency p50/p95/p99 for /api/ai/chat (last hour)
+
 ```kql
 requests
 | where timestamp > ago(1h)
@@ -32,6 +34,7 @@ requests
 ```
 
 ## 2. Top 10 slowest chat requests (last 24h) with correlation IDs
+
 ```kql
 requests
 | where timestamp > ago(24h)
@@ -46,6 +49,7 @@ requests
 ```
 
 ## 3. Error rate by hour (5xx + dependency failures)
+
 ```kql
 requests
 | where timestamp > ago(24h)
@@ -59,6 +63,7 @@ requests
 ```
 
 ## 4. Token usage per hour (input + output)
+
 ```kql
 // Activity spans land in dependencies, NOT traces
 dependencies
@@ -74,6 +79,7 @@ dependencies
 ```
 
 ## 5. Provider latency vs gateway latency
+
 ```kql
 let gateway =
     requests
@@ -94,6 +100,7 @@ gateway
 ```
 
 ## 6. Failures classified by category
+
 ```kql
 exceptions
 | where timestamp > ago(24h)
@@ -107,6 +114,7 @@ exceptions
 ```
 
 ## 7. Trace a single correlation ID end-to-end
+
 ```kql
 union requests, dependencies, traces, exceptions
 | where customDimensions.CorrelationId == "0HN..."
@@ -116,6 +124,7 @@ union requests, dependencies, traces, exceptions
 ```
 
 ## 8. Cache hit rate (last 1 hour) — Day 7+
+
 ```kql
 dependencies
 | where name == "claude.chat.api"
@@ -132,6 +141,7 @@ dependencies
 ```
 
 ## 9. Estimated token cost savings (last 24 hours) — Day 7+
+
 ```kql
 // claude-sonnet-4-6 pricing: $3/M input tokens, $0.30/M cached read tokens
 // Cached write billed at 125% of input rate ($3.75/M)
@@ -206,6 +216,7 @@ customMetrics
 ---
 
 ## 11. Streaming TTFT p50/p95/p99 (last hour)
+
 ```kql
 customMetrics
 | where timestamp > ago(1h)
@@ -221,6 +232,7 @@ customMetrics
 ```
 
 ## 12. Streaming TTFT by model (last 24h)
+
 ```kql
 customMetrics
 | where timestamp > ago(24h)

@@ -25,6 +25,7 @@ Preparation includes:
 The purpose is to create a stable environment where workloads can be deployed safely.
 
 ## Topics to Learn
+
 - Landing zones
 - Governance
 - Resource organization
@@ -41,7 +42,7 @@ Each section learned is broken down into 5 steps:
 
 # Landing Zone
 
-1. Plain English: 
+1. Plain English:
     A landing zone is a pre-built cloud environment where applications can safely live.
 
 2. What an architect thinks about:
@@ -79,7 +80,7 @@ Each section learned is broken down into 5 steps:
     c. What naming standards must be followed?
     d. How do we control cost?
     e. How do we enforce security?
-    
+
 3. What it looks like in Azure
     a. Azure Policy - enforce rules (e.g., only East US allowed)
     b. RBAC (Role-Based Access Control) - who can do what
@@ -164,7 +165,7 @@ Each section learned is broken down into 5 steps:
         gio-architecture-prod
 
 5. Key takeaway
-    Subscriptions are boundaries for cost, access, and risk.   
+    Subscriptions are boundaries for cost, access, and risk.
 
 # Management Groups
 
@@ -187,7 +188,7 @@ Each section learned is broken down into 5 steps:
         └─ Landing Zones
             ├─ Dev
             ├─ Test
-            └─ Prod    
+            └─ Prod
     b. Policies applied at higher levels flow down.
     c. Why this matters
         Instead of configuring 10 subscriptions manually:
@@ -213,4 +214,5 @@ This is the mental model you want:
     Resources (apps, databases, AI services)
 
 ## Notes
+
 This file will store my notes on Azure Cloud Adoption Framework.

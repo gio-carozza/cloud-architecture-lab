@@ -37,7 +37,7 @@ the first request.
 
 ## Sequence Flow
 
-```
+```text
 Caller                  Gateway                   Anthropic Batch API
   |                        |                               |
   |-- POST /api/ai/batch ->|                               |

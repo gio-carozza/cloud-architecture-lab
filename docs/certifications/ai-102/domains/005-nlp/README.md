@@ -1,7 +1,7 @@
 # AI-102 Domain 5: Implement natural language processing solutions
 
 **Weight:** 15–20%
-**Source:** https://learn.microsoft.com/certifications/resources/study-guides/ai-102
+**Source:** <https://learn.microsoft.com/certifications/resources/study-guides/ai-102>
 **Fetched:** 2026-06-03 (skills as of December 23, 2025)
 
 > ⚠️ **AI-102 retires June 30, 2026.**
@@ -9,6 +9,7 @@
 ## Sub-topics
 
 ### Analyze and translate text
+
 - Extract key phrases and entities
 - Determine sentiment of text
 - Detect the language used in text
@@ -16,6 +17,7 @@
 - Translate text and documents by using the Azure Translator in Foundry Tools service
 
 ### Process and translate speech
+
 - Integrate generative AI speaking capabilities in an application
 - Implement text-to-speech and speech-to-text using Azure Speech in Foundry Tools
 - Improve text-to-speech by using Speech Synthesis Markup Language (SSML)
@@ -24,6 +26,7 @@
 - Translate speech-to-speech and speech-to-text by using the Azure Speech in Foundry Tools service
 
 ### Implement custom language models
+
 - Create intents, entities, and add utterances
 - Train, evaluate, deploy, and test a language understanding model
 - Optimize, backup, and recover language understanding model
@@ -38,5 +41,6 @@
 - Implement custom translation, including training, improving, and publishing a custom model
 
 ## MS Learn resources
+
 - [Azure AI Language](https://learn.microsoft.com/en-us/azure/cognitive-services/luis/)
 - [Azure AI Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)

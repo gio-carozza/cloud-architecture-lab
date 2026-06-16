@@ -1,9 +1,11 @@
 # ADR-001: Adopt Azure as the Cloud Platform for the Learning Lab
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-03-15
 
 ## Context

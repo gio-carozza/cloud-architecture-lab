@@ -19,6 +19,7 @@ ADR-009 put caching inside the seam. ADR-010 takes batch outside. The fact that 
 test produced opposite answers is not inconsistency — it's the test working as designed.
 
 The test: does this change alter the operation set or break substitutability?
+
 - Caching: no new operations, `SendAsync` returns the same `ChatResponse`, a
   non-caching provider is still fully substitutable. Inside the seam.
 - Batch: three new operations, no `ChatResponse` returned from submit (a handle instead),

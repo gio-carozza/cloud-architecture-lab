@@ -1,6 +1,7 @@
 # Day 7 → AI-102 Mapping
 
 ## What Day 7 covered (build side)
+
 - Anthropic prompt caching via `cache_control: {"type":"ephemeral","ttl":"1h"}` annotation
 - `AnthropicOptions.EnablePromptCaching` — operational toggle, no redeploy required
 - `AnthropicOptions.SystemPrompt` — gateway-managed system prompt kept in config, not code
@@ -13,6 +14,7 @@
 ## AI-102 objectives directly exercised
 
 ### Domain 1 — Plan and Manage an Azure AI Solution
+
 - [x] **Manage costs for Azure AI services**
   - Prompt caching reduces input token costs by ~90% on cached content. The pattern
     (annotate stable content, measure hit rate, surface savings as a metric) is identical
@@ -29,6 +31,7 @@
     `llm.cache.read_tokens` and `llm.cache.creation_tokens`.
 
 ### Domain 6 — Implement Generative AI Solutions
+
 - [x] **Optimize Azure OpenAI usage**
   - Azure OpenAI supports prompt caching for compatible models. The mechanism differs
     in annotation format (no explicit `cache_control` block — Azure OpenAI caches
@@ -47,15 +50,18 @@
 ## Concepts at four levels
 
 ---
+
 ## Prompt Caching
 
 ### If you're 10 years old
+
 Imagine every time you called a customer service line, the rep had to read a 10-page
 manual before answering you. Prompt caching is like giving the rep a "cheat sheet"
 they can keep on their desk. The first caller pays for printing the cheat sheet. Every
 caller after that gets a faster, cheaper answer because the cheat sheet is already there.
 
 ### If you're a CEO
+
 Prompt caching cuts AI input token costs by roughly 90% on the cached portion — for
 any AI feature with a static system prompt, that means paying full price once and ~10%
 on every subsequent request. At 10,000 daily requests with a 3,000-token system prompt,
@@ -63,6 +69,7 @@ uncached cost is ~$90/day; cached cost drops to ~$9/day. That's $30,000/year per
 from one configuration change.
 
 ### If you're an Engineer
+
 Annotate stable content blocks with `cache_control: {"type":"ephemeral","ttl":"1h"}`.
 Verify it's working by checking `cache_creation_input_tokens > 0` on the first request
 and `cache_read_input_tokens > 0` on subsequent requests. Common failures: prompt under
@@ -71,6 +78,7 @@ model without specifying a TTL — Claude 4 silently ignores `{"type":"ephemeral
 a `ttl` field. Log both fields as Activity tags; alert on hit rate dropping below threshold.
 
 ### If you're an Architect
+
 Anthropic (and Azure OpenAI for compatible models) implements prompt caching as a
 server-side KV store keyed on a prefix hash of the request content. Annotating a
 content block with `cache_control: {"type":"ephemeral","ttl":"1h"}` signals the
@@ -93,15 +101,18 @@ provider's minimum cacheable size (1024 tokens for most Anthropic models) and co
 Always verify with a prompt known to exceed the threshold.
 
 ---
+
 ## Cache Hit Rate as an SLO Metric
 
 ### If you're 10 years old
+
 If your school library started tracking how often kids found a book they needed vs.
 had to order it from another library, that "find rate" would tell the librarian whether
 the collection was working. Cache hit rate does the same thing for your AI gateway —
 it tells you whether the "pre-loaded answers" are actually being used.
 
 ### If you're a CEO
+
 If your cache hit rate drops to zero — because someone changed the system prompt or a
 TTL expired — your AI cost multiplies by 10x with no error, no alert, and no notification.
 You discover it on the next invoice. Cache hit rate as an SLO metric means an alert fires
@@ -109,6 +120,7 @@ within minutes of the regression, and the on-call engineer can fix it before it 
 material. This is the difference between proactive cost governance and reactive damage control.
 
 ### If you're an Engineer
+
 Compute hit rate as `cache_read_input_tokens / (cache_read_input_tokens + cache_creation_input_tokens)`.
 Track it as a custom metric in Application Insights using `TelemetryClient` or an OpenTelemetry
 counter. Write a KQL scheduled query alert that fires when `avg(hitRate) < 0.1` during a
@@ -117,9 +129,11 @@ Common mistake: alerting on absolute miss count — this fires legitimately on c
 TTL expiry; hit rate percentage in a traffic-bearing window is the correct signal.
 
 ### If you're an Architect
+
 Cache hit rate (`cacheHits / totalRequests * 100`) is a leading indicator of cost
 efficiency. It belongs on an SLO dashboard alongside latency and error rate — not buried
 in logs. The distinction matters because:
+
 - A log field is queried reactively (you look when something seems wrong)
 - An SLO metric is queried proactively (an alert fires before you look)
 
@@ -134,15 +148,18 @@ are expected on cold start and after TTL expiry. The signal is miss-to-hit ratio
 time in a traffic-bearing window, not absolute miss count.
 
 ---
+
 ## Token Cost Attribution
 
 ### If you're 10 years old
+
 If you and three friends all use the same shared phone plan, someone needs to track
 who made which calls so the bill gets split fairly. Token attribution is the same idea
 for AI costs — tracking which team, feature, or user consumed how many tokens, so
 you know who to charge or where to optimize.
 
 ### If you're a CEO
+
 Without token attribution, you have one AI bill for the entire company and no way to
 break it down. You can't tell finance which product is driving spend, you can't hold
 teams accountable for cost efficiency, and you can't identify which feature to optimize
@@ -150,11 +167,13 @@ first. Token attribution turns the bill into a line-item report. It's the founda
 of any internal AI chargeback model.
 
 ### If you're an Engineer
+
 Tag every telemetry span with a `caller_id` or `team_id` dimension at the gateway layer.
 In .NET, set it as an Activity tag: `activity.SetTag("gateway.caller_id", callerId)`.
 This flows through to `customDimensions` in App Insights. Query: `dependencies | where name == "claude.chat.api" | summarize totalInputTokens = sum(toint(customDimensions["llm.tokens.input"])) by tostring(customDimensions["gateway.caller_id"])`. The `caller_id` must be propagated from the inbound request — typically from a JWT claim or API key lookup — not invented in the provider layer.
 
 ### If you're an Architect
+
 In enterprise AI gateways, every request produces a usage tuple: `(input_tokens,
 output_tokens, cache_read_tokens, cache_creation_tokens)`. These fields, surfaced as
 Activity tags on distributed traces, flow into Application Insights and become queryable
@@ -201,6 +220,7 @@ content. The stable prefix caches; the dynamic portion bills normally. This is a
 design decision at annotation time, not a binary cache-on/off choice.
 
 ## Gaps to study (NOT covered by Day 7 — read on Microsoft Learn)
+
 - Azure OpenAI Provisioned Throughput Units (PTU) — reserved capacity vs pay-as-you-go
 - Azure OpenAI prefix caching (automatic, no annotation required — differs from Anthropic)
 - Content Safety integration for cost-responsible filtering before expensive model calls
@@ -209,6 +229,7 @@ design decision at annotation time, not a binary cache-on/off choice.
 - Batch API for non-latency-sensitive workloads (Day 8 target)
 
 ## Action items
+
 - [ ] Read MS Learn: "Optimize Azure OpenAI costs" — learn.microsoft.com/azure/ai-services/openai/how-to/prompt-caching
 - [ ] Read MS Learn: "Monitor Azure OpenAI" — usage metrics and cost dashboards
 - [ ] Note: Azure OpenAI prompt caching minimum is 1024 tokens (same as Anthropic 3.x); verify current threshold before exam

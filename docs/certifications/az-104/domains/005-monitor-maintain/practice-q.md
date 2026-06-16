@@ -1,6 +1,7 @@
 # Practice Questions — Monitor and maintain Azure resources
 
 ## Day 007 additions (2026-06-03)
+
 *5 questions — KQL, App Insights tables, alert rules, custom dimensions*
 
 ---

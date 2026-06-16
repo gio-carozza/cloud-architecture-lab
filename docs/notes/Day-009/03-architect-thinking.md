@@ -22,7 +22,7 @@ Does this operation have a genuinely different lifecycle and error model, or is 
 
 Anthropic's streaming response is `text/event-stream` (Server-Sent Events). The wire format is line-based:
 
-```
+```text
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
 
@@ -37,6 +37,7 @@ data: {"type":"message_stop"}
 ```
 
 Key implementation notes:
+
 - Read the response stream line by line; blank line = end of event
 - Only `content_block_delta` events with `delta.type = "text_delta"` carry text to yield
 - `message_delta` carries `stop_reason` and final `output_tokens` — yield the final `ChatChunk` with usage here
@@ -46,6 +47,7 @@ Key implementation notes:
 
 **Azure App Service SSE pass-through:**
 App Service on Linux (the lab's tier) passes SSE through without modification as long as:
+
 - `Cache-Control: no-cache` is set (prevents proxy buffering)
 - `X-Accel-Buffering: no` is set (nginx directive — App Service uses nginx as reverse proxy)
 - Response flushing is explicit: call `HttpResponse.Body.FlushAsync()` after each chunk
@@ -57,6 +59,7 @@ If the streaming works locally but chunks arrive all at once from Azure, missing
 ## 3. No resilience pipeline on the streaming client
 
 The synchronous `ClaudeApiClient` has `AddStandardResilienceHandler`. The streaming path must NOT retry on the SSE connection because:
+
 1. Streaming starts emitting content immediately — a retry after partial output would duplicate tokens
 2. If a stream is interrupted mid-way (500 or network drop), the caller has already received partial content; the correct recovery is caller-side re-connection with a `Last-Event-ID`, not a transparent retry at the gateway layer
 

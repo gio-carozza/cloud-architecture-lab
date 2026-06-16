@@ -3,6 +3,7 @@
 ## Code
 
 ### Contracts (Phase A)
+
 - [x] `Models/AI/BatchProcessingStatus.cs` — enum: `InProgress`, `Canceling`, `Ended`
 - [x] `Models/AI/BatchJob.cs` — submit return: id, status, requestCount, createdAt, expiresAt
 - [x] `Models/AI/BatchJobStatus.cs` — poll return: id, status, per-bucket counts (succeeded, errored, canceled, expired)
@@ -10,17 +11,20 @@
 - [x] `Services/AI/IBatchChatModelProvider.cs` — `SubmitBatchAsync`, `GetBatchStatusAsync`, `GetBatchResultsAsync`, `ProviderName`
 
 ### Anthropic implementation (Phase B)
+
 - [x] `Services/Claude/ClaudeBatchApiClient.cs` — submit (`POST /v1/messages/batches`), status (`GET /{id}`), results (`GET /{id}/results` JSONL stream)
 - [x] `Services/AI/ClaudeBatchChatModelProvider.cs` — implements `IBatchChatModelProvider`, wraps `ClaudeBatchApiClient`
 - [x] DI registration: `IBatchChatModelProvider` → `ClaudeBatchChatModelProvider` scoped in `Program.cs`
 - [x] No resilience pipeline on submit (duplicate batch on retry = billing error)
 
 ### API surface (Phase C)
+
 - [x] `Controllers/AiBatchController.cs` — `POST /api/ai/batch` (submit), `GET /api/ai/batch/{id}` (status), `GET /api/ai/batch/{id}/results` (retrieve)
 - [x] All endpoints return `ApiError` with `correlationId` on failure (no stack traces)
 - [x] `IChatModelProvider` / `ChatRequest` / `ChatResponse` — NOT modified
 
 ### Telemetry (Phase D)
+
 - [x] `GatewayTelemetry.BatchJobsSubmitted` counter added (`ai.provider.batch.submitted`)
 - [x] `GatewayTelemetry.BatchJobsCompleted` counter added (`ai.provider.batch.completed`)
 - [x] `GatewayTelemetry.BatchResultCount` histogram added (`ai.provider.batch.result_count`)

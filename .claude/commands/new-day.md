@@ -1,8 +1,9 @@
-﻿# /new-day
+# /new-day
 
 Scaffold a new day in the AI Engineer → Forward-Deployed Engineer → LLM Architect roadmap.
 
 ## Usage
+
 `/new-day 6 observability-and-resilience`
 
 ## What this does
@@ -99,7 +100,7 @@ See 04-posture-check.md (filled at end of day, BEFORE marking complete)
 <name the corner you were tempted to cut, and whether you cut it>
 
 ## 3. What did I try, fail at, and learn?
-<add to docs/standards/_principles.md "Graveyard" table>
+<add to docs/standards/graveyard.md>
 
 ## 4. Could I explain today's work at all four levels?
 
@@ -214,6 +215,7 @@ See `src/lab-observability-api.Tests/` for existing patterns (WebApplicationFact
 fake providers, collection fixture, SSE headers, correlation ID round-trip).
 
 ## Reminders
+
 - Use 3-digit zero-padded day numbers (Day-006, not Day-6)
 - Inside the day folder, use numeric reading-order prefix (01-summary.md, 02-completion-checklist.md, …); no day prefix
 - In shared folders (architecture/, etc.), KEEP the day prefix

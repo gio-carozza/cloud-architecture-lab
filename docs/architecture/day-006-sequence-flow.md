@@ -24,7 +24,7 @@ ClaudeChatModelProvider
   v
 ClaudeApiClient
   |
-  | POST https://api.anthropic.com/v1/messages
+  | POST <https://api.anthropic.com/v1/messages>
   v
 Anthropic Claude API
   |

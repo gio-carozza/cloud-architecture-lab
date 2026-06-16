@@ -11,6 +11,7 @@ allowed-tools: Read, Write
 Read `docs/notes/Day-NNN/01-summary.md`.
 
 Confirm:
+
 1. The file exists.
 2. The file contains the section heading `## Whose Problem Am I Solving?`
 
@@ -31,6 +32,7 @@ Read `CLAUDE.md`. Find the line beginning `**Current phase:`. Extract the phase 
 ## STEP 2 — Read today's context
 
 Read `docs/notes/Day-NNN/01-summary.md`. Extract:
+
 - The body of the `## Whose Problem Am I Solving?` section.
 - The primary ADR decision line if present in the day's artifact list.
 
@@ -57,6 +59,7 @@ From the phase rows read in STEP 3, identify:
 ## STEP 5 — Emit the lens block
 
 Build the block below. **HARD CAPS — count every line before writing:**
+
 - PRIMARY block: posture line (1) + question line (1) + four level-lines (4) = **6 lines**
 - Each secondary: 1 line each
 - Blank lines between sections do NOT count toward the cap
@@ -64,7 +67,7 @@ Build the block below. **HARD CAPS — count every line before writing:**
 
 If the block would exceed 12 content lines, cut a secondary or shorten a level-line to one sentence. Never cut the PRIMARY.
 
-```
+```markdown
 ### Collaboration Lens (Day NNN)
 
 **Primary — [Collaborator Name]**

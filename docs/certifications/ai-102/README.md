@@ -3,6 +3,7 @@
 > ⚠️ **Retired June 30, 2026.** This folder is a historical record. Successor: **AI-103** (Azure AI Apps and Agents Developer Associate) — Phase 2, ~Day 21+. Do not schedule AI-102.
 
 ## Why this cert first (alongside build)
+
 AI-102 is the most directly applicable cert to the AI Gateway work. Every
 observability, prompt management, and Azure OpenAI integration topic in the
 exam maps to a build day. Studying it in parallel with the roadmap is the
@@ -14,6 +15,7 @@ highest-leverage cert path.
 > revision was announced.
 
 ## Status
+
 - [ ] Skills-measured PDF downloaded → `objectives.md` populated
 - [ ] Free Microsoft Learn path completed
 - [ ] First practice exam attempted (baseline score)
@@ -22,8 +24,10 @@ highest-leverage cert path.
 - [ ] Exam passed
 
 ## Domain Map (high-level — verify against current PDF)
+
 Domain weights and exact wording shift with revisions. The structure has
 historically been:
+
 1. **Plan and manage an Azure AI solution** (~15–20%)
 2. **Implement decision support solutions** (~10–15%)
 3. **Implement computer vision solutions** (~15–20%)
@@ -34,6 +38,7 @@ historically been:
 The generative AI domain is where build-day work most directly converts.
 
 ## Build → Cert Reinforcement
+
 | Day | Topic | Domain Touched |
 |---|---|---|
 | 005 | Provider abstraction, secrets handling | Plan and manage |
@@ -43,18 +48,21 @@ The generative AI domain is where build-day work most directly converts.
 | TBD | Content safety / responsible AI | Plan and manage |
 
 ## Study Cadence (suggested)
+
 - **Daily (15 min):** Read one Microsoft Learn module section
 - **Weekly (1 hr):** One labbed scenario tied to roadmap work
 - **Bi-weekly (1 hr):** Practice questions on covered domains
 - **Pre-exam week:** Two full practice exams + weak-area drill
 
 ## Resources
+
 - Microsoft Learn: AI-102 learning path (free, official)
 - Skills-measured PDF: from the AI-102 page on learn.microsoft.com
 - Practice: MeasureUp (paid, official), Tutorials Dojo, Whizlabs
 - Microsoft Documentation: Azure OpenAI, AI Search, Content Safety, Document Intelligence
 
 ## Files in this folder
+
 - `README.md` (this file)
 - `objectives.md` — full skills-measured outline with checkboxes
 - `study-notes/` — per-domain notes

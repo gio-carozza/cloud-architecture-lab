@@ -7,19 +7,23 @@ allowed-tools: Read, Write
 # Lab.Observability.Api Conventions
 
 ## When to use
+
 - Adding any new code to `src/lab-observability-api/`
 - Creating controllers, services, options classes, middleware
 - Implementing a new `IChatModelProvider`
 - Reviewing existing code for compliance
 
 ## Namespace & Folder Layout
+
 - Root namespace: `Lab.Observability.Api`
 - Folder = namespace segment:
   - `Controllers/` → `Lab.Observability.Api.Controllers`
-  - `Providers/` → `Lab.Observability.Api.Providers`
+  - `Services/AI/` → `Lab.Observability.Api.Services.AI` (provider interfaces + implementations)
+  - `Services/Claude/` → `Lab.Observability.Api.Services.Claude` (Anthropic transport)
   - `Models/` → `Lab.Observability.Api.Models`
   - `Options/` → `Lab.Observability.Api.Options`
   - `Middleware/` → `Lab.Observability.Api.Middleware`
+  - `Telemetry/` → `Lab.Observability.Api.Telemetry`
 
 ## Provider Abstraction (CRITICAL — do not break)
 
@@ -28,12 +32,19 @@ The seam is `IChatModelProvider`. ALL LLM calls go through it.
 ```csharp
 public interface IChatModelProvider
 {
-    Task<ChatResponse> SendAsync(ChatRequest request, CancellationToken ct);
-    string ProviderName { get; }
+    Task<ChatResponse> SendAsync(ChatRequest request, CancellationToken cancellationToken = default);
+
+    // Default implementation degrades to a single terminal ChatChunk — non-streaming providers
+    // get substitutability for free. Override in ClaudeChatModelProvider for real SSE streaming.
+    IAsyncEnumerable<ChatChunk> StreamAsync(ChatRequest request, CancellationToken ct)
+    {
+        // default: call SendAsync, yield result as one terminal chunk
+    }
 }
 ```
 
 **Rules:**
+
 - `ChatRequest` and `ChatResponse` are PROVIDER-AGNOSTIC. No Anthropic-,
   OpenAI-, or Bedrock-specific types may leak into them.
 - Provider-specific quirks live INSIDE the provider implementation only.
@@ -57,6 +68,7 @@ public sealed class AnthropicOptions
 ```
 
 **Registration in Program.cs:**
+
 ```csharp
 builder.Services
     .AddOptions<AnthropicOptions>()
@@ -66,6 +78,7 @@ builder.Services
 ```
 
 **Consumption:**
+
 ```csharp
 public ClaudeChatModelProvider(IOptions<AnthropicOptions> options, ...)
 {
@@ -73,7 +86,7 @@ public ClaudeChatModelProvider(IOptions<AnthropicOptions> options, ...)
 }
 ```
 
-**Always:** `using Microsoft.Extensions.Options;` (the IOptions<T> gotcha).
+**Always:** `using Microsoft.Extensions.Options;` (the `IOptions<T>` gotcha).
 
 ## Secrets Handling
 
@@ -89,13 +102,13 @@ public ClaudeChatModelProvider(IOptions<AnthropicOptions> options, ...)
 
 ```csharp
 [ApiController]
-[Route("api/ai")]
-public class AiChatController : ControllerBase
+[Route("api/[controller]")]
+public class AiController : ControllerBase
 {
     private readonly IChatModelProvider _provider;
-    private readonly ILogger<AiChatController> _logger;
+    private readonly ILogger<AiController> _logger;
 
-    public AiChatController(IChatModelProvider provider, ILogger<AiChatController> logger)
+    public AiController(IChatModelProvider provider, ILogger<AiController> logger)
     {
         _provider = provider;
         _logger = logger;
@@ -113,6 +126,7 @@ public class AiChatController : ControllerBase
 ```
 
 **Rules:**
+
 - Controllers are THIN. No business logic. Delegate to providers/services.
 - Always accept `CancellationToken` — pass through to async calls.
 - Return `ActionResult<T>` for typed responses + status code flexibility.
@@ -148,12 +162,14 @@ public class ExceptionHandlingMiddleware
 and translated to safe HTTP status codes by the provider, not surfaced raw.
 
 ## Logging Conventions
+
 - Use structured logging only: `_logger.LogInformation("Sent {Tokens} to {Provider}", tokens, name);`
 - Never log secrets, API keys, or full prompt bodies in production.
 - Include correlation ID in every log scope.
 - Day 6 added Serilog + Application Insights — already wired; use `ILogger<T>` and the existing telemetry helpers.
 
 ## Common mistakes (avoid)
+
 - Putting Anthropic SDK types in `ChatRequest`/`ChatResponse` (breaks abstraction)
 - Reading config via `IConfiguration` directly instead of `IOptions<T>` (no validation)
 - Returning `Exception.Message` to clients (info disclosure)

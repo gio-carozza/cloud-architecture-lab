@@ -1,12 +1,13 @@
 # AZ-900 Domain 2: Describe Azure architecture and services
 
 **Weight:** 35–40%
-**Source:** https://learn.microsoft.com/certifications/resources/study-guides/az-900
+**Source:** <https://learn.microsoft.com/certifications/resources/study-guides/az-900>
 **Fetched:** 2026-06-03
 
 ## Sub-topics
 
 ### Describe the core architectural components of Azure
+
 - Describe Azure regions, region pairs, and sovereign regions
 - Describe availability zones
 - Describe Azure datacenters
@@ -16,6 +17,7 @@
 - Describe the hierarchy of resource groups, subscriptions, and management groups
 
 ### Describe Azure compute and networking services
+
 - Compare compute types, including containers, virtual machines, and functions
 - Describe virtual machine options, including Azure virtual machines, Azure Virtual Machine Scale Sets, availability sets, and Azure Virtual Desktop
 - Describe the resources required for virtual machines
@@ -24,6 +26,7 @@
 - Define public and private endpoints
 
 ### Describe Azure storage services
+
 - Compare Azure Storage services
 - Describe storage tiers
 - Describe redundancy options
@@ -32,6 +35,7 @@
 - Describe migration options, including Azure Migrate and Azure Data Box
 
 ### Describe Azure identity, access, and security
+
 - Describe directory services in Azure, including Microsoft Entra ID and Microsoft Entra Domain Services
 - Describe authentication methods in Azure, including single sign-on (SSO), multifactor authentication (MFA), and passwordless
 - Describe external identities in Azure
@@ -42,5 +46,6 @@
 - Describe the purpose of Microsoft Defender for Cloud
 
 ## MS Learn resources
+
 - [Azure documentation](https://learn.microsoft.com/en-us/azure/?product=featured)
 - [AZ-900 learning paths](https://learn.microsoft.com/en-us/credentials/certifications/exams/az-900#two-ways-to-prepare)

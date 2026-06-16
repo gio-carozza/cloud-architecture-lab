@@ -1,6 +1,7 @@
 # Practice Questions — Design identity, governance, and monitoring solutions
 
 ## Day 007 additions (2026-06-03)
+
 *5 questions — WAF Cost Optimization, observable cost controls, AI workload governance*
 
 ---

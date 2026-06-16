@@ -8,7 +8,7 @@ Adds SSE streaming to the interactive chat path. The existing synchronous `POST 
 
 ### Before (Day 8 state)
 
-```
+```text
 Client → POST /api/ai/chat → AiController → IChatModelProvider.ChatAsync()
                                                       ↓
                                            ClaudeApiClient (POST, waits for full body)
@@ -18,7 +18,7 @@ Client → POST /api/ai/chat → AiController → IChatModelProvider.ChatAsync()
 
 ### After (Day 9)
 
-```
+```text
 Client → POST /api/ai/chat/stream → AiController → IChatModelProvider.StreamAsync()
                                                              ↓
                                               ClaudeApiClient.StreamAsync()
@@ -53,7 +53,7 @@ Client → POST /api/ai/chat (sync, unchanged)
 
 Anthropic SSE events relevant to this implementation:
 
-```
+```text
 event: message_start      → extract input_tokens from usage
 event: content_block_delta → extract text_delta → yield ChatChunk(TextDelta)
 event: message_delta       → extract stop_reason + output_tokens → yield final ChatChunk

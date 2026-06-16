@@ -1,8 +1,9 @@
-﻿# /deploy
+# /deploy
 
 Deploy `lab-observability-api` to Azure App Service using the proven Kudu zip path.
 
 ## Usage
+
 `/deploy`
 
 ## What this does
@@ -42,26 +43,30 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
    new settings were applied and continue. **If the file exists but any setting
    fails to apply, halt immediately and report — do not proceed to publish.**
 
-2. Run `dotnet publish -c Release -o ./publish` from the API project
-3. Zip with `Compress-Archive -Path .\publish\*` (files at root)
-4. Ensure `WEBSITE_RUN_FROM_PACKAGE=1` is set
+1. Run `dotnet publish -c Release -o ./publish` from the API project
+2. Zip with `Compress-Archive -Path .\publish\*` (files at root)
+3. Ensure `WEBSITE_RUN_FROM_PACKAGE=1` is set
    - This calls `az webapp config appsettings set`, which hits
      `management.azure.com` and WILL reset on this network's TLS inspection.
    - BEFORE step 4, apply the SSL workaround:
+
      ```powershell
      az config set core.disable_ssl_certificate_verification=true
      ```
+
      Run step 4, then restore:
+
      ```powershell
      az config set core.disable_ssl_certificate_verification=false
      ```
+
    - If it STILL resets, use the ARM bearer-token path instead (see
      CLAUDE.md Gotchas): acquire a token with
      `az account get-access-token` and PUT the setting via
      `Invoke-RestMethod` against the ARM REST endpoint.
-5. Acquire ARM token: `az account get-access-token --query accessToken -o tsv`
-6. POST to Kudu publish API (uses Windows native TLS — not affected by the reset)
-7. Verify post-deploy, using `Invoke-RestMethod` (NOT `curl` — the curl alias
+4. Acquire ARM token: `az account get-access-token --query accessToken -o tsv`
+5. POST to Kudu publish API (uses Windows native TLS — not affected by the reset)
+6. Verify post-deploy, using `Invoke-RestMethod` (NOT `curl` — the curl alias
    triggers an IE-engine security prompt on this machine):
    - `GET /health` returns 200
    - `GET /swagger` loads
@@ -69,6 +74,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
    - Response carries `X-Correlation-Id` header (Day 6+)
 
 ## DO NOT
+
 - Deploy without a clean pillars audit — no RED items may be open at the time of step 4 (publish)
 - Use `az webapp deploy` (known to fail on this network)
 - Zip the `publish` folder itself (must be `publish\*`)
@@ -78,6 +84,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
   halt and report; never deploy code that expects a setting that isn't there
 
 ## Output
+
 Report each step's status. If any step fails, halt and surface the exact error.
 If the failure is a TLS reset on `management.azure.com`, state that explicitly
 and apply the SSL workaround before retrying.
@@ -122,6 +129,7 @@ bad zip layout, missing env vars. Empty table if none.)
 ```
 
 **Logging rules:**
+
 - Every test attempt is logged inline, in order — never delete a failed attempt
 - "Fix applied" goes between the failed attempt and the retry, inside the test block
 - The "Issues & fixes" table is for deployment-level problems (SSL reset, Kudu 401,

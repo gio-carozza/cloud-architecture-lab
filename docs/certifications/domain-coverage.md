@@ -22,6 +22,7 @@ Last updated: Day-009 cert-update (2026-06-08)
 ## Domain scaffold status
 
 ### AZ-900 (as of January 14, 2026)
+
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
 | 1 | Describe cloud concepts | 25–30% | ✅ | — |
@@ -29,6 +30,7 @@ Last updated: Day-009 cert-update (2026-06-08)
 | 3 | Describe Azure management and governance | 30–35% | ✅ | Day 6, 9 ✅ |
 
 ### AZ-104 (as of April 17, 2026)
+
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
 | 1 | Manage Azure identities and governance | 20–25% | ✅ | — |
@@ -38,6 +40,7 @@ Last updated: Day-009 cert-update (2026-06-08)
 | 5 | Monitor and maintain Azure resources | 10–15% | ✅ | Day 6 ✅, Day 7 ✅ |
 
 ### AZ-305 (as of April 17, 2026)
+
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
 | 1 | Design identity, governance, and monitoring solutions | 25–30% | ✅ | Day 7 |
@@ -46,6 +49,7 @@ Last updated: Day-009 cert-update (2026-06-08)
 | 4 | Design infrastructure solutions | 30–35% | ✅ | Day 6, 7, 8, 9 ✅ |
 
 ### AI-102 (as of December 23, 2025) — ⚠️ retired June 30, 2026 — historical record only
+
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|
 | 1 | Plan and manage an Azure AI solution | 20–25% | ✅ | Day 5, 6, 7, 8 ✅ |
@@ -56,9 +60,10 @@ Last updated: Day-009 cert-update (2026-06-08)
 | 6 | Implement knowledge mining and information extraction solutions | 15–20% | ✅ | — |
 
 ### AI-103 — Azure AI Apps and Agents Developer Associate (Beta — scaffold at Phase 2 ~Day 21)
+>
 > Domains not finalized. Run `/cert-scaffold AI-103` at Phase 2 start to build structure from the live study guide.
-> Cert page: https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/
-> Study guide: https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103
+> Cert page: <https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/>
+> Study guide: <https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103>
 
 | # | Domain | Weight | Scaffold | Content |
 |---|---|---|---|---|

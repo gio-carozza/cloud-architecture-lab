@@ -80,6 +80,7 @@ Design verification accordingly.
 The system prompt is gateway-managed, not caller-managed. Callers of the AI gateway
 post a user message; the gateway prepends the operational system prompt. Exposing
 system prompt as a field on `ChatRequest` would:
+
 - Leak an operational concern into a public contract
 - Allow callers to override gateway-level instructions (a security issue at
   the enterprise layer)
@@ -88,6 +89,7 @@ system prompt as a field on `ChatRequest` would:
 
 Keeping the system prompt in `AnthropicOptions` (bound from config/environment
 variables) means it is:
+
 - Controlled by the platform, not the consumer
 - Changeable without code deployment (App Service env var)
 - Guaranteed to be the same across all requests (cache key stability)
@@ -101,6 +103,7 @@ Two queries the gateway now enables. Add these to `docs/standards/kql-cookbook.m
 as Query 8 and Query 9.
 
 **Query 8 — Cache hit rate (last 1 hour)**
+
 ```kql
 dependencies
 | where name == "claude.chat.api"
@@ -117,6 +120,7 @@ dependencies
 ```
 
 **Query 9 — Estimated savings (last 24 hours)**
+
 ```kql
 // Assumes claude-opus-4-7 pricing: $15/M input tokens, $1.50/M cached read tokens
 // Cached write is billed at 125% of input rate ($18.75/M)
@@ -184,6 +188,7 @@ requests yet" when in fact caching is entirely inoperative.
 ### The response format evolved: nested `cache_creation` object
 
 Claude 4 usage responses include both:
+
 - The old flat field: `"cache_creation_input_tokens": N` (present for backward compat)
 - A new nested object: `"cache_creation": {"ephemeral_1h_input_tokens": N, "ephemeral_5m_input_tokens": N}`
 

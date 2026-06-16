@@ -217,18 +217,23 @@ It is not yet architected for growth, scale, or AI-heavy request patterns.
 # 6. Pillar summary
 
 ## Reliability
+
 Good enough for a first deployment milestone, but not production-resilient.
 
 ## Security
+
 Minimal and intentionally incomplete for the lab stage.
 
 ## Cost Optimization
+
 Appropriate for experimentation, not for sustained usage.
 
 ## Operational Excellence
+
 Strong learning value on Day 4, but still heavily manual.
 
 ## Performance Efficiency
+
 Fine for current scope, not yet designed for scale.
 
 ---
@@ -236,21 +241,27 @@ Fine for current scope, not yet designed for scale.
 # What would break in production?
 
 ## 1. Manual deployment process
+
 The current deployment approach depends on manual file publishing and manual placement into App Service. This is fragile, slow, and difficult to govern.
 
 ## 2. No slot or release safety
+
 A bad release would directly affect the live app because there is no staging slot or rollout safety net.
 
 ## 3. Weak startup/runtime observability
+
 Although the app now runs, deployment and startup troubleshooting exposed how difficult runtime diagnosis can be without strong logging and platform-integrated telemetry.
 
 ## 4. No access control
+
 The app is public and unauthenticated.
 
 ## 5. No environment separation
+
 There is no clean dev/test/prod lifecycle yet.
 
 ## 6. No IaC baseline
+
 The infrastructure is not yet reproducible through Bicep or Terraform.
 
 ---
@@ -288,7 +299,7 @@ The Day 4 architecture is small, but it establishes the first real hosting patte
 - failure visibility
 - repeatable deployment shape
 
-## If this evolved into an AI system, likely next layers would be:
+## If this evolved into an AI system, likely next layers would be
 
 - API gateway/front door
 - authentication layer

@@ -1,18 +1,22 @@
 ﻿# Day 009 — Streaming Responses on the Interactive Path
 
 ## Track
+
 Build
 
 ## Career Phase
+
 AI Engineer (Phase 1)
 
 ## Focus
+
 Add Server-Sent Events (SSE) streaming to the interactive chat path: a new
-POST /api/ai/chat/stream endpoint, a StreamAsync operation on the provider
+`O` endpoint, a StreamAsync operation on the provider
 seam, and a first-token-latency (TTFT) histogram so perceived latency becomes a
 first-class, queryable SLO — not a feeling.
 
 ## Why This Matters
+
 Interactive LLM UX lives or dies on time-to-first-token, not total completion
 time. A 6-second buffered response feels broken; the same 6 seconds with tokens
 arriving at 400ms feels instant. Every production chat surface (Claude, ChatGPT,
@@ -33,10 +37,11 @@ Today's question: can you tell from the logs whether a latency complaint is a TT
 
 **10yo:** Today we made the gateway answer like a typewriter instead of a printer — words appear one at a time — and we added a stopwatch on the very first word so anyone watching can tell if the AI is slow to start or slow to finish.
 **CEO:** The TTFT histogram means the first latency complaint from a customer demo is diagnosable from a dashboard — and that distinction (provider slow vs. model slow) determines whether we escalate to Anthropic or optimize our prompt.
-**Engineer:** IAsyncEnumerable<ChatChunk>, TTFT stopwatch, X-Accel-Buffering:no, RequestAborted propagation, SSE event:error frame — each is an on-call artifact as much as a feature; the histogram is what turns "it felt slow" into "p95 TTFT spiked at 14:32."
+**Engineer:** `IAsyncEnumerable<ChatChunk>`, TTFT stopwatch, X-Accel-Buffering:no, RequestAborted propagation, SSE event:error frame — each is an on-call artifact as much as a feature; the histogram is what turns "it felt slow" into "p95 TTFT spiked at 14:32."
 **Architect:** Streaming adds a failure mode sync paths don't have — the half-delivered response; the mid-stream error contract (event:error frame, correlationId only, never stack trace) is the architectural answer to "what does on-call see when the provider drops the stream at token 47?"
 
 **Also in frame:**
+
 - Security/AppSec/CISO — mid-stream error frame carries only correlationId + safe message; stack trace suppression on the streaming path requires the same discipline as the sync path, confirmed in the Day 9 pillars audit
 - Cloud & Model-Vendor Support — Anthropic SSE format (message_start / content_block_delta / message_delta / message_stop) is vendor-specific; the parser must handle all four event types or silently drop data
 
@@ -49,14 +54,15 @@ future-me-on-call, who needs to know whether a latency complaint is a TTFT probl
 fixes, indistinguishable without the histogram.
 
 ## What I Will Build
-- StreamAsync on IChatModelProvider returning IAsyncEnumerable<ChatChunk>
+
+- StreamAsync on IChatModelProvider returning `IAsyncEnumerable<ChatChunk>`
   (placement decision formalized in ADR-011 — see Architect Thinking).
 - ChatChunk — a provider-agnostic delta contract (text delta, nullable stop
   reason, optional end-of-stream usage). Reuses ChatRequest unchanged as input.
 - ClaudeApiClient streaming path: "stream": true, SSE event parsing
   (message_start → content_block_delta/text_delta → message_delta → message_stop),
   with cancellation propagated to the upstream HTTP call.
-- POST /api/ai/chat/stream on AiController: text/event-stream response,
+- `O` on AiController: text/event-stream response,
   response buffering disabled, HttpContext.RequestAborted wired through to cancel
   the Anthropic stream on client disconnect.
 - TTFT histogram (ai.provider.stream.ttft_ms) on GatewayTelemetry, plus a
@@ -70,12 +76,14 @@ fixes, indistinguishable without the histogram.
 ## Step-by-Step Execution
 
 ### Phase A — Contract & seam (the ADR-011 decision point)
-- Add StreamAsync(ChatRequest, CancellationToken) : IAsyncEnumerable<ChatChunk>
+
+- Add StreamAsync(ChatRequest, CancellationToken) : `IAsyncEnumerable<ChatChunk>`
   to IChatModelProvider.
 - Add the ChatChunk model (provider-agnostic; no Anthropic types).
 - Do NOT touch ChatRequest (reused as-is) or ChatResponse.
 
 ### Phase B — Provider streaming path
+
 - ClaudeApiClient: build the streaming payload (carry cache_control exactly as
   the buffered path does), open the SSE stream, parse deltas, yield chunks.
 - Start the TTFT stopwatch at request send; record the histogram the instant the
@@ -86,7 +94,8 @@ fixes, indistinguishable without the histogram.
   the outer span (Day 6 pattern preserved).
 
 ### Phase C — SSE endpoint
-- POST /api/ai/chat/stream on AiController: set Content-Type: text/event-stream,
+
+- `O` on AiController: set Content-Type: text/event-stream,
   Cache-Control: no-cache, X-Accel-Buffering: no; disable response buffering.
 - await foreach over StreamAsync, writing data: frames and flushing per chunk.
 - Wire HttpContext.RequestAborted as the CancellationToken.
@@ -94,17 +103,20 @@ fixes, indistinguishable without the histogram.
   frame on success.
 
 ### Phase D — Telemetry
-- GatewayTelemetry: add Histogram<double> StreamTtftMs and the
+
+- GatewayTelemetry: add `Histogram<double>` StreamTtftMs and the
   claude.chat.stream.api / ai.chat.stream spans; tag llm.stream.ttft_ms,
-  llm.stream.chunks, and end-of-stream llm.tokens.* + llm.cache.*.
+  llm.stream.chunks, and end-of-stream llm.tokens.*+ llm.cache.*.
 
 ### Phase E — Verify (local → Azure)
+
 - Local: stream a >=1100-token-system-prompt request; confirm tokens arrive
   incrementally, TTFT recorded, cache_read tokens > 0 on the second call.
-- Deploy via /deploy; confirm SSE is not buffered by App Service.
+- Deploy via `d`; confirm SSE is not buffered by App Service.
 - KQL: TTFT percentile query against the new histogram.
 
 ## Architect Thinking
+
 The load-bearing decision is not "how to stream" — it's "does streaming belong on
 IChatModelProvider or on a sibling seam?" Day 8 answered the equivalent question
 for batch with a sibling interface (IBatchChatModelProvider) on
@@ -144,18 +156,21 @@ disconnects — RequestAborted must cancel the Anthropic call or you pay for tok
 nobody reads.
 
 ### CEO Framing
+
 This is the difference between a chatbot that feels instant and one that feels
 broken — and it gives us a single number (time-to-first-token) we can put an SLA on,
 so "the AI is slow" becomes a measurable, defensible commitment instead of an
 argument.
 
 ### Phase Note
+
 Reinforces Phase 1 (AI Engineer): streaming/SSE is a core API-integration skill on
 the AI-102 path, and TTFT instrumentation extends the "token cost and latency as
 first-class telemetry" muscle from Days 6-8. It also pre-stages Phase 2 — a
 streaming endpoint is the minimum bar for any live customer demo.
 
 ## Artifacts
+
 - Code:
   - `Services/AI/IChatModelProvider.cs` (add StreamAsync)
   - `Models/AI/ChatChunk.cs` (new)
@@ -172,6 +187,7 @@ streaming endpoint is the minimum bar for any live customer demo.
   - `Infra/Day-009/appsettings-template.md` (no new app settings — streaming reuses existing Anthropic__* config)
 
 ## Portfolio Value
+
 Proves to a hiring panel that I can (1) implement production SSE streaming in .NET 8
 with correct cancellation and mid-stream error semantics, (2) instrument perceived
 latency as an SLO, not just total duration, and — most credibly — (3) re-apply my own
@@ -180,9 +196,11 @@ the prior one. That last point is what separates "follows patterns" from "owns t
 reasoning behind them."
 
 ## Completion Checklist
+
 See 02-completion-checklist.md.
 
 ## Certification Reinforcement
+
 - AZ-900: Secondary — Azure Monitor custom metrics/histograms; App Service as the
   compute host for a streaming workload.
 - AZ-104: None — no admin/ops surface today (AZ-104 parallel track starts ~Day 10-15).
@@ -193,4 +211,5 @@ See 02-completion-checklist.md.
   June 30, 2026 — keep this track moving.
 
 ## Architect Posture Check
+
 See 04-posture-check.md (filled at end of day, BEFORE marking complete).

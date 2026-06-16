@@ -4,6 +4,7 @@
 > Fill this at the END of the day, BEFORE marking the day complete.
 
 ## 1. Whose problem did I actually solve today?
+
 The human staring at a blank response box. Streaming solves PERCEIVED latency,
 not total latency — completion time is unchanged; first visible token now lands
 at p50 TTFT = 1354ms instead of dead air for the full generation.
@@ -16,6 +17,7 @@ single-digit milliseconds by comparison — the tail, when it lengthens, will be
 Anthropic latency or cold-start contamination, not gateway logic.
 
 ## 2. What would I refuse to ship if I were the only one in the room?
+
 CS1626 was fixed by restructuring to `try/finally` without a catch clause on the
 iterator's outer try block — CS1626 fires only when yield appears in a try WITH a
 catch. The provider-level safety net is intact: HTTP-level exceptions are caught
@@ -27,6 +29,7 @@ during streaming.","correlationId":"<id>"}\n\n`. Error handling was not deleted 
 satisfy the compiler — it was relocated to the appropriate layer.
 
 ## 3. What did I try, fail at, and learn?
+
 The real lesson is NOT "yield can't go in try/catch." It is: the C# iterator
 restriction forces a deliberate error-propagation design in streaming providers,
 and the naive fix (deleting the try/catch) silently drops provider-level
@@ -47,18 +50,21 @@ invite callers to condition on it rather than relying on the degrade guarantee.
 ## 4. Could I explain today's work at all four levels?
 
 ### 10-year-old
+
 Two friends answer a long question — one says nothing until fully done, the other
 starts talking word-by-word. Same answer, same time, but the second never looks
 broken. Taught the robot to be the second friend.
 
 ### CEO
+
 Users abandon a frozen-looking screen. Streaming starts the answer in ~1.3s
 instead of a blank box for the full duration — same cost, same total time, lower
 abandonment. Risk that was closed today: if the connection drops mid-answer we
 still log what we were billed for, so streaming is not a cost-tracking hole.
 
 ### Engineer
-StreamAsync returns IAsyncEnumerable<ChatChunk>. ClaudeApiClient.StreamChatAsync
+
+StreamAsync returns `IAsyncEnumerable<ChatChunk>`. ClaudeApiClient.StreamChatAsync
 parses Anthropic SSE (message_start / content_block_delta / message_delta carrying
 final usage / message_stop). Controller sets X-Accel-Buffering:no, FlushAsync per
 chunk, threads RequestAborted. CS1626 resolved by using try/finally (no catch
@@ -67,6 +73,7 @@ catch which writes `event: error\ndata: {ApiError}\n\n`. Default degrade on
 IChatModelProvider wraps SendAsync and yields one terminal ChatChunk.
 
 ### Architect
+
 The decision that matters is StreamAsync extending the interactive seam while
 batch got a sibling, and WHY that's consistent (Liskov, per ADR-011). At scale
 the streaming path is where the audit trail leaks: usage arrives in the final
@@ -81,6 +88,7 @@ test (no test project yet — deferred).
 *If any level is missing, the concept isn't fully owned — schedule a teach-back.*
 
 ## 5. Which pillar took the most damage today, and what's the minimum fix?
+
 The metric naming question is RESOLVED: renamed `ai.chat.stream.ttft_ms` →
 `ai.provider.stream.ttft_ms` to align with the `ai.provider.*` namespace used by
 every other metric. Zero dashboards or alerts depended on the old name. GREEN.

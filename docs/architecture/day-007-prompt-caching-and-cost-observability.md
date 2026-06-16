@@ -17,7 +17,7 @@ Day 6 established the full observability and resilience stack. Day 7 extends
 the `ClaudeApiClient` layer only — no new middleware, no new endpoints, no
 changes above the provider boundary.
 
-```
+```text
 Before (Day 6):
   ChatController
     └── ClaudeChatModelProvider
@@ -74,54 +74,54 @@ Existing metrics and tags (`llm.tokens.input`, `llm.tokens.output`,
 
 ## Sequence Flow — Cache Miss (first request after cold start or TTL expiry)
 
-```
+```text
 Client          ChatController      ClaudeChatModelProvider    ClaudeApiClient     Anthropic API
   │                  │                        │                      │                    │
   │ POST /chat       │                        │                      │                    │
   │─────────────────>│                        │                      │                    │
-  │                  │ CompleteAsync()         │                      │                    │
+  │                  │ CompleteAsync()        │                      │                    │
   │                  │───────────────────────>│                      │                    │
-  │                  │                        │ SendChatAsync()       │                    │
+  │                  │                        │ SendChatAsync()      │                    │
   │                  │                        │─────────────────────>│                    │
-  │                  │                        │                      │ POST /messages      │
-  │                  │                        │                      │ [system: array      │
+  │                  │                        │                      │ POST /messages     │
+  │                  │                        │                      │ [system: array     │
   │                  │                        │                      │  with cache_control]│
   │                  │                        │                      │───────────────────>│
   │                  │                        │                      │                    │
-  │                  │                        │                      │     usage:          │
-  │                  │                        │                      │  cache_creation=N   │
+  │                  │                        │                      │     usage:         │
+  │                  │                        │                      │  cache_creation=N  │
   │                  │                        │                      │<───────────────────│
   │                  │                        │                      │                    │
   │                  │                        │                      │ tag: llm.cache.creation_tokens=N
   │                  │                        │                      │ counter: CacheMisses++
-  │                  │ ChatResponse            │                      │                    │
+  │                  │ ChatResponse           │                      │                    │
   │<─────────────────────────────────────────────────────────────────│                    │
 ```
 
 ## Sequence Flow — Cache Hit (subsequent request within TTL)
 
-```
+```text
 Client          ChatController      ClaudeChatModelProvider    ClaudeApiClient     Anthropic API
   │                  │                        │                      │                    │
   │ POST /chat       │                        │                      │                    │
   │─────────────────>│                        │                      │                    │
-  │                  │ CompleteAsync()         │                      │                    │
+  │                  │ CompleteAsync()        │                      │                    │
   │                  │───────────────────────>│                      │                    │
-  │                  │                        │ SendChatAsync()       │                    │
+  │                  │                        │ SendChatAsync()      │                    │
   │                  │                        │─────────────────────>│                    │
-  │                  │                        │                      │ POST /messages      │
-  │                  │                        │                      │ [same cache_control │
-  │                  │                        │                      │  annotation]        │
+  │                  │                        │                      │ POST /messages     │
+  │                  │                        │                      │ [same cache_control│
+  │                  │                        │                      │  annotation]       │
   │                  │                        │                      │───────────────────>│
   │                  │                        │                      │                    │
-  │                  │                        │                      │     usage:          │
-  │                  │                        │                      │  cache_read=N       │
-  │                  │                        │                      │  (billed at ~10%)   │
+  │                  │                        │                      │     usage:         │
+  │                  │                        │                      │  cache_read=N      │
+  │                  │                        │                      │  (billed at ~10%)  │
   │                  │                        │                      │<───────────────────│
   │                  │                        │                      │                    │
   │                  │                        │                      │ tag: llm.cache.read_tokens=N
   │                  │                        │                      │ counter: CacheHits++
-  │                  │ ChatResponse            │                      │                    │
+  │                  │ ChatResponse           │                      │                    │
   │<─────────────────────────────────────────────────────────────────│                    │
 ```
 

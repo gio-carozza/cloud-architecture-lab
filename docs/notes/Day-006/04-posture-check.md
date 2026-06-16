@@ -4,6 +4,7 @@
 > Honest answers only. The graveyard is more valuable than the trophy case.
 
 ## 1. Whose problem did I actually solve today?
+
 The on-call engineer at 3 AM who gets paged when `/api/ai/chat` starts
 returning 500s. Without Day 6's work, they'd be staring at a black box.
 With it, they have correlation IDs, structured logs, latency percentiles,
@@ -16,6 +17,7 @@ gateway costs in tokens per hour.
 *If "the platform" was your first instinct, push harder until you can name a human.*
 
 ## 2. What would I refuse to ship if I were the only one in the room?
+
 - [ ] Returning raw exception messages or stack traces to clients (info disclosure)
 - [ ] Logging full prompt bodies (PII + secrets risk)
 - [ ] Retrying on 401s (wastes budget, alarms upstream)
@@ -26,6 +28,7 @@ If any of these slipped in under deadline pressure, name it here:
 I would stand my ground and not compromise quality over deadline.
 
 ## 3. What did I try, fail at, and learn?
+
 Full entries in the Graveyard table (`docs/standards/_principles.md`). Summary:
 
 - **`SamplingDuration=30s` + `AttemptTimeout=45s`** → startup validator threw. v10 enforces `SamplingDuration >= 2x AttemptTimeout`. Learned: startup validators catch a class of semantic errors no compiler can.
@@ -36,6 +39,7 @@ Full entries in the Graveyard table (`docs/standards/_principles.md`). Summary:
 ## 4. Could I explain today's work to a 10-year-old AND defend it at a doctorate level?
 
 ### 10-year-old version
+
 "We taught the AI gateway to keep a really detailed diary. Every time
 someone asks the AI a question, it writes down what was asked, how long
 it took, how much it cost, and what went wrong if anything broke. We
@@ -44,6 +48,7 @@ tries again instead of giving up. And if the service is really sick, it
 stops bothering it for a bit so it can recover."
 
 ### Doctorate-level version
+
 "Implemented a structured observability layer using Serilog as a logging
 library within a single OpenTelemetry export pipeline (ADR-008). Serilog
 formats to Console; the OTel ILoggerProvider exports to Azure Monitor via

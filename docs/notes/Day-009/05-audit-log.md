@@ -9,21 +9,23 @@
 > NOTE: audits current file state, not Day 009 snapshot. Code is at Day 009 completion.
 > Sources read: AiController.cs, ClaudeApiClient.cs (StreamChatAsync), ClaudeChatModelProvider.cs
 > (StreamAsync + try/finally posture fix), IChatModelProvider.cs, ChatChunk.cs,
-> GatewayTelemetry.cs, Infra/Day-009/appsettings-template.md, docs/notes/Day-009/07-files-changed.md
+> GatewayTelemetry.cs, `n`, `o`
 
 ### Reliability
+
 | Check | Status | Finding |
 |---|---|---|
 | R1 — HttpClient timeouts set | GREEN | `ClaudeApiClient` retains `InfiniteTimeSpan` — correct for streaming; `StreamChatAsync` uses `HttpCompletionOption.ResponseHeadersRead` with `CancellationToken` through every read; no new HttpClients added |
 | R2 — No retry on non-idempotent calls | GREEN | Resilience pipeline on `ClaudeApiClient` has `ShouldHandle = false` disabling retry — unchanged; applies to streaming path since both sync and async paths share the same client |
 | R3 — Circuit breaker not on batch/streaming | GREEN | Pre-stream connection errors throw `ClaudeProviderException` and trip the circuit breaker correctly; mid-stream `ReadLineAsync` errors are not exposed to `SendAsync` circuit breaker logic — no spurious trips from partial delivery |
-| R4 — ValidateOnStart() for IOptions<T> | YELLOW | No new `IOptions<T>` bindings added; carry-forward from Day 006 |
+| R4 — ValidateOnStart() for `IOptions<T>` | YELLOW | No new `IOptions<T>` bindings added; carry-forward from Day 006 |
 | R5 — New exceptions caught by global handler | GREEN | Pre-stream `ClaudeProviderException` caught by controller's own `catch (Exception ex)` → SSE error frame; global handler not involved for streaming errors; all pre-header 400 validations return before SSE headers committed |
 | R6 — CancellationToken threaded through async | GREEN | `HttpContext.RequestAborted` threaded through `StreamAsync` → `StreamChatAsync` → `SendAsync` and every `ReadLineAsync` call |
 
 **Pillar: YELLOW**
 
 ### Security
+
 | Check | Status | Finding |
 |---|---|---|
 | S1 — No secrets in source files | GREEN | No hardcoded API keys or secrets |
@@ -37,6 +39,7 @@
 **Pillar: GREEN**
 
 ### Cost Optimization
+
 | Check | Status | Finding |
 |---|---|---|
 | C1 — Prompt caching active on interactive path | GREEN | `StreamChatAsync` calls `BuildAnthropicRequest(payload)` — same function that adds `cache_control: {"type":"ephemeral","ttl":"1h"}` on sync path; caching fully active on streaming |
@@ -49,6 +52,7 @@
 **Pillar: GREEN**
 
 ### Performance Efficiency
+
 | Check | Status | Finding |
 |---|---|---|
 | P1 — Streaming sets X-Accel-Buffering: no | GREEN | `Response.Headers.Append("X-Accel-Buffering", "no")` set before first write |
@@ -61,6 +65,7 @@
 **Pillar: GREEN**
 
 ### Operational Excellence
+
 | Check | Status | Finding |
 |---|---|---|
 | O1 — New paths log structured event with CorrelationId | GREEN | `AiController.StreamChat` logs `CorrelationId` + `PromptLength` at start and mid-stream error; `ClaudeChatModelProvider.StreamAsync` logs TTFT on first chunk and full usage on completion; `CorrelationId` enriched via Serilog on all events |
@@ -68,11 +73,12 @@
 | O3 — New env vars in appsettings-template.md | GREEN | `Infra/Day-009/appsettings-template.md` correctly states no new app settings; streaming reuses existing `Anthropic__*` config |
 | O4 — files-changed.md has row for every file touched | GREEN | 44 rows covering all phases from scaffold through collab-lens |
 | O5 — KQL cookbook updated for new signals | GREEN | Queries 11 (TTFT p50/p95/p99) and 12 (TTFT by model) added per files-changed.md |
-| O6 — /health/ready reflects new required config | GREEN | No new required config; `/health/ready` unchanged |
+| O6 — `h`/ready reflects new required config | GREEN | No new required config; `/health/ready` unchanged |
 
 **Pillar: GREEN**
 
 ### Responsible AI
+
 | Check | Status | Finding |
 |---|---|---|
 | RA1 — Prompt/completion content NOT logged | GREEN | `AiController.StreamChat` logs `PromptLength` (count only); `ClaudeChatModelProvider.StreamAsync` logs model, TTFT, token counts — no prompt or completion text at any log level |
@@ -87,6 +93,7 @@
 ---
 
 ### Summary
+
 | Pillar | Result | Key finding |
 |---|---|---|
 | Reliability | YELLOW | R4: ValidateOnStart() carry-forward from Day 006 |
@@ -97,9 +104,11 @@
 | Responsible AI | YELLOW | RA3: content policy → generic SSE error (structural gap); RA6: audit trail present but not fault-injection tested |
 
 ### RED items → fixes
+
 None.
 
 ### YELLOW items → fixes
+
 - **R4** ValidateOnStart() not wired: carry-forward from Day 006 — **accepted debt — tracked for Day 010+**
 - **RA3** Content policy violation on streaming path → generic SSE error frame, not 422: SSE headers committed before `StreamAsync` call; 422 status structurally unreachable once `text/event-stream` is written; minimum fix = include `providerErrorCode` in the SSE error frame so callers can distinguish content policy from transient errors without changing HTTP status — **accepted debt — tracked for Day 010+**
 - **RA6** Streaming audit trail not fault-injection tested: `try/finally` path is correct by inspection but unverified under client disconnect at token 1, token N, or on network drop — **accepted per posture-check — tracked for Day 010+**

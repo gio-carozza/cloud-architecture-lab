@@ -28,10 +28,11 @@
 - [x] `EnablePromptCaching=false` path verified: payload falls back to `"system": "<string>"`
 
 > **Fixes required during verification:**
+>
 > 1. `claude-opus-4-6` (in user-secrets) does not activate caching — switched to `claude-sonnet-4-6`.
 > 2. `{"type":"ephemeral"}` without TTL produces 0 cache tokens on Claude 4 models — added `"ttl":"1h"`.
 > 3. `TryExtractUsage` updated to also sum `cache_creation.ephemeral_*_input_tokens` (new Anthropic API response format).
-
+>
 > **Files changed during verification:**
 >
 > | File | Change |

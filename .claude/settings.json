@@ -1,34 +1,22 @@
 {
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | tr -d '\\r' | { IFS= read -r f; [[ \"$f\" == *.md ]] && markdownlint --fix \"$f\"; } 2>/dev/null || true",
+            "statusMessage": "Linting markdown..."
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
-      "Read:**/*.cs",
-      "Read:**/*.csproj",
-      "Read:**/*.sln",
-      "Read:**/*.json",
-      "Read:**/*.md",
-      "Read:**/*.yml",
-      "Read:**/*.yaml",
-      "Read:**/*.bicep",
-      "Read:**/*.tf",
-      "Write:**/*.md",
-      "Write:**/*.cs",
-      "Write:**/*.csproj",
-      "Write:docs/**/*",
-      "Write:Infra/**/*",
-      "Write:src/**/*",
-      "Bash:dotnet build *",
-      "Bash:dotnet run *",
-      "Bash:dotnet test *",
-      "Bash:dotnet publish *",
-      "Bash:dotnet user-secrets *",
       "Bash:git status",
-      "Bash:git diff *",
-      "Bash:git log *",
-      "Bash:git add *",
-      "Bash:git commit *",
-      "Bash:az account show",
-      "Bash:az webapp config appsettings list *",
-      "Bash:az webapp log *"
+      "Bash:az account show"
     ],
     "deny": [
       "Read:**/.env",
@@ -42,5 +30,8 @@
       "Bash:git push --force *",
       "Bash:git reset --hard *"
     ]
+  },
+  "enabledPlugins": {
+    "microsoft-docs@claude-plugins-official": true
   }
 }

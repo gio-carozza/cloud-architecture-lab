@@ -5,12 +5,14 @@
 Move the AI Gateway from a working provider integration to a more production-oriented cloud AI service component.
 
 Day 5 delivered:
+
 - provider abstraction
 - Claude-backed endpoint
 - Azure deployment
 - basic operational success
 
 Day 6 adds:
+
 - resilience
 - observability
 - health modeling
@@ -35,6 +37,7 @@ The Day 6 scope includes:
 A functional AI endpoint is not yet a production-grade AI gateway.
 
 Without Day 6 hardening, the service has the following gaps:
+
 - difficult to trace individual requests across logs
 - external provider failures are not normalized well enough
 - provider timeouts and recurring failures are not bounded strongly enough
@@ -90,6 +93,7 @@ The service should emit logs, metrics, and traces to Azure Monitor/Application I
 ### `AiController`
 
 Responsibility:
+
 - receive API request
 - validate prompt presence
 - call the provider abstraction
@@ -98,11 +102,13 @@ Responsibility:
 ### `IChatModelProvider`
 
 Responsibility:
+
 - define the application-level abstraction for sending a chat request
 
 ### `ClaudeChatModelProvider`
 
 Responsibility:
+
 - map application request model to Claude request model
 - call `ClaudeApiClient`
 - shape the `ChatResponse`
@@ -110,6 +116,7 @@ Responsibility:
 ### `ClaudeApiClient`
 
 Responsibility:
+
 - own outbound provider HTTP behavior
 - classify provider failures
 - extract response text
@@ -118,6 +125,7 @@ Responsibility:
 ### `CorrelationIdMiddleware`
 
 Responsibility:
+
 - create or preserve `x-correlation-id`
 - store it in request context
 - return it in the response
@@ -126,6 +134,7 @@ Responsibility:
 ### `GatewayTelemetry`
 
 Responsibility:
+
 - define shared activity source
 - define counters and histograms for provider telemetry
 
@@ -134,12 +143,14 @@ Responsibility:
 ### `/health/live`
 
 Meaning:
+
 - the process is alive
 - the application pipeline is running
 
 ### `/health/ready`
 
 Meaning:
+
 - the service has required Anthropic configuration present
 - the app is prepared to attempt real provider calls
 
@@ -148,6 +159,7 @@ The readiness check intentionally does not call Anthropic on every request.
 ## Operational outcomes
 
 After Day 6, the service should allow an operator to answer:
+
 - did the request reach the app
 - which request failed
 - what provider was called
@@ -158,9 +170,11 @@ After Day 6, the service should allow an operator to answer:
 ## Portfolio value
 
 Day 6 changes the portfolio story from:
+
 - “I integrated Claude into an API”
 
 to:
+
 - “I designed and hardened an AI gateway with transport isolation, resilience, observability, health modeling, and stable error handling on Azure”
 
 That is a materially stronger architecture narrative.

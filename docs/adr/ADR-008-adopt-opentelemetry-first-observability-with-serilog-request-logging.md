@@ -1,9 +1,11 @@
 ﻿# ADR-008: Adopt OpenTelemetry-First Observability with Serilog for Request Logging
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-04-29
 
 ## Context
@@ -45,28 +47,34 @@ Serilog is a logging library inside that pipeline, not a parallel one.
 ## Alternatives Considered
 
 ### Alternative 1 — Original Day 6 plan: Serilog + classic AI SDK
+
 Install `Serilog.Sinks.ApplicationInsights` and
 `Microsoft.ApplicationInsights.AspNetCore`, remove the existing OTel wiring.
 
 Rejected:
+
 - Throws away working Day 5 instrumentation.
 - Locks observability to a single Azure-specific SDK on a deprecation runway.
 - Conflicts with future multi-cloud provider goals (Bedrock, Vertex, Foundry).
 - Microsoft's strategic direction for .NET observability is OTel-first.
 
 ### Alternative 2 — Run both pipelines in parallel
+
 Install everything, accept duplicate telemetry as a tradeoff.
 
 Rejected:
+
 - Duplicate request telemetry breaks every percentile, error rate, and count.
 - Two sampling algorithms with no shared state — un-reasonable about drops.
 - Doubles ingestion cost.
 - This is a broken design, not a tradeoff.
 
 ### Alternative 3 — OpenTelemetry only, no Serilog
+
 Use OTel's built-in `ILogger` integration and skip Serilog entirely.
 
 Considered seriously and partially adopted. Serilog earns its keep for:
+
 - `LogContext.PushProperty` enrichment (correlation IDs propagate cleanly through async).
 - `UseSerilogRequestLogging` middleware (rich, structured request logs in one line).
 - Console formatting during local development.
@@ -77,6 +85,7 @@ export pipeline. This ADR captures that distinction explicitly.
 ## Consequences
 
 ### Positive
+
 - Single telemetry pipeline → no duplicate signals, no cost amplification.
 - Vendor-neutral instrumentation → portable to multi-cloud.
 - Preserves Day 5 work → no rewrite of `GatewayTelemetry` or `ClaudeApiClient`.
@@ -84,12 +93,14 @@ export pipeline. This ADR captures that distinction explicitly.
 - Rich logging ergonomics via Serilog without the export coupling.
 
 ### Negative
+
 - Slightly less canonical Serilog wiring (no `WriteTo.ApplicationInsights`).
 - Requires understanding the boundary between "logging library" and
   "telemetry export pipeline" — this is a real concept that some
   developers conflate.
 
 ### Neutral / Tradeoffs
+
 - Some classic AI SDK conveniences (`TelemetryClient.TrackCustomEvent`,
   `TrackDependency`) are not directly available. They are replaced by
   `Activity` events and `Meter` counters, which the codebase already uses.
@@ -97,6 +108,7 @@ export pipeline. This ADR captures that distinction explicitly.
 ## Implementation Notes
 
 Files affected:
+
 - `lab-observability-api.csproj` — add `Serilog.AspNetCore`,
   `Serilog.Settings.Configuration`, `Serilog.Sinks.Console`, and
   `OpenTelemetry.Extensions.Hosting`.
@@ -108,6 +120,7 @@ Files affected:
   OTel instrumentation is preserved verbatim.
 
 NOT installed (explicitly avoided to prevent pipeline duplication):
+
 - `Microsoft.ApplicationInsights.AspNetCore`
 - `Serilog.Sinks.ApplicationInsights`
 
@@ -118,5 +131,5 @@ NOT installed (explicitly avoided to prevent pipeline duplication):
 - `docs/notes/Day-006/01-summary.md`
 - `.claude/skills/observability-net/SKILL.md` (must be updated to reflect
   this decision; the original guidance assumed classic AI SDK)
-- OpenTelemetry .NET docs: https://opentelemetry.io/docs/languages/net/
-- Azure Monitor OpenTelemetry distro: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
+- OpenTelemetry .NET docs: <https://opentelemetry.io/docs/languages/net/>
+- Azure Monitor OpenTelemetry distro: <https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable>

@@ -1,3 +1,3 @@
 ﻿# Day Mapping
 
-*To be populated by /cert-update.*
+*To be populated by `c`.*

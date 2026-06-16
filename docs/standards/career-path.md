@@ -53,6 +53,7 @@ problem. This phase ends when you can build reliably, not just experimentally.
 - [x] Prompt caching implemented and verified with token metrics — Day 7, ADR-009
 - [x] Batch API path implemented with cost controls — Day 8, ADR-010
 - [x] Observability: structured logs with correlation IDs, token usage per request — Day 6, ADR-006
+- [x] SSE streaming on interactive path, TTFT histogram, provider default-degrade — Day 9, ADR-011
 - [ ] Can explain any AI behavior at 10yo, CEO, Engineer, and Architect level (ongoing — assessed at phase close)
 - [ ] Multi-turn context management
 - [ ] Eval framework basics

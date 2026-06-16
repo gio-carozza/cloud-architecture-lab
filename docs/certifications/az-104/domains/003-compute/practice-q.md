@@ -1,6 +1,7 @@
 # Practice Questions — Deploy and manage Azure compute resources
 
 ## Day 007 additions (2026-06-03)
+
 *5 questions — App Service configuration, operational toggles, ARM settings management*
 
 ---

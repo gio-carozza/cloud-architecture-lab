@@ -125,7 +125,7 @@ Specifically:
   slightly more boilerplate). Either keeps substitutability real, not conventional.
 - IChatModelProvider, ChatRequest, ChatResponse keep their existing shape; SendAsync
   is untouched. No new DI seam, no new registration.
-- The HTTP surface is an explicit POST /api/ai/chat/stream endpoint, not content
+- The HTTP surface is an explicit `POST /api/ai/chat/stream` endpoint, not content
   negotiation on the existing endpoint (see Alternative 3).
 
 ### Why the same YAGNI question reaches the opposite conclusion from ADR-010
@@ -312,7 +312,7 @@ for, extending the seam.
 - No DI registration change: StreamAsync rides the existing scoped IChatModelProvider
   registration (`AddScoped<IChatModelProvider, ClaudeChatModelProvider>()`).
 - No new app setting anticipated (streaming reuses Anthropic__*); confirmed in
-  Infra/Day-009/appsettings-template.md ("No new app settings this day").
+  `Infra/Day-009/appsettings-template.md` ("No new app settings this day").
 
 ### Rollback strategy
 
@@ -330,4 +330,4 @@ for, extending the seam.
 - Anthropic streaming Messages documentation: <https://docs.anthropic.com/en/docs/build-with-claude/streaming>
   (verify current SSE event names and the message_start/message_delta usage fields
   during Build mode)
-- docs/standards/kql-cookbook.md — TTFT percentile query to be added on Day 9
+- `docs/standards/kql-cookbook.md` — TTFT percentile query to be added on Day 9

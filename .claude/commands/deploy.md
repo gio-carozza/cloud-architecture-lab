@@ -37,7 +37,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
    (where NNN is the current day, or the most recent `Infra/Day-NNN/` folder if
    the day is unspecified). If the file exists, read every setting it documents
    under "New settings" and apply them to the App Service via
-   `az webapp config appsettings set`, using the SSL workaround from CLAUDE.md
+   `az webapp config appsettings set`, using the SSL workaround from `CLAUDE.md`
    Gotchas. For each setting, first check whether it is already set to the same
    value — if so, skip it (idempotent). If the file does not exist, note that no
    new settings were applied and continue. **If the file exists but any setting
@@ -61,7 +61,7 @@ Read `.claude/skills/azure-deploy/SKILL.md` and execute the steps:
      ```
 
    - If it STILL resets, use the ARM bearer-token path instead (see
-     CLAUDE.md Gotchas): acquire a token with
+     `CLAUDE.md` Gotchas): acquire a token with
      `az account get-access-token` and PUT the setting via
      `Invoke-RestMethod` against the ARM REST endpoint.
 4. Acquire ARM token: `az account get-access-token --query accessToken -o tsv`

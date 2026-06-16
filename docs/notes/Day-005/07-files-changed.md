@@ -7,7 +7,7 @@
 | `src/lab-observability-api/Models/AI/ChatResponse.cs` | build | Created — provider-agnostic response contract |
 | `src/lab-observability-api/Services/AI/IChatModelProvider.cs` | build | Created — provider seam interface (ADR-005) |
 | `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` | build | Created — Anthropic implementation of IChatModelProvider |
-| `src/lab-observability-api/Controllers/AiController.cs` | build | Created — POST /api/ai/chat endpoint |
+| `src/lab-observability-api/Controllers/AiController.cs` | build | Created — `POST /api/ai/chat` endpoint |
 | `src/lab-observability-api/Program.cs` | build | Updated — DI registration for options and provider |
 | `docs/adr/ADR-005-introduce-provider-abstraction-for-claude-integration.md` | docs pass | Created — ADR for provider abstraction decision |
 | `docs/architecture/day-005-ai-gateway-v1.md` | docs pass | Created — system diagram v1 |

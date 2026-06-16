@@ -97,7 +97,7 @@ Any match in `ChatRequest.cs`, `ChatResponse.cs`, or `ChatChunk.cs` is a ❌ vio
 
 ### 9. Drift check — src changes reflected everywhere (git-diff-based, token-optimized)
 
-**Purpose:** catch any case where code changed in `src/` but skill docs, ADRs, CLAUDE.md, notes, or certifications still reference old names, paths, or signatures. Uses git as the source of truth — not a manually-maintained log.
+**Purpose:** catch any case where code changed in `src/` but skill docs, ADRs, `CLAUDE.md`, notes, or certifications still reference old names, paths, or signatures. Uses git as the source of truth — not a manually-maintained log.
 
 **Token contract:** the entire check runs on grep output and git diff output. No `Read` calls on source files or doc files unless a confirmed mismatch requires a targeted fix. On a clean day (nothing renamed or removed), total overhead is ~4 shell commands and zero reads.
 

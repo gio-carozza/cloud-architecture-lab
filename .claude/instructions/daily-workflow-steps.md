@@ -116,7 +116,7 @@ from CLAUDE.md. One response. No code.
 
 Blanks: previous day = what you shipped. Focus = from STEP 2. Constraints =
 anything broken/deferred. Don't know the focus? Replace CONSTRAINTS with:
-"Recommend today's focus from CLAUDE.md north star and yesterday's parking lot."
+"Recommend today's focus from `CLAUDE.md` north star and yesterday's parking lot."
 
 Before copying the summary, validate the CEO Framing section:
 

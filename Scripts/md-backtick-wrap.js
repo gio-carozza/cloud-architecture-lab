@@ -82,7 +82,7 @@ const PATTERNS = [
   // 1. HTTP method + path
   [
     /(?<![`\w])((?:GET|POST|PUT|PATCH|DELETE) \/[A-Za-z0-9/_{}.*-]+)(?![`])/g,
-    m => `\`${m[1]}\``,
+    (match, g1) => `\`${g1}\``,
   ],
   // 2. Slash commands with optional technical args
   [
@@ -90,30 +90,30 @@ const PATTERNS = [
       `(?<![\\w\`/])(/(${CMD_NAMES})(?:\\s+${ARG})?)(?=[^a-zA-Z0-9_/-]|$)`,
       'g'
     ),
-    m => `\`${m[1]}\``,
+    (match, g1) => `\`${g1}\``,
   ],
   // 3. Standalone /health /swagger /api paths
   [
     /(?<![`\w/])(\/(?:health|swagger|api(?:\/[A-Za-z0-9/_{}.*-]*)?))\b/g,
-    m => `\`${m[1]}\``,
+    (match, g1) => `\`${g1}\``,
   ],
   // 4. Repo paths (known prefixes)
   [
     /(?<![`[\(/\w])((?:\.claude|docs|src|Infra|audit-output)\/[^\s`[\]<>()"',;|!?:\\]*)/g,
-    m => {
-      let t = m[1].replace(/[.,;:!?)]+$/, ''); // trim trailing sentence punct
-      return `\`${t}\`` + m[1].slice(t.length);
+    (match, g1) => {
+      let t = g1.replace(/[.,;:!?)]+$/, ''); // trim trailing sentence punct
+      return `\`${t}\`` + g1.slice(t.length);
     },
   ],
   // 5. Root known files referenced in prose
   [
     /(?<![`[\(/\w])(CLAUDE\.md|README\.md|\.gitattributes|\.markdownlint\.json|\.gitignore)(?![`\w])/g,
-    m => `\`${m[1]}\``,
+    (match, g1) => `\`${g1}\``,
   ],
   // 6. dotnet CLI commands in prose
   [
     /(?<![`])(dotnet\s+(?:build|run|test|publish|restore|user-secrets|add|new|ef|watch)(?:\s+[^\s`.,;:!?)\]|]+)*)(?![`])/g,
-    m => `\`${m[1]}\``,
+    (match, g1) => `\`${g1}\``,
   ],
 ];
 

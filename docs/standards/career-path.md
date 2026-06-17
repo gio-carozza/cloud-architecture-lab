@@ -327,7 +327,7 @@ Goal: Enterprise governance. Platform-scale design. Multi-tenant SaaS hardening.
 | Day 057 | A/B testing for prompt variants |
 | Day 058 | Semantic versioning for prompts (prompt registry) |
 | Day 059 | Token budget enforcement at platform scale |
-| Day 060 | Governance capstone: policy document + enforcement |
+| Day 060 | Governance capstone: policy document + enforcement, including compliance framework (GDPR, HIPAA considerations) |
 
 **Days 061–070 — Platform Infrastructure**
 

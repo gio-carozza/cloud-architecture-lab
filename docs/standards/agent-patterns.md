@@ -242,19 +242,15 @@ as the surrounding workflow.
 
 | Paradigm | Attribution Unit | Logged Field |
 |---|---|---|
-| Generative AI | Per request | `llm.tokens.input`, `llm.tokens.output`, `llm.latency_ms` |
-| AI Agent | Per tool call + per loop iteration | `llm.agent.tool_calls`, `llm.agent.iterations`, `llm.agent.total_tokens` |
-| Agentic AI | Per workflow + per agent within workflow | `llm.workflow.id`, `llm.workflow.agent_id`, `llm.workflow.total_tokens` |
+| Generative AI | Per request | `ai.provider.tokens.input`, `ai.provider.tokens.output`, `ai.provider.latency.ms` |
+| AI Agent | Per tool call + per loop iteration | `ai.agent.tool_calls_total` (reuses the metric already defined above), `ai.agent.iterations`, `ai.agent.total_tokens` |
+| Agentic AI | Per workflow + per agent within workflow | `ai.agent.workflow_id`, `ai.agent.workflow_agent_id`, `ai.agent.workflow_total_tokens` |
 
 All fields follow the OpenTelemetry naming convention established
-in `docs/architecture/observability-architecture.md`.
-
-**Naming inconsistency, not yet reconciled:** the table above uses `llm.*`
-prefixes (`llm.tokens.input`, `llm.agent.tool_calls`, `llm.workflow.id`), but
-this file's own Observability Requirements section above (and every metric
-actually built in `GatewayTelemetry.cs`) uses the `ai.provider.*` / `ai.agent.*`
-convention. Reconcile this — pick one prefix — before any of these fields are
-implemented at Day 025+; don't ship both namespaces.
+in `docs/architecture/observability-architecture.md` — the same
+`ai.provider.*` / `ai.agent.*` prefixes used by every metric already
+built in `GatewayTelemetry.cs` and by the Observability Requirements
+section above.
 
 ## Anti-Patterns (do not do these)
 

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>cloud-architecture-lab — Claude Code Tooling Reference</title>
+<style>
+  @page { size: Letter; margin: 0.7in; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; color: #1b1f24; font-size: 10.5pt; line-height: 1.45; }
+  h1 { color: #0b3d91; font-size: 22pt; margin-bottom: 2px; }
+  .subtitle { color: #5a6472; font-size: 11pt; margin-top: 0; margin-bottom: 24px; }
+  h2 { color: #0b3d91; font-size: 15pt; border-bottom: 2px solid #0b3d91; padding-bottom: 4px; margin-top: 34px; page-break-after: avoid; }
+  h3 { color: #1a4fa0; font-size: 12.5pt; margin-top: 20px; page-break-after: avoid; }
+  h4 { color: #333; font-size: 11pt; margin-top: 14px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 18px 0; font-size: 9.3pt; page-break-inside: avoid; }
+  th { background: #0b3d91; color: white; text-align: left; padding: 6px 8px; }
+  td { border-bottom: 1px solid #d8dde3; padding: 6px 8px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f3f6fa; }
+  code { background: #eef1f5; color: #0b3d91; padding: 1px 4px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 9.3pt; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 8pt; font-weight: 600; color: white; }
+  .b-claude { background: #2e7d32; }
+  .b-chat { background: #8e44ad; }
+  .b-manual { background: #b8860b; }
+  .box-row { display: flex; gap: 10px; margin: 14px 0; }
+  .box { flex: 1; border: 2px solid #0b3d91; border-radius: 8px; padding: 10px 12px; background: #f7f9fc; }
+  .box h4 { margin-top: 0; color: #0b3d91; }
+  .arrow { text-align: center; font-size: 18pt; color: #0b3d91; margin: 2px 0; }
+  .finding { border-left: 4px solid #c0392b; background: #fdf1ef; padding: 8px 12px; margin: 10px 0; font-size: 9.5pt; }
+  .finding.fixed { border-left-color: #2e7d32; background: #eef7ee; }
+  .note { border-left: 4px solid #b8860b; background: #fdf8ec; padding: 8px 12px; margin: 10px 0; font-size: 9.5pt; }
+  .toc { background: #f3f6fa; border: 1px solid #d8dde3; border-radius: 6px; padding: 14px 20px; }
+  .toc a { color: #0b3d91; text-decoration: none; }
+  .toc ul { margin: 4px 0; }
+  .pagebreak { page-break-before: always; }
+  .small { font-size: 8.7pt; color: #5a6472; }
+  .flow-step { background: #fff; border: 1px solid #c7d0db; border-left: 5px solid #0b3d91; border-radius: 4px; padding: 6px 10px; margin: 4px 0; font-size: 9.5pt; }
+</style>
+</head>
+<body>
+
+<h1>cloud-architecture-lab</h1>
+<p class="subtitle">Claude Code Tooling Reference — how `.claude/`, `docs/standards/`, and the daily workflow fit together<br>
+Generated 2026-06-16 · current state: Day 009 complete, Day 010 next</p>
+
+<div class="toc">
+<strong>Contents</strong>
+<ul>
+<li><a href="#map">1. System map — the four layers</a></li>
+<li><a href="#claude">2. Inside `.claude/` — orchestration layer</a>
+  <ul><li><a href="#commands">2.1 Slash commands</a></li>
+  <li><a href="#skills">2.2 Skills</a></li>
+  <li><a href="#hooks">2.3 Hooks &amp; settings</a></li>
+  <li><a href="#instructions">2.4 Instructions (the master workflow)</a></li></ul>
+</li>
+<li><a href="#standards">3. `docs/standards/` — the knowledge library</a></li>
+<li><a href="#workflow">4. The daily workflow, step by step</a></li>
+<li><a href="#day-in-life">5. A day in the life — worked example</a></li>
+<li><a href="#scripts">6. `scripts/` — automated guards</a></li>
+<li><a href="#findings">7. Findings from this audit</a></li>
+<li><a href="#expected">8. Expected results</a></li>
+</ul>
+</div>
+
+<h2 id="map">1. System map — the four layers</h2>
+
+<p>This repo is two things at once: a .NET 8 AI gateway (<code>src/lab-observability-api/</code>) and a
+self-documenting <strong>process</strong> for building it day by day, encoded almost entirely as
+Claude Code configuration. The process layer has four tiers, each one consuming the layer below it.</p>
+
+<div class="box-row">
+<div class="box"><h4>1. Instructions</h4>
+<code>.claude/instructions/</code><br>
+The master script. Defines STEP 0–12 and what model/surface runs each one.</div>
+<div class="box"><h4>2. Commands &amp; Skills</h4>
+<code>.claude/commands/</code><br><code>.claude/skills/</code><br>
+The verbs the instructions invoke. A command is a one-shot recipe; a skill is reusable know-how a command or you can pull in.</div>
+<div class="box"><h4>3. Standards</h4>
+<code>docs/standards/</code><br>
+The knowledge commands/skills read from and write decisions into. Naming rules, error taxonomy, cert mapping, etc.</div>
+<div class="box"><h4>4. Artifacts</h4>
+<code>docs/notes/</code>, <code>docs/adr/</code>, <code>src/</code><br>
+What actually gets produced: code, ADRs, day notes, the changelog.</div>
+</div>
+
+<p>Two enforcement mechanisms run underneath all four layers:</p>
+<div class="box-row">
+<div class="box"><h4>Hooks</h4>
+<code>.claude/settings.json</code><br>
+Fire automatically on every <code>Write</code>/<code>Edit</code> — no command has to remember to call them.</div>
+<div class="box"><h4>Scripts</h4>
+<code>scripts/*.js</code><br>
+Stateless checkers (<code>md-backtick-wrap.js</code>, <code>symbol-drift-check.js</code>) invoked by hooks, commands, and STEP 8 of the workflow.</div>
+</div>
+
+<h2 id="claude">2. Inside <code>.claude/</code> — orchestration layer</h2>
+
+<h3 id="commands">2.1 Slash commands (<code>.claude/commands/*.md</code>)</h3>
+<p>Each file is a prompt template Claude Code expands when you type the matching <code>/name</code>. There are 7 registered commands.</p>
+
+<table>
+<tr><th>Command</th><th>Workflow step</th><th>What it does</th><th>Reads</th><th>Writes</th></tr>
+<tr><td><code>/new-day N slug</code></td><td>STEP 3</td><td>Scaffolds the empty day skeleton — folder, summary/checklist stubs, architecture doc, Infra template — before any content exists</td><td><code>docs/notes/_index.md</code></td><td>New <code>Day-NNN/</code> folder, <code>changelog.md</code> section, architecture stub, Infra stub</td></tr>
+<tr><td><code>/adr title</code></td><td>STEP 6</td><td>Creates the next-numbered ADR from the standard template, Status: Proposed</td><td><code>adr-writer/SKILL.md</code>, existing ADR numbers</td><td>New <code>docs/adr/ADR-NNN-*.md</code></td></tr>
+<tr><td><code>/collab-lens N</code></td><td>STEP 6</td><td>Inserts a bounded "who does this serve" block into <code>01-summary.md</code>, phase-filtered against the collaboration map</td><td><code>collaboration-lens/SKILL.md</code>, <code>collaboration-map.md</code>, <code>01-summary.md</code></td><td><code>01-summary.md</code> (insert), <code>changelog.md</code> (row)</td></tr>
+<tr><td><code>/deploy</code></td><td>STEP 9</td><td>Pre-deploy gates (tests + pillars audit) → Kudu zip publish → post-deploy verification</td><td><code>azure-deploy/SKILL.md</code>, <code>Infra/Day-NNN/appsettings-template.md</code></td><td>Azure App Service, <code>06-deployment-log.md</code></td></tr>
+<tr><td><code>/cert-update N [all]</code></td><td>STEP 10</td><td>Reads the day's Certification Reinforcement section, generates concepts/practice-q/resources for one touched domain (or all, with <code>all</code>)</td><td><code>01-summary.md</code>, MS Learn MCP</td><td><code>docs/certifications/&lt;exam&gt;/domains/.../*.md</code></td></tr>
+<tr><td><code>/cert-scaffold EXAM</code></td><td>one-time per exam</td><td>Fetches the official skills outline, builds the domain folder structure — does not generate explanations</td><td>MS Learn certification page</td><td><code>docs/certifications/&lt;EXAM&gt;/</code> structure</td></tr>
+<tr><td><code>/repo-audit N</code></td><td>STEP 12</td><td>9-check end-of-day health scan: folder completeness, ADR structure, lint, backticks, <code>CLAUDE.md</code> accuracy, changelog coverage, cert coverage, provider abstraction, symbol drift</td><td>Everything</td><td>Auto-fixes lint/backticks; reports the rest</td></tr>
+</table>
+
+<div class="note"><strong>Not a real command:</strong> <code>/devil</code>, <code>/pitch</code>, and <code>/10x</code> are referenced in <code>daily-workflow.md</code>'s command table but are <em>not</em> files in <code>.claude/commands/</code>. They are "paste this exactly" prompt blocks embedded directly in <code>daily-workflow-steps.md</code> (STEP 4, 5, and 11) — reasoning gates you run inline in a chat, not slash commands the harness resolves. Active from Day 010+.</div>
+
+<h3 id="skills">2.2 Skills (<code>.claude/skills/*/SKILL.md</code>)</h3>
+<p>Skills are reusable knowledge packs. Unlike commands, they're not typed directly — they're invoked by name from inside a command's instructions, or pulled in by Claude Code automatically when the situation matches their description.</p>
+
+<table>
+<tr><th>Skill</th><th>Invoked by</th><th>What it knows</th></tr>
+<tr><td><code>adr-writer</code></td><td><code>/adr</code></td><td>ADR template, heading structure, "verb-led title", at least 2 alternatives with rejection reasons</td></tr>
+<tr><td><code>azure-deploy</code></td><td><code>/deploy</code></td><td>The Kudu zip path and why <code>az webapp deploy</code> fails on this network; SSL workarounds; post-deploy verification checklist</td></tr>
+<tr><td><code>collaboration-lens</code></td><td><code>/collab-lens</code></td><td>How to pick 1 primary + ≤2 secondary collaborators from <code>collaboration-map.md</code>, phase-filtered, and format the 4-level compression block</td></tr>
+<tr><td><code>dotnet-api-conventions</code></td><td>auto (writing controllers/services in <code>src/</code>)</td><td>Provider abstraction rules, options pattern, the <em>real</em> error-handling pipeline (inline <code>app.Use</code>, not a middleware class)</td></tr>
+<tr><td><code>observability-net</code></td><td>auto (logging/tracing work)</td><td>Serilog + OpenTelemetry wiring, correlation IDs, the <code>TryExtractUsage</code> 4-tuple cache-format gotcha</td></tr>
+<tr><td><code>pillars-audit</code></td><td><code>/deploy</code> (gate b), STEP 8/12</td><td>The 6-pillar pre-deploy audit (5 WAF pillars + Responsible AI), 34 codebase-specific GREEN/YELLOW/RED checks</td></tr>
+</table>
+
+<h3 id="hooks">2.3 Hooks &amp; settings</h3>
+<table>
+<tr><th>File</th><th>Role</th><th>Behavior</th></tr>
+<tr><td><code>.claude/settings.json</code></td><td>Project-level config — <strong>this is the closest thing to "appsettings.json at the .claude level"</strong> (there is no literal file by that name; this is its functional equivalent for the harness itself, as opposed to <code>src/lab-observability-api/appsettings.json</code> which configures the .NET app)</td><td>Registers one <code>PostToolUse</code> hook: after any <code>Write</code>/<code>Edit</code> on a <code>.md</code> file, run <code>markdownlint --fix</code> on it automatically. Also holds the permission allow/deny lists (denies reading secrets/<code>.pfx</code>/<code>appsettings.Production.json</code>; denies destructive git/az commands) and enables the Microsoft Docs MCP plugin.</td></tr>
+<tr><td><code>.claude/settings.local.json</code></td><td>Machine-local permission overrides (not committed for secrets, but this one just allow-lists a few read-only Azure/PowerShell commands)</td><td>Merges on top of <code>settings.json</code></td></tr>
+<tr><td><code>.claude/hooks/cert-tag.json</code></td><td>A second hook definition, separate from <code>settings.json</code></td><td>On every file touch, regex-matches the path against topic keywords (Telemetry, Resilience, Provider, Bicep, Cache, ...) and appends a cert-domain tag to <code>.claude/cert-tags-today.txt</code></td></tr>
+</table>
+<div class="finding"><strong>Finding:</strong> nothing in this repo currently reads <code>.claude/cert-tags-today.txt</code> — <code>/cert-update</code> derives touched domains purely from <code>01-summary.md</code>'s Certification Reinforcement section. The cert-tag hook's output is generated but unconsumed today.</div>
+
+<h3 id="instructions">2.4 Instructions — the master workflow</h3>
+<p><code>daily-workflow.md</code> is the one-page overview (the STEP 0–12 table, the four rules, the auto-print handoff mechanic). <code>daily-workflow-steps.md</code> is the long version — the literal prompt text for every step, including the <code>/devil</code>/<code>/pitch</code>/<code>/10x</code> gate scripts. You read the overview to orient; you paste from the steps file to actually run a step.</p>
+
+<div class="pagebreak"></div>
+<h2 id="standards">3. <code>docs/standards/</code> — the knowledge library</h2>
+<p>26 files. Each is read on-demand (none are in permanent hot context except <code>_principles.md</code>, <code>naming-conventions.md</code>, <code>azure-environment.md</code> per <code>CLAUDE.md</code>'s context-discipline rules). Grouped by what they govern:</p>
+
+<table>
+<tr><th>Governs</th><th>Files</th></tr>
+<tr><td>Posture &amp; career</td><td><code>_principles.md</code>, <code>career-path.md</code>, <code>competitive-intelligence.md</code>, <code>architect-thinking-template.md</code>, <code>graveyard.md</code></td></tr>
+<tr><td>Naming &amp; environment</td><td><code>naming-conventions.md</code>, <code>azure-environment.md</code></td></tr>
+<tr><td>Build conventions</td><td><code>testing-standard.md</code>, <code>commit-convention.md</code>, <code>error-handling-standard.md</code>, <code>api-versioning.md</code>, <code>dependency-policy.md</code></td></tr>
+<tr><td>Cost &amp; performance</td><td><code>cost-governance.md</code>, <code>slo-performance.md</code>, <code>multi-turn-context.md</code></td></tr>
+<tr><td>Security &amp; compliance</td><td><code>security-standard.md</code>, <code>responsible-ai.md</code></td></tr>
+<tr><td>Operations</td><td><code>monitoring-runbook.md</code>, <code>kql-cookbook.md</code>, <code>provider-onboarding.md</code></td></tr>
+<tr><td>Evaluation &amp; future paradigms</td><td><code>eval-framework.md</code>, <code>agent-patterns.md</code>, <code>rag-patterns.md</code></td></tr>
+<tr><td>People &amp; communication</td><td><code>collaboration-map.md</code>, <code>public-documentation.md</code>, <code>portfolio-strategy.md</code></td></tr>
+</table>
+
+<h2 id="workflow">4. The daily workflow, step by step</h2>
+<table>
+<tr><th>Step</th><th>Surface</th><th>Model</th><th>What happens</th></tr>
+<tr><td>0 CLOSE (prev)</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Verify the previous day is fully frozen — audit, posture-check, changelog row all present — before starting anything new</td></tr>
+<tr><td>1 PRUNE</td><td>Manual</td><td><span class="badge b-manual">—</span></td><td>Move the previous day's hot-context files out; rotate which ADRs stay loaded</td></tr>
+<tr><td>2 DECIDE</td><td>Chat (new)</td><td><span class="badge b-chat">Sonnet</span></td><td>Lock the day's workload and slug</td></tr>
+<tr><td>3 SCAFFOLD</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td><code>/new-day N slug</code> — build the empty skeleton</td></tr>
+<tr><td>4 DRAFT</td><td>Chat (new)</td><td><span class="badge b-chat">Sonnet</span></td><td>Full 13-section Day N summary; <code>/pitch</code> gate validates the CEO framing</td></tr>
+<tr><td>5 ADR</td><td>Chat (new)</td><td><span class="badge b-chat">latest Opus</span></td><td>Reason out the architectural decision (skip if none this day); <code>/devil</code> gate stress-tests it</td></tr>
+<tr><td>6 POPULATE</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Fill summary + checklist, run <code>/adr</code>, run <code>/collab-lens</code></td></tr>
+<tr><td>7 BUILD</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Implement each phase of the day's plan</td></tr>
+<tr><td>8 TEST + AUDIT</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td><code>dotnet test</code>, the 6-pillar audit, <code>symbol-drift-check.js</code> — all before deploy is allowed</td></tr>
+<tr><td>9 DEPLOY</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td><code>/deploy</code> + post-deploy verification</td></tr>
+<tr><td>10 DOCUMENT</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Update docs, commit, <code>/cert-update</code></td></tr>
+<tr><td>11 REFLECT</td><td>Chat (new)</td><td><span class="badge b-chat">latest Opus</span></td><td>Posture check (5 questions); <code>/10x</code> gate audits the scale ceiling (mandatory Day 051+)</td></tr>
+<tr><td>12 CLOSE</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Save posture check, final commit, <code>/repo-audit</code></td></tr>
+</table>
+<p class="small">Rule of thumb: Sonnet does all the building; the latest Opus is reserved for the two steps where reasoning depth — not execution — is the actual deliverable (ADR reasoning, posture reflection).</p>
+
+<div class="pagebreak"></div>
+<h2 id="day-in-life">5. A day in the life — worked example</h2>
+<p>Tracing one real artifact, <code>IBatchChatModelProvider</code>, through the whole stack on the day it was built (Day 008):</p>
+
+<div class="flow-step">STEP 2 (chat) — decide: "batch API for cost control" is the Day 008 workload</div>
+<div class="flow-step">STEP 3 — <code>/new-day 8 batch-api-cost-controls</code> creates <code>docs/notes/Day-008/</code>, a <code>## Day 008</code> section in <code>changelog.md</code>, and <code>docs/architecture/day-008-batch-api-cost-controls.md</code></div>
+<div class="flow-step">STEP 5 (chat, latest Opus) — reasons out: new seam vs. extending <code>IChatModelProvider</code> → new seam wins (different computation model, not just different speed)</div>
+<div class="flow-step">STEP 6 — <code>/adr introduce-parallel-batch-provider-abstraction</code> creates <code>ADR-010</code>, Status: Proposed</div>
+<div class="flow-step">STEP 7 — builds <code>IBatchChatModelProvider.cs</code>, <code>ClaudeBatchChatModelProvider.cs</code>, <code>AiBatchController.cs</code>; the <code>dotnet-api-conventions</code> skill governs the shape</div>
+<div class="flow-step">STEP 8 — <code>pillars-audit</code> finds two RED items (missing <code>MaxPromptLength</code> guard) → fixed → re-audit GREEN; <code>symbol-drift-check.js</code> confirms every new type is referenced correctly everywhere it's mentioned</div>
+<div class="flow-step">STEP 9 — <code>/deploy</code>; the <code>azure-deploy</code> skill's Kudu path ships it to <code>app-ai-lab-api-dev-eastus-gio</code></div>
+<div class="flow-step">STEP 10 — <code>/cert-update 008</code> writes AI-102 and AZ-305 domain content citing the batch pattern; <code>changelog.md</code>'s Day 008 section gets every file logged</div>
+<div class="flow-step">STEP 12 — <code>/repo-audit 8</code> confirms ADR-010 has all required headings, no drift, day folder complete</div>
+
+<h2 id="scripts">6. <code>scripts/</code> — automated guards</h2>
+<table>
+<tr><th>Script</th><th>Triggered by</th><th>Checks</th></tr>
+<tr><td><code>md-backtick-wrap.js</code></td><td><code>settings.json</code> hook (every <code>.md</code> write/edit), <code>/repo-audit</code> Check 4</td><td>Wraps bare file paths, slash commands, and HTTP paths in backticks per the markdown convention. Idempotent — re-running on clean content changes nothing.</td></tr>
+<tr><td><code>symbol-drift-check.js</code></td><td>STEP 8, <code>/repo-audit</code> Check 9</td><td>Rebuilds the actual symbol/telemetry-name table from <code>src/</code> on every run; flags any backtick-wrapped doc reference that doesn't match current code — including symbols that were <em>documented but never built</em>. Also flags single-letter backtick spans as likely truncation/corruption (added 2026-06-16 after recovering 80 such occurrences).</td></tr>
+</table>
+
+<h2 id="findings">7. Findings from this audit</h2>
+<div class="finding fixed"><strong>Fixed — severe:</strong> a buggy <code>md-backtick-wrap.js</code> replace callback (before its fix in commit <code>1e33390</code>) had collapsed full paths/commands down to single letters inside backticks across 50 files, 80 occurrences — <code>/health</code> → <code>`h`</code>, <code>/cert-update</code> → <code>`c`</code>, etc. Recovered every instance from git history and added a permanent guard so this class of corruption can't recur silently.</div>
+<div class="finding fixed"><strong>Fixed:</strong> 6 source files (<code>ApiError.cs</code>, <code>TestController.cs</code>, <code>HttpContextExtensions.cs</code>, <code>CorrelationIdMiddleware.cs</code>, <code>ClaudeProviderException.cs</code>, the main <code>.csproj</code>) existed with zero changelog provenance — every <code>src/</code> file now traces to a Day NNN.</div>
+<div class="note"><strong>Open, not a bug:</strong> <code>.claude/hooks/cert-tag.json</code> generates tags nothing consumes (see §2.3). Worth deciding whether to wire it into <code>/cert-update</code> or remove it.</div>
+<div class="note"><strong>Open, accepted debt:</strong> ADR-001/002/003 predate the "Alternatives Considered" convention. Not fixed — adding that section retroactively to an Accepted ADR isn't a "factual correction" under this repo's own ADR-immutability rule.</div>
+
+<h2 id="expected">8. Expected results</h2>
+<p>When every layer is working together correctly, a closed day means: the code builds and tests pass; the ADR (if any) has all required headings and no open placeholders; every touched file has a <code>changelog.md</code> row under that day's section; every cert domain marked Primary/Secondary in the day's summary has a corresponding day-mapping row; <code>symbol-drift-check.js</code> and markdownlint both report zero findings; the deploy succeeded and was verified against the live App Service; and the posture-check honestly names what's still YELLOW. <code>/repo-audit</code> is the single command that verifies all of this at once — a clean run is the actual definition of "Day N is done."</p>
+
+</body>
+</html>

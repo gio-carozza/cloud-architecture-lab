@@ -14,7 +14,7 @@ allowed-tools: Bash, Read, Write
 
 ## What this does
 
-1. Reads `o` for the given day number
+1. Reads `docs/notes/Day-NNN/01-summary.md` for the given day number
 2. Extracts the Certification Reinforcement section to identify which exams
    and domains were touched (Primary + Secondary)
 3. Builds the list of touched domains, then processes them ONE AT A TIME:
@@ -29,7 +29,7 @@ allowed-tools: Bash, Read, Write
    - practice-q.md — 5 synthesized practice questions (see cap below)
    - resources.md  — curated links from MS Learn + reputable sources
    - day-mapping.md — append this day number
-5. Update `o` to mark the domain
+5. Update `docs/certifications/domain-coverage.md` to mark the domain
 
 ## Why one domain per run
 

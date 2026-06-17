@@ -18,9 +18,9 @@ A minimal ASP.NET Core Web API called `lab-observability-api` and deployed it to
 ## Endpoints implemented
 
 - /
-- `h`
-- `a`
-- `a`
+- `/health`
+- `/api/test/ping`
+- `/api/test/error`
 
 ## What I validated
 

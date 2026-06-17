@@ -94,7 +94,7 @@ Invoke-RestMethod `
   ```
 
   If it still resets, use `Invoke-RestMethod` with an ARM bearer token instead
-  (see `L` Gotchas for the full pattern).
+  (see `CLAUDE.md` Gotchas for the full pattern).
 - **502 Bad Gateway after deploy:** check log stream
   (`az webapp log tail -g rg-ai-lab-dev-eastus -n app-ai-lab-api-dev-eastus-gio`) —
   usually a startup binding issue or missing env var.

@@ -14,11 +14,11 @@ allowed-tools: Bash, Read, Write
 
 1. Fetches the official skills outline for the given exam
 2. Creates the domain folder structure under `docs/certifications/<EXAM>/`
-3. Populates `E` per domain with name, weighting, and official
+3. Populates `README.md` per domain with name, weighting, and official
    MS Learn links
 4. Creates empty concepts.md, practice-q.md, resources.md, day-mapping.md
-   stubs so `c` knows what to fill
-5. Updates `o` with the new exam row
+   stubs so `/cert-update` knows what to fill
+5. Updates `docs/certifications/domain-coverage.md` with the new exam row
 
 ## Source of truth (in priority order)
 
@@ -59,26 +59,26 @@ content, do NOT use it — fall back to the study guide page above.
 5. Create `docs/certifications/<EXAM>/` if it does not exist.
 6. For each confirmed domain, create:
    `docs/certifications/<EXAM>/domains/<NNN-kebab-name>/`
-   with `E` (populated), and empty concepts.md, practice-q.md,
+   with `README.md` (populated), and empty concepts.md, practice-q.md,
    resources.md, day-mapping.md.
-7. Populate each `E` with:
+7. Populate each `README.md` with:
    - Domain name and exam weighting
    - Official MS Learn module links for that domain
    - Sub-topics listed verbatim from the study guide
    - A line noting the source URL and the date fetched (domains change;
      record provenance)
-8. Update `o`
+8. Update `docs/certifications/domain-coverage.md`
 
 ## Idempotency
 
 - If `docs/certifications/<EXAM>/` already exists, do NOT overwrite populated
   files. Report which domains already exist and only add missing ones.
-- `E` may be refreshed if the study guide changed; note the change
+- `README.md` may be refreshed if the study guide changed; note the change
   in the source/date line rather than silently overwriting.
 
 ## Token discipline
 
 - Scaffold only. No explanations generated here.
-- This command fetches and structures; `c` generates.
+- This command fetches and structures; `/cert-update` generates.
 - One page fetch + one study-guide fetch per exam, not per domain.
 - Do not fetch every linked MS Learn module — link to them, don't read them.

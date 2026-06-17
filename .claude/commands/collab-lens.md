@@ -31,7 +31,7 @@ Steps 0–6 in that file:
 
 Reads exactly two named sections of 01-summary.md (the `## Whose Problem Am I Solving?` body and, optionally, the ADR artifact line). Does NOT read the full 01-summary.md. Does NOT read any other day's folder. Reads collaboration-map.md once, phase-filtered.
 
-**Total new files read this run:** 01-summary.md (partial), `L` (one line), collaboration-map.md (phase rows only).
+**Total new files read this run:** 01-summary.md (partial), `CLAUDE.md` (one line), collaboration-map.md (phase rows only).
 
 ---
 

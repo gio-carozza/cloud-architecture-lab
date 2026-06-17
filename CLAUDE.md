@@ -23,7 +23,7 @@ Full career path: `docs/standards/career-path.md`
 - Azure App Service (Linux, East US)
 - Anthropic Claude (current LLM provider; abstracted for swap-out)
 - Azure CLI + PowerShell + Kudu for deploys
-- Local tooling: VS Code, Windows, `o`
+- Local tooling: VS Code, Windows, `dotnet user-secrets`
 
 ## Azure Environment
 

@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 009 snapshot. Code is at Day 009 completion.
 > Sources read: AiController.cs, ClaudeApiClient.cs (StreamChatAsync), ClaudeChatModelProvider.cs
 > (StreamAsync + try/finally posture fix), IChatModelProvider.cs, ChatChunk.cs,
-> GatewayTelemetry.cs, `n`, `o`
+> GatewayTelemetry.cs, `Infra/Day-009/appsettings-template.md`, `docs/notes/Day-009/07-files-changed.md` (now `docs/notes/changelog.md`)
 
 ### Reliability
 
@@ -73,7 +73,7 @@
 | O3 — New env vars in appsettings-template.md | GREEN | `Infra/Day-009/appsettings-template.md` correctly states no new app settings; streaming reuses existing `Anthropic__*` config |
 | O4 — files-changed.md has row for every file touched | GREEN | 44 rows covering all phases from scaffold through collab-lens |
 | O5 — KQL cookbook updated for new signals | GREEN | Queries 11 (TTFT p50/p95/p99) and 12 (TTFT by model) added per files-changed.md |
-| O6 — `h`/ready reflects new required config | GREEN | No new required config; `/health/ready` unchanged |
+| O6 — `/health/ready` reflects new required config | GREEN | No new required config; `/health/ready` unchanged |
 
 **Pillar: GREEN**
 

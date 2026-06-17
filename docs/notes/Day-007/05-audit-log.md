@@ -8,8 +8,8 @@
 
 > NOTE: audits current file state, not Day 007 snapshot. Code has progressed through Day 009.
 > Sources read: ClaudeApiClient.cs, AnthropicOptions.cs, GatewayTelemetry.cs, Program.cs,
-> AiController.cs, ClaudeChatModelProvider.cs, `n`,
-> `o`, `o` (queries 8–9)
+> AiController.cs, ClaudeChatModelProvider.cs, `Infra/Day-007/appsettings-template.md`,
+> `docs/notes/Day-007/07-files-changed.md` (now `docs/notes/changelog.md`), `docs/standards/kql-cookbook.md` (queries 8–9)
 
 ### Reliability
 
@@ -70,10 +70,10 @@
 |---|---|---|
 | O1 — New paths log structured event with CorrelationId | GREEN | Cache activity log includes CacheReadTokens/CacheCreationTokens; CorrelationId flows via Serilog enrichment on all paths |
 | O2 — New metric names follow ai.provider.* convention | GREEN | ai.provider.cache.hits, ai.provider.cache.misses — both follow convention |
-| O3 — New env vars in appsettings-template.md | GREEN | `n` documents Anthropic__EnablePromptCaching and Anthropic__SystemPrompt with TTL note and 1024-token minimum warning |
+| O3 — New env vars in appsettings-template.md | GREEN | `Infra/Day-007/appsettings-template.md` documents Anthropic__EnablePromptCaching and Anthropic__SystemPrompt with TTL note and 1024-token minimum warning |
 | O4 — files-changed.md has row for every file touched | GREEN | 25+ rows covering all phases: build, verification, docs pass, audit, deploy, cert-update |
 | O5 — KQL cookbook updated for new signals | GREEN | Queries 8 (cache hit rate) and 9 (estimated token savings) added to kql-cookbook.md |
-| O6 — `h`/ready reflects new required config | GREEN | Both new options optional by design — empty SystemPrompt skips caching gracefully; gateway functional either way |
+| O6 — `/health/ready` reflects new required config | GREEN | Both new options optional by design — empty SystemPrompt skips caching gracefully; gateway functional either way |
 
 **Pillar: GREEN**
 

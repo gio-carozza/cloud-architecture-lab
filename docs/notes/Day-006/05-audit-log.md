@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 006 snapshot. Code has progressed through Day 009.
 > Sources read: Program.cs, CorrelationIdMiddleware.cs, ClaudeChatModelProvider.cs,
 > AiController.cs, AnthropicOptions.cs, GatewayTelemetry.cs, ClaudeProviderException.cs,
-> HttpContextExtensions.cs, ApiError.cs, `n`, kql-cookbook.md
+> HttpContextExtensions.cs, ApiError.cs, `Infra/Day-006/appsettings-template.md`, kql-cookbook.md
 
 ### Reliability
 
@@ -18,7 +18,7 @@
 | R1 — HttpClient timeouts set | GREEN | ClaudeApiClient: InfiniteTimeSpan (correct — streaming + CancellationToken); ClaudeBatchApiClient: 30s |
 | R2 — No retry on non-idempotent calls | GREEN | ShouldHandle = false disables retry on interactive path; batch client has no resilience handler |
 | R3 — Circuit breaker not on batch/streaming | GREEN | AddStandardResilienceHandler on ClaudeApiClient only; ClaudeBatchApiClient excluded |
-| R4 — ValidateOnStart() for `IOptions<T>` | YELLOW | `Configure<AnthropicOptions>` not chained with `.ValidateDataAnnotations().ValidateOnStart()`; `h`/ready is partial substitute but fails at first request, not startup |
+| R4 — ValidateOnStart() for `IOptions<T>` | YELLOW | `Configure<AnthropicOptions>` not chained with `.ValidateDataAnnotations().ValidateOnStart()`; `/health/ready` is partial substitute but fails at first request, not startup |
 | R5 — New exceptions caught by global handler | GREEN | ClaudeProviderException has explicit handler; generic Exception has catch-all; both return ApiError |
 | R6 — CancellationToken threaded through async | GREEN | SendAsync and StreamAsync both accept CancellationToken; Chat passes it through; StreamChat uses RequestAborted |
 
@@ -73,7 +73,7 @@
 | O3 — New env vars in appsettings-template.md | YELLOW | APPLICATIONINSIGHTS_CONNECTION_STRING documented ✓; stale: Anthropic:Model suggestion was "claude-opus-4-7" (retired) |
 | O4 — files-changed.md has row for every file touched | YELLOW | Only collab-lens entries present; Day 006 source files (Program.cs, CorrelationIdMiddleware.cs, GatewayTelemetry.cs, HttpContextExtensions.cs, ClaudeProviderException.cs) untracked — pre-dates files-changed enforcement |
 | O5 — KQL cookbook updated for new signals | GREEN | kql-cookbook.md has latency p50/p95/p99, error rate, and token-spend queries covering Day 006 telemetry |
-| O6 — `h`/ready reflects new required config | GREEN | Checks ApiKey, Model, BaseUrl; APPLICATIONINSIGHTS_CONNECTION_STRING intentionally optional |
+| O6 — `/health/ready` reflects new required config | GREEN | Checks ApiKey, Model, BaseUrl; APPLICATIONINSIGHTS_CONNECTION_STRING intentionally optional |
 
 **Pillar: YELLOW**
 
@@ -109,7 +109,7 @@
 
 ### YELLOW items → fixes
 
-- **R4** ValidateOnStart() not wired: minimum fix = add `[Required]` to `ApiKey`, `Model`, `BaseUrl` in `AnthropicOptions` and chain `.ValidateDataAnnotations().ValidateOnStart()` in Program.cs → **accepted debt** — `h`/ready provides runtime guard; dedicated fix warranted as separate change
+- **R4** ValidateOnStart() not wired: minimum fix = add `[Required]` to `ApiKey`, `Model`, `BaseUrl` in `AnthropicOptions` and chain `.ValidateDataAnnotations().ValidateOnStart()` in Program.cs → **accepted debt** — `/health/ready` provides runtime guard; dedicated fix warranted as separate change
 - **O3** Stale `claude-opus-4-7` in `Infra/Day-006/appsettings-template.md` → updated to `claude-opus-4-8` → **GREEN**
 - **O4** files-changed.md incomplete: pre-dates enforcement convention; retroactive row reconstruction speculative → **accepted debt — acknowledged historical gap**
 - **RA3** Content policy 400 → 502 mismatch: requires reading ClaudeApiClient exception mapper and updating global handler switch → **accepted debt** — tracked for Day 010+

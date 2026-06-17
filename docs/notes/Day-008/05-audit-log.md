@@ -9,7 +9,7 @@
 > NOTE: audits current file state, not Day 008 snapshot. Code has progressed through Day 009.
 > Sources read: AiBatchController.cs, ClaudeBatchApiClient.cs, ClaudeBatchChatModelProvider.cs,
 > IBatchChatModelProvider.cs, AnthropicOptions.cs, GatewayTelemetry.cs, Program.cs,
-> `n`, `o`
+> `Infra/Day-008/appsettings-template.md`, `docs/notes/Day-008/07-files-changed.md` (now `docs/notes/changelog.md`)
 
 ### Reliability
 
@@ -73,7 +73,7 @@
 | O3 — New env vars in appsettings-template.md | GREEN | `Infra/Day-008/appsettings-template.md` correctly states "No new app settings this day" — `MaxBatchSize` has a default; no Azure env var required |
 | O4 — files-changed.md has row for every file touched | GREEN | 43 rows covering all phases from populate through cert-update |
 | O5 — KQL cookbook updated for new signals | GREEN | Query 10 (batch activity + cost vs sync equivalent) added per files-changed.md |
-| O6 — `h`/ready reflects new required config | GREEN | `MaxBatchSize` has a default value; `/health/ready` unchanged |
+| O6 — `/health/ready` reflects new required config | GREEN | `MaxBatchSize` has a default value; `/health/ready` unchanged |
 
 **Pillar: GREEN**
 

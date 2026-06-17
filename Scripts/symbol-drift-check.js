@@ -39,6 +39,15 @@ const EXCLUDE_DOC_FILES = [
 // name rejected designs that were never built, and accepted ADRs can't be edited
 // to "fix" this anyway (only factual corrections are allowed).
 
+// Catches the 2026-06-16 corruption class: a buggy backtick-wrap.js replace
+// callback collapsed full paths/commands down to a single character inside
+// the backticks (`/health` -> `` `h` ``, `/cert-update` -> `` `c` ``, etc.),
+// silently destroying real content across 50 files / 80 occurrences. A
+// single-letter backtick span in prose is essentially never intentional in
+// this repo (no generic-type-parameter docs use bare `T`/`K`/`V` today) —
+// treat any as a near-certain truncation/corruption signal.
+const SINGLE_LETTER_RE = /^[A-Za-z]$/;
+
 const SUFFIX_RE = /^[A-Z][A-Za-z0-9]*(?:Controller|Provider|Client|Options|Middleware|Telemetry|Exception|Handler|Chunk|Usage|Job|Status|Result)$/;
 // Only check OUR telemetry namespace — broader snake_case/dotted matching also
 // catches Anthropic's own wire-format field names (prompt_tokens, usage.*, etc.)
@@ -126,7 +135,7 @@ function scanDocs(symbolSet, codeStringSet) {
   const findings = [];
 
   for (const rel of mdFiles) {
-    if (isExcludedDocFile(rel)) continue;
+    const excluded = isExcludedDocFile(rel);
 
     const lines = fs.readFileSync(rel, 'utf8').split(/\r?\n/);
     let inFence = false;
@@ -139,6 +148,17 @@ function scanDocs(symbolSet, codeStringSet) {
       let m;
       while ((m = re.exec(line)) !== null) {
         const span = m[1];
+
+        // Runs on every file, including ones excluded from the checks below —
+        // corruption can land anywhere, and a single-letter span is never the
+        // kind of legitimate "narrates an old name on purpose" content those
+        // exclusions exist for.
+        if (SINGLE_LETTER_RE.test(span)) {
+          findings.push({ file: rel, line: idx + 1, kind: 'truncated', span });
+          continue;
+        }
+
+        if (excluded) continue;
 
         const pathFinding = checkPathSpan(span);
         if (pathFinding) {
@@ -181,7 +201,9 @@ for (const [file, items] of Object.entries(byFile)) {
       ? `path does not exist on disk`
       : it.kind === 'symbol'
         ? `symbol not found anywhere in src/`
-        : `code/telemetry string not found in any src/ string literal`;
+        : it.kind === 'truncated'
+          ? `single-letter backtick span — likely backtick-wrap.js corruption truncating real content (see 2026-06-16 incident); check git history to recover the original`
+          : `code/telemetry string not found in any src/ string literal`;
     console.log(`  line ${it.line}: \`${it.span}\` — ${reason}`);
   }
 }

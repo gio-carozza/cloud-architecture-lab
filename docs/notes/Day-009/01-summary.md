@@ -11,7 +11,7 @@ AI Engineer (Phase 1)
 ## Focus
 
 Add Server-Sent Events (SSE) streaming to the interactive chat path: a new
-`O` endpoint, a StreamAsync operation on the provider
+`POST /api/ai/chat/stream` endpoint, a StreamAsync operation on the provider
 seam, and a first-token-latency (TTFT) histogram so perceived latency becomes a
 first-class, queryable SLO — not a feeling.
 
@@ -62,7 +62,7 @@ fixes, indistinguishable without the histogram.
 - ClaudeApiClient streaming path: "stream": true, SSE event parsing
   (message_start → content_block_delta/text_delta → message_delta → message_stop),
   with cancellation propagated to the upstream HTTP call.
-- `O` on AiController: text/event-stream response,
+- `POST /api/ai/chat/stream` on AiController: text/event-stream response,
   response buffering disabled, HttpContext.RequestAborted wired through to cancel
   the Anthropic stream on client disconnect.
 - TTFT histogram (ai.provider.stream.ttft_ms) on GatewayTelemetry, plus a
@@ -95,7 +95,7 @@ fixes, indistinguishable without the histogram.
 
 ### Phase C — SSE endpoint
 
-- `O` on AiController: set Content-Type: text/event-stream,
+- `POST /api/ai/chat/stream` on AiController: set Content-Type: text/event-stream,
   Cache-Control: no-cache, X-Accel-Buffering: no; disable response buffering.
 - await foreach over StreamAsync, writing data: frames and flushing per chunk.
 - Wire HttpContext.RequestAborted as the CancellationToken.
@@ -112,7 +112,7 @@ fixes, indistinguishable without the histogram.
 
 - Local: stream a >=1100-token-system-prompt request; confirm tokens arrive
   incrementally, TTFT recorded, cache_read tokens > 0 on the second call.
-- Deploy via `d`; confirm SSE is not buffered by App Service.
+- Deploy via `/deploy`; confirm SSE is not buffered by App Service.
 - KQL: TTFT percentile query against the new histogram.
 
 ## Architect Thinking

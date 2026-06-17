@@ -48,7 +48,7 @@ Deploy the first lab API as an ASP.NET Core Web API on Azure App Service and int
 - Security and networking are still basic
 - No infrastructure-as-code baseline yet
 
-## Alternatives considered
+## Alternatives Considered
 
 1. Deploy to Azure Container Apps
    - Rejected for Day 4 because it adds more platform complexity than needed for the first workload

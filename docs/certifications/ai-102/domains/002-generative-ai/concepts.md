@@ -56,13 +56,13 @@ The Batch API cuts your AI processing costs in half for any workload that doesn'
 
 ### If you're an Engineer
 
-Submit a JSONL file where each line is a separate request object with a `custom_id`. Receive a batch job ID. Poll `GET /batches/{id}` until `status == "completed"` (Anthropic: `"ended"`). Then `GET /batches/{id}/output_file_id` to retrieve results as another JSONL. Each output line maps back to your `custom_id`. In .NET, implement `IBatchProvider` with `SubmitAsync(IEnumerable<BatchRequest>)`, `GetStatusAsync(string jobId)`, and `GetResultsAsync(string jobId)`. Common error: calling the results endpoint before polling for completion — it returns 404 or an error, not partial results.
+Submit a JSONL file where each line is a separate request object with a `custom_id`. Receive a batch job ID. Poll `GET /batches/{id}` until `status == "completed"` (Anthropic: `"ended"`). Then `GET /batches/{id}/output_file_id` to retrieve results as another JSONL. Each output line maps back to your `custom_id`. In .NET, implement `IBatchChatModelProvider` with `SubmitAsync(IEnumerable<BatchRequest>)`, `GetStatusAsync(string jobId)`, and `GetResultsAsync(string jobId)`. Common error: calling the results endpoint before polling for completion — it returns 404 or an error, not partial results.
 
 ### If you're an Architect
 
 The batch API pattern (Anthropic Messages Batch API; Azure OpenAI Global Batch) is an asynchronous, offline-processing model: clients submit a JSONL file of requests, receive a job ID, poll for completion, then retrieve results. Azure OpenAI Global Batch guarantees a 24-hour turnaround and prices at **50% of the synchronous (global standard) rate**, funded by separate enqueued-token quota that does not compete with your online workload quota.
 
-The abstraction contract matters across providers: both Anthropic and Azure OpenAI use the same three-phase semantic — **submit → poll → retrieve** — enabling a single `IBatchProvider` interface to span both without leaking provider-specific types. Enterprise architects choose the batch path when: (a) results are not user-facing in real time, (b) cost-per-token matters more than latency, and (c) workload volume is predictable enough for quota management.
+The abstraction contract matters across providers: both Anthropic and Azure OpenAI use the same three-phase semantic — **submit → poll → retrieve** — enabling a single `IBatchChatModelProvider` interface to span both without leaking provider-specific types. Enterprise architects choose the batch path when: (a) results are not user-facing in real time, (b) cost-per-token matters more than latency, and (c) workload volume is predictable enough for quota management.
 
 **Why this matters in enterprise:** Nightly report generation, bulk document summarization, and offline classification jobs are natural batch workloads. Running them synchronously pays 2× the token cost with no latency benefit for the business.
 
@@ -82,7 +82,7 @@ Every AI request in your system is either "someone is waiting for this right now
 
 ### If you're an Engineer
 
-Encode the routing decision as an explicit field in your API contract: `"mode": "sync" | "batch"`. Never infer it from request size or caller identity — callers know their latency requirements, the gateway doesn't. In the gateway, route to `IChatModelProvider` for sync and `IBatchProvider` for batch. For the batch path, validate the request against `MaxBatchSize` before enqueuing — rejecting at the boundary (HTTP 400) is cheaper than cancelling a job mid-flight. Log `path=sync|batch` as a dimension on every token-usage event so cost attribution works.
+Encode the routing decision as an explicit field in your API contract: `"mode": "sync" | "batch"`. Never infer it from request size or caller identity — callers know their latency requirements, the gateway doesn't. In the gateway, route to `IChatModelProvider` for sync and `IBatchChatModelProvider` for batch. For the batch path, validate the request against `MaxBatchSize` before enqueuing — rejecting at the boundary (HTTP 400) is cheaper than cancelling a job mid-flight. Log `path=sync|batch` as a dimension on every token-usage event so cost attribution works.
 
 ### If you're an Architect
 

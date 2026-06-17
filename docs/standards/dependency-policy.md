@@ -31,7 +31,7 @@ Before adding any new package, answer:
 - [ ] Does `dotnet list package --vulnerable` show zero HIGH/CRITICAL after adding it?
 - [ ] Is the license MIT, Apache 2.0, or BSD?
 
-If any answer is "no" or "unknown": do not add it without documenting the exception in `07-files-changed.md` with explicit reasoning.
+If any answer is "no" or "unknown": do not add it without documenting the exception in `docs/notes/changelog.md` with explicit reasoning.
 
 ---
 
@@ -66,7 +66,7 @@ These are the packages already in use. No re-evaluation required.
 | Patch versions (x.y.**Z**) | Weekly (Day NNN divisible by 5) | Update without ADR; run tests |
 | Minor versions (x.**Y**.0) | Every 2 weeks | Update; run tests; check changelog for behavior changes |
 | Major versions (**X**.0.0) | Review required | Do not update without reading migration guide; ADR if breaking changes affect the gateway |
-| Security patches | Same day as disclosure | Update immediately; log in `07-files-changed.md` (step: `security-scan`) |
+| Security patches | Same day as disclosure | Update immediately; log in `docs/notes/changelog.md` (step: `security-scan`) |
 
 ---
 
@@ -87,4 +87,4 @@ Results:
 | MEDIUM | Fix within 5 days; log as YELLOW in `05-audit-log.md` |
 | LOW | Assess; log finding; fix at next dependency update cycle |
 
-If a vulnerable package cannot be updated (pinned transitive dependency): document the CVE, the reason it cannot be updated, and the compensating control (e.g., "network-isolated, no external input reaches this code path") in `07-files-changed.md`.
+If a vulnerable package cannot be updated (pinned transitive dependency): document the CVE, the reason it cannot be updated, and the compensating control (e.g., "network-isolated, no external input reaches this code path") in `docs/notes/changelog.md`.

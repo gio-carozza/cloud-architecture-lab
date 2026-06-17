@@ -17,7 +17,7 @@ STEP 4  DRAFT          chat (new) · Sonnet     full Day N summary in 13-section
 STEP 5  ADR            chat (new) · latest Opus  reason out the decision (skip if none)
 STEP 6  POPULATE       Claude Code · Sonnet    fill summary + checklist + /adr
 STEP 7  BUILD          Claude Code · Sonnet    implement each phase
-STEP 8  TEST + AUDIT   Claude Code · Sonnet    local tests + 6-pillar gate before deploy
+STEP 8  TEST + AUDIT   Claude Code · Sonnet    local tests + 6-pillar gate + symbol-drift-check before deploy
 STEP 9  DEPLOY         Claude Code · Sonnet    /deploy + verify
 STEP 10 DOCUMENT       Claude Code · Sonnet    update docs + commit + /cert-update
 STEP 11 REFLECT        chat (new) · latest Opus  posture check

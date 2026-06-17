@@ -23,7 +23,7 @@ Steps 0–6 in that file:
 3. **Context extraction (STEP 2)** — reads ONLY the `## Whose Problem Am I Solving?` section of 01-summary.md.
 4. **Phase-row filter (STEP 3)** — reads `docs/standards/collaboration-map.md`; loads only the phase rows matching today's phase.
 5. **Collaborator selection (STEP 4)** — selects 1 PRIMARY + at most 2 secondary.
-6. **Block emission + insertion (STEPs 5–6)** — writes the `### Collaboration Lens (Day NNN)` subsection into 01-summary.md; upserts 07-files-changed.md.
+6. **Block emission + insertion (STEPs 5–6)** — writes the `### Collaboration Lens (Day NNN)` subsection into 01-summary.md; upserts a row under the current day's `## Day NNN` section in `docs/notes/changelog.md`.
 
 ---
 
@@ -49,4 +49,4 @@ The inserted block is always ≤ 12 content lines:
 - AT MOST 2 secondary: 1 line each
 - Omits the "Also in frame" heading if no secondaries apply
 
-No new files are created. Two existing files are modified: 01-summary.md (insert) and 07-files-changed.md (upsert).
+No new files are created. Two existing files are modified: 01-summary.md (insert) and `docs/notes/changelog.md` (upsert a row under the current day's section).

@@ -13,7 +13,7 @@ Before starting any new day, verify the previous day is frozen. Paste:
 Verify Day ___ is fully closed out:
 1. Check docs/notes/Day-___/02-completion-checklist.md — all items [x]?
 2. Check docs/notes/Day-___/04-posture-check.md — all five questions answered?
-3. Check docs/notes/Day-___/07-files-changed.md — no duplicate rows, no stale text?
+3. Check the current day's section in docs/notes/changelog.md — no duplicate rows, no stale text?
 4. Check docs/standards/graveyard.md — new graveyard entries added for this day?
 5. Check docs/notes/_index.md — Day ___ status = Complete?
 6. Run git status — working tree clean?
@@ -281,19 +281,34 @@ Then, once local tests pass, run the pre-deploy pillars audit:
 
 ```text
 Pillars audit for Day ___.
-Read: docs/notes/Day-___/01-summary.md, docs/notes/Day-___/07-files-changed.md,
-src/lab-observability-api/Program.cs, and every source file listed in
-07-files-changed.md that was added or modified this day.
+Read: docs/notes/Day-___/01-summary.md, the current "## Day ___" section in
+docs/notes/changelog.md, src/lab-observability-api/Program.cs, and every source
+file listed in that section that was added or modified this day.
 Run all 6-pillar checks from .claude/skills/pillars-audit/SKILL.md.
 Append the full per-check output (all checks, RAG per pillar, RED/YELLOW fix
 sections) to docs/notes/Day-___/05-audit-log.md under "## Run: STEP 8 pre-deploy (YYYY-MM-DD)".
 Fix any RED items, update the RED items → fixes section, re-audit.
-Upsert YELLOW items as debt rows in 07-files-changed.md (step: audit).
+Upsert YELLOW items as debt rows under the current day's section in docs/notes/changelog.md (step: audit).
 When the audit is complete with no open RED items, print the STEP 9 DEPLOY prompt
 with the day number filled in.
 ```
 
-→ STOP when local tests pass AND audit returns no RED items.
+Then run the symbol-drift check — catches today's docs (skill, standard, or note
+edits made during STEP 7/STEP 10) referencing a C# symbol, `ai.*` telemetry name,
+or `src/` path that was renamed or never actually built:
+
+```bash
+node scripts/symbol-drift-check.js
+```
+
+Fix every real finding with a targeted `Edit`. Leave alone any finding that's a
+legitimate "renamed `OLD` → `NEW`" narration or a rejected-ADR-alternative mention —
+re-run to confirm only those remain. This is the prevention mechanism: catching
+drift the same day it's introduced is cheaper than finding it at the next full
+`/repo-audit`. See `.claude/commands/repo-audit.md` Check 9 for the full rationale.
+
+→ STOP when local tests pass AND audit returns no RED items AND the drift check
+has no unaddressed findings.
 
 ---
 
@@ -336,8 +351,8 @@ Day ___ documentation pass.
    — include a "CEO Framing" subsection: one sentence on the business value of today's change
    — include a "Phase Note" subsection: which career phase did this day reinforce and why
 5. Update CLAUDE.md (north star done items, new conventions)
-6. Update docs/notes/Day-___/07-files-changed.md — upsert one row per file touched
-   this pass; dedup on file path; label Step column "docs pass"
+6. Update docs/notes/changelog.md — upsert one row per file touched this pass
+   under the current day's section; dedup on file path; label Step column "docs pass"
 7. git add -A && git commit -m "feat(day-___): ___"
 Report what changed.
 ```
@@ -425,7 +440,7 @@ Then run the full repo health check:
 ```
 
 This checks day folder completeness, ADR structure, markdownlint, backtick conventions,
-`CLAUDE.md` accuracy, `07-files-changed.md` coverage, cert domain coverage, and provider
+`CLAUDE.md` accuracy, `changelog.md` coverage, cert domain coverage, and provider
 abstraction integrity. It auto-fixes what it can (markdownlint, backtick wrap) and reports
 everything else. Fix any ❌ items before closing. If only ⚠️ items remain, confirm with
 the user before proceeding.
@@ -440,16 +455,16 @@ Then run a final pillars audit pass to catch anything introduced since STEP 8:
 
 ```text
 Close-of-day audit for Day ___.
-Read docs/notes/Day-___/07-files-changed.md and identify any files edited AFTER
-the "audit" step row was written (docs pass edits, posture-gap fixes, graveyard
-additions that touched source files).
+Read the current "## Day ___" section in docs/notes/changelog.md and identify
+any files edited AFTER the "audit" step row was written (docs pass edits,
+posture-gap fixes, graveyard additions that touched source files).
 Re-run only the pillar checks relevant to those files. If no source files
-changed after STEP 8, run only O4 (07-files-changed.md coverage complete?) and
+changed after STEP 8, run only O4 (changelog.md coverage complete for this day?) and
 O5 (KQL cookbook updated for any new signals?).
 Append the output (re-checked pillars only) to docs/notes/Day-___/05-audit-log.md
 under "## Run: STEP 12 close-audit (YYYY-MM-DD)".
 If RED: fix and commit before closing; update RED items → fixes section in 05-audit-log.md.
-If YELLOW: upsert a debt row in 07-files-changed.md (step: close-audit) and record
+If YELLOW: upsert a debt row under the current day's section in docs/notes/changelog.md (step: close-audit) and record
 disposition in YELLOW items → fixes section in 05-audit-log.md.
 If all GREEN or N/A: append "close-audit: GREEN" to 05-audit-log.md and proceed.
 ```

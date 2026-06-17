@@ -7,8 +7,8 @@
 **Inputs to read before running:**
 
 1. `docs/notes/Day-NNN/01-summary.md` — what was built
-2. `docs/notes/Day-NNN/07-files-changed.md` — every file touched
-3. Each changed source file listed in `07-files-changed.md`
+2. The current day's `## Day NNN` section in `docs/notes/changelog.md` — every file touched
+3. Each changed source file listed there
 4. `src/lab-observability-api/Program.cs` — DI registrations and pipeline
 5. `src/lab-observability-api/Options/AnthropicOptions.cs` — config contract
 
@@ -77,7 +77,7 @@ Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 | O1 — New paths log structured event with CorrelationId | | |
 | O2 — New metric names follow ai.provider.* convention | | |
 | O3 — New env vars in appsettings-template.md | | |
-| O4 — 07-files-changed.md has row for every file touched | | |
+| O4 — changelog.md has a row for every file touched, under the current day's section | | |
 | O5 — KQL cookbook updated for new signals | | |
 | O6 — /health/ready reflects new required config | | |
 
@@ -152,7 +152,7 @@ Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 | O1 | New paths log structured event with `CorrelationId` | Read new controller and service methods |
 | O2 | New metric names follow `ai.provider.*` | Grep new `Meter.Create*` calls in `GatewayTelemetry.cs` |
 | O3 | New env vars in `appsettings-template.md` | Read the template; "No new settings" only if genuinely true |
-| O4 | `07-files-changed.md` has row for every file touched | Cross-check against git diff |
+| O4 | `changelog.md` has a row for every file touched, under the current day's section | Cross-check against git diff |
 | O5 | KQL cookbook updated for new signals | If new telemetry added → `kql-cookbook.md` should have a query |
 | O6 | `/health/ready` reflects new required config | Read readiness handler in `Program.cs` |
 | RA1 | Prompt/completion NOT logged | Grep changed files for `Log*` near `request.Prompt`, `response.Text`, user content fields |
@@ -172,7 +172,7 @@ Use `N/A` (not GREEN) for checks that do not apply to today's changes.
 4. Populate the output format table and fix sections.
 5. Append to `05-audit-log.md` under the appropriate run header.
 6. RED items: stop, fix, re-run only the affected pillar, update `### RED items → fixes`. Do not deploy with any open RED.
-7. YELLOW items: record finding and disposition. Upsert debt row in `07-files-changed.md` (step: `audit`).
+7. YELLOW items: record finding and disposition. Upsert a debt row under the current day's section in `docs/notes/changelog.md` (step: `audit`).
 
 ---
 

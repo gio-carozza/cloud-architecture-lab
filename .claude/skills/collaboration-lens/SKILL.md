@@ -92,9 +92,8 @@ Omit the `**Also in frame:**` heading if no secondaries were selected.
 
 **Insert** the block into `docs/notes/Day-NNN/01-summary.md` immediately after the `## Whose Problem Am I Solving?` heading line, before any existing body text. If a `### Collaboration Lens` subsection already exists, replace it in place — do not duplicate.
 
-**Upsert** `docs/notes/Day-NNN/07-files-changed.md`. Dedup key is the file path. If a row for `docs/notes/Day-NNN/01-summary.md` already exists, update the Change cell in place. Add a row for `07-files-changed.md` itself as the final action.
+**Upsert** the current day's `## Day NNN` section in `docs/notes/changelog.md`. Dedup key is the file path within that section. If a row for `docs/notes/Day-NNN/01-summary.md` already exists under that heading, update the Change cell in place.
 
 | File | Step | Change |
 |---|---|---|
 | `docs/notes/Day-NNN/01-summary.md` | collab-lens | Collaboration Lens block inserted under "Whose Problem Am I Solving?" — primary: [Collaborator Name] |
-| `docs/notes/Day-NNN/07-files-changed.md` | collab-lens | This file — collab-lens rows upserted |

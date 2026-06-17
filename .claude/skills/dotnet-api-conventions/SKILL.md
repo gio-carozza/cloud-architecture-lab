@@ -134,32 +134,40 @@ public class AiController : ControllerBase
 
 ## Error Handling (production-grade)
 
-**Never return stack traces.** Wrap unhandled exceptions in middleware:
+**Never return stack traces.** The actual implementation is a global exception
+pipeline registered as an inline `app.Use(...)` delegate in `Program.cs` (not a
+separate middleware class) — it catches `ClaudeProviderException` first (classified,
+provider-specific) then falls through to a generic `Exception` handler:
 
 ```csharp
-// Middleware/ExceptionHandlingMiddleware.cs
-public class ExceptionHandlingMiddleware
+// Program.cs — global exception handling pipeline
+app.Use(async (context, next) =>
 {
-    public async Task InvokeAsync(HttpContext ctx, RequestDelegate next)
+    try { await next(); }
+    catch (ClaudeProviderException ex)
     {
-        try { await next(ctx); }
-        catch (Exception ex)
+        var correlationId = context.GetCorrelationId();
+        // ... LogWarning with Provider/ProviderStatusCode/ProviderErrorCode/IsTransient
+        context.Response.StatusCode = ex.ProviderStatusCode switch
         {
-            var correlationId = ctx.TraceIdentifier;
-            _logger.LogError(ex, "Unhandled exception. CorrelationId={CorrelationId}", correlationId);
-            ctx.Response.StatusCode = 500;
-            await ctx.Response.WriteAsJsonAsync(new
-            {
-                error = "An unexpected error occurred.",
-                correlationId
-            });
-        }
+            HttpStatusCode.TooManyRequests => StatusCodes.Status503ServiceUnavailable,
+            HttpStatusCode.RequestTimeout => StatusCodes.Status504GatewayTimeout,
+            _ when ex.IsTransient => StatusCodes.Status503ServiceUnavailable,
+            _ => StatusCodes.Status502BadGateway
+        };
+        await context.Response.WriteAsJsonAsync(new ApiError(Code: "claude_provider_error", Message: "...", CorrelationId: correlationId));
     }
-}
+    catch (Exception ex)
+    {
+        var correlationId = context.GetCorrelationId();
+        // ... LogError, then write a generic ApiError with the same correlationId, no stack trace
+    }
+});
 ```
 
-**Provider-specific errors** (e.g., 401 from Anthropic) should be classified
-and translated to safe HTTP status codes by the provider, not surfaced raw.
+**Provider-specific errors** (e.g., 401 from Anthropic) are classified into
+`ClaudeProviderException` (see `Services/Claude/ClaudeProviderException.cs`) and
+translated to safe HTTP status codes in the pipeline above, not surfaced raw.
 
 ## Logging Conventions
 

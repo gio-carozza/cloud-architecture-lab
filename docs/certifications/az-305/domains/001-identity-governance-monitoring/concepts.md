@@ -18,7 +18,7 @@ The Well-Architected Framework's Cost Optimization pillar says: build the cheape
 
 ### If you're an Engineer
 
-The five WAF pillars are Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency. For AZ-305 exam scenarios, you must satisfy multiple pillars simultaneously — the right answer is the design that meets all pillars at the lowest cost. Cost-specific decisions for AI gateways: (1) use `IOptions<T>` binding for model selection so it's configurable without redeployment; (2) implement `IBatchProvider` for deferrable workloads at 50% token cost; (3) add prompt caching for stable system prompts at ~10% of base input cost; (4) use `MaxBatchSize` enforcement to prevent cost blowouts. Each of these is a WAF Cost Optimization pattern.
+The five WAF pillars are Reliability, Security, Cost Optimization, Operational Excellence, and Performance Efficiency. For AZ-305 exam scenarios, you must satisfy multiple pillars simultaneously — the right answer is the design that meets all pillars at the lowest cost. Cost-specific decisions for AI gateways: (1) use `IOptions<T>` binding for model selection so it's configurable without redeployment; (2) implement `IBatchChatModelProvider` for deferrable workloads at 50% token cost; (3) add prompt caching for stable system prompts at ~10% of base input cost; (4) use `MaxBatchSize` enforcement to prevent cost blowouts. Each of these is a WAF Cost Optimization pattern.
 
 ### If you're an Architect
 

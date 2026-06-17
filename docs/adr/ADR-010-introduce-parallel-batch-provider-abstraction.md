@@ -165,7 +165,7 @@ auth or model ID.
   (a future lightweight or interactive-only provider) must throw
   `NotSupportedException` on the batch methods. Substitutability is broken at the
   type level.
-- ISP cost: interactive-path consumers (`AiChatController`) would depend on batch
+- ISP cost: interactive-path consumers (`AiController`) would depend on batch
   operations they never invoke.
 
 **Revisit conditions:** none foreseen. Cohesion is the only motivation and it is

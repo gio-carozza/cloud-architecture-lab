@@ -2,9 +2,9 @@
 
 ## When this track activates
 
-Around Day 10–15 of the roadmap, AZ-104 begins as a parallel cert track
-ahead of the main AZ-305 push. Until then, AZ-104-relevant concepts are
-flagged in each daily roadmap as Secondary reinforcement.
+Around Day 035 of the roadmap, AZ-104 begins as a parallel cert track
+ahead of the main AZ-305 push (target: Day 070). Until then, AZ-104-relevant
+concepts are flagged in each daily roadmap as Secondary reinforcement.
 
 ## Why before AZ-305
 

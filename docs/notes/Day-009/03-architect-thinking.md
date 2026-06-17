@@ -69,7 +69,7 @@ This is a different flavor of the batch no-retry rule (ADR-010), but for a diffe
 
 ## 4. First-token latency as the primary SLO metric for streaming
 
-For synchronous chat, the relevant metric is total latency (time to complete response). For streaming, total latency is less meaningful — users don't wait for the full response, they wait for the first token. `StreamFirstTokenMs` is the metric that directly correlates with perceived performance. A p95 first-token latency of < 500ms is the target for interactive use.
+For synchronous chat, the relevant metric is total latency (time to complete response). For streaming, total latency is less meaningful — users don't wait for the full response, they wait for the first token. `StreamTtftMs` (`ai.provider.stream.ttft_ms`) is the metric that directly correlates with perceived performance. A p95 first-token latency of < 500ms is the target for interactive use.
 
 This distinction matters architecturally: if you only instrument `ProviderLatencyMs` (total), you will miss regressions in first-token time that users actually feel.
 

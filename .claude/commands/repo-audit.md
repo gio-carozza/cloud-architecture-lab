@@ -26,7 +26,7 @@ For `docs/notes/Day-<NNN>/`:
 
 - `01-summary.md` — must exist and be non-empty
 - `02-completion-checklist.md` — must exist; count unchecked `[ ]` items; report any that are NOT marked with an explicit deferral note
-- `07-files-changed.md` — must exist and be a valid markdown table (columns: File, Step, Change); must have at least one row beyond the header
+- `docs/notes/changelog.md` must have a `## Day <NNN>` section with a valid markdown table (columns: File, Step, Change) and at least one row beyond the header
 - `03-architect-thinking.md` — must exist if the day is being closed (STEP 12 creates it); warn if missing
 - `04-posture-check.md` — must exist if STEP 11 was run; warn if missing
 - `05-audit-log.md` — must exist if STEP 8 was run; warn if missing
@@ -35,7 +35,7 @@ Report ✅ / ⚠️ / ❌ per file. Do NOT create missing files — report them 
 
 ### 2. ADR structure
 
-For any ADR whose filename contains the word "Day-<NNN>" in its date field, OR any ADR modified today (check `07-files-changed.md` for rows in `docs/adr/`):
+For any ADR whose filename contains the word `Day-<NNN>` in its date field, OR any ADR modified today (check the current day's `## Day <NNN>` section in `docs/notes/changelog.md` for rows in `docs/adr/`):
 
 - Has `## Status` heading with value `Accepted`, `Proposed`, or `Superseded`
 - Has `## Date` heading with a date value (not blank)
@@ -49,8 +49,14 @@ Also verify that the ADR number sequence in `docs/adr/` has no gaps — list ADR
 Run:
 
 ```bash
-markdownlint "**/*.md" --ignore "docs/architecture/**" --ignore "node_modules/**"
+markdownlint "**/*.md" ".claude/**/*.md" --ignore "docs/architecture/**" --ignore "node_modules/**"
 ```
+
+The `.claude/**/*.md` glob is required in addition to `**/*.md` — `**` does not match
+dotfolders by default, so `**/*.md` alone silently skips everything under `.claude/`
+(skills, commands, hooks instructions) and reports a false "0 violations." Confirmed
+during the 2026-06-16 audit: two pre-existing MD033 violations in
+`.claude/commands/repo-audit.md` itself had never been caught by this check.
 
 If violations found: run `markdownlint --fix` on each offending file, then re-run to confirm zero.
 Report which files were auto-fixed vs. which still have violations.
@@ -73,17 +79,19 @@ Read `CLAUDE.md` and verify:
 - Any new ADR created today is mentioned in the Phase 1 / Phase 2 / Phase 3 section with the correct day number
 - Any new skills or commands added today are listed in `## Commands` or `## Architecture` sections if relevant
 
-### 6. 07-files-changed.md coverage
+### 6. changelog.md coverage
 
-Read `docs/notes/Day-<NNN>/07-files-changed.md`. For each file path in the table:
+Read `docs/notes/changelog.md`, find the current day's `## Day <NNN>` section. For each file path in that section's table:
 
 - Verify the file actually exists in the repo (warn on orphan rows for deleted files — they are okay if intentional, but should be noted)
 
-Then scan `07-files-changed.md` itself for any file in `docs/notes/Day-<NNN>/` that is NOT listed in the table. If a day folder file is missing from the log, add its row (step: `close-audit`, change: `created — not logged during session`).
+Then scan that section for any file in `docs/notes/Day-<NNN>/` that is NOT listed. If a day folder file is missing from the log, add its row under the current day's section (step: `close-audit`, change: `created — not logged during session`).
+
+**Scope discipline:** this check (and any row you add) is about files `Day-<NNN>`'s own session actually touched — but the row always goes under the **current day's** section in `changelog.md`, regardless of which day's folder the file lives in. If a drift fix found elsewhere in this audit (Check 9) touches a file owned by a *different*, already-closed day (e.g. fixing a stale path in `Day-006/01-summary.md` during a Day-009 audit), log that row under `## Day 009`, not `## Day 006`. Git already has the authoritative timestamp for when the edit happened; the single-file format with day-of-edit sections (not day-of-file-creation sections) is exactly what replaced the old per-day-file convention, which forced this same lookup as a real cost (lesson from the 2026-06-16 audit).
 
 ### 7. Cert coverage
 
-Read `docs/notes/Day-<NNN>/01-summary.md`. Find the "Certification Reinforcement" section. For each domain marked **Primary**, check whether `docs/certifications/<exam>/domains/<NNN-domain>/day-mapping.md` contains "Day-<NNN>". If not, warn that `/cert-update <NNN>` was not run for that domain.
+Read `docs/notes/Day-<NNN>/01-summary.md`. Find the "Certification Reinforcement" section. For each domain marked **Primary**, check whether `docs/certifications/<exam>/domains/<NNN-domain>/day-mapping.md` contains `Day-<NNN>`. If not, warn that `/cert-update <NNN>` was not run for that domain.
 
 ### 8. Provider abstraction contract check
 
@@ -95,204 +103,50 @@ grep -r "Anthropic\|claude\|Claude" src/lab-observability-api/Models/AI/ --inclu
 
 Any match in `ChatRequest.cs`, `ChatResponse.cs`, or `ChatChunk.cs` is a ❌ violation. Matches in `ChatUsage.cs` for field names are acceptable — note them but do not flag as ❌.
 
-### 9. Drift check — src changes reflected everywhere (git-diff-based, token-optimized)
+### 9. Drift check — doc references vs. actual source (script-based)
 
-**Purpose:** catch any case where code changed in `src/` but skill docs, ADRs, `CLAUDE.md`, notes, or certifications still reference old names, paths, or signatures. Uses git as the source of truth — not a manually-maintained log.
-
-**Token contract:** the entire check runs on grep output and git diff output. No `Read` calls on source files or doc files unless a confirmed mismatch requires a targeted fix. On a clean day (nothing renamed or removed), total overhead is ~4 shell commands and zero reads.
-
----
-
-#### Step 1 — Find today's commit range (one git command)
+**Purpose:** catch any case where a doc (skill, standard, day note, or cert file)
+references a C# type/member name, an `ai.*` telemetry string, or a `src/` path that
+doesn't exist in current source — whether it was renamed, or simply never built
+(a class a skill describes that was never actually created). Run:
 
 ```bash
-git log --pretty=format:"%H" --grep="[Dd]ay.0*<NNN>" | tail -1
+node scripts/symbol-drift-check.js
 ```
 
-This finds the hash of the **oldest commit** for Day NNN (commits whose message contains e.g. `day-010` or `Day-010`). Call this `OLDEST`.
+This replaces the previous git-diff-range heuristic, which relied on finding "the
+oldest commit for Day NNN" to define a diff base — that assumption breaks in this
+repo because work is committed in bulk consolidation commits, not one commit per
+day (confirmed during the 2026-06-16 audit: the heuristic's diff range spanned
+nearly the entire repo history). The script instead rebuilds the full symbol/string
+table from `src/` on every run and checks doc references against current truth —
+no git history dependency, and it catches "never existed" drift that a diff-based
+approach structurally cannot (nothing was ever removed, so there's no diff to find).
 
-- If `OLDEST` is empty (no commits yet): use `HEAD` as base and also check `git status --short` for uncommitted `.cs` changes.
-- If `OLDEST` is found: base = `OLDEST^` (the parent commit, i.e. where the day started).
+**Scope (by design, not a bug):** only inline single-backtick spans are checked —
+fenced ` ```csharp ` examples are not parsed (too much noise from abbreviated
+illustrative code). Only symbol names ending in a recognized suffix (`Controller`,
+`Provider`, `Client`, `Options`, `Middleware`, `Telemetry`, `Exception`, `Handler`,
+`Chunk`, `Usage`, `Job`, `Status`, `Result`) are checked, to avoid flagging generic
+prose. `docs/adr/`, `docs/architecture/`, `*-log.md`, `docs/notes/changelog.md`,
+`commit-convention.md`, `graveyard.md`, and explicit Phase-2/future-scope stub
+standards are excluded — those genres intentionally name rejected or not-yet-built
+designs. A small allowlist in the script covers common BCL/framework types and
+designs explicitly rejected in an ADR.
 
-```bash
-BASE=$(git log --pretty=format:"%H" --grep="[Dd]ay.0*<NNN>" | tail -1)
-[ -z "$BASE" ] && BASE="HEAD" || BASE="${BASE}^"
-```
+**Output:** the script prints `file:line: \`span\` — reason` for each finding, or
+`clean — 0 findings`. For each finding:
 
----
+1. Read the line (`grep -n` or a 3-line `Read`) to confirm it's real drift and not
+   a legitimate "renamed `OLD` → `NEW`" or "rejected alternative" narration (those
+   read as correct in context even though the script can't tell the difference —
+   check the sentence before flagging it as a problem).
+2. If real: make the targeted `Edit`.
+3. If a recurring false-positive pattern emerges (a new BCL type, a new rejected
+   design name, a new stub file), add it to the relevant allowlist/exclude-list in
+   `scripts/symbol-drift-check.js` rather than re-triaging it every run.
 
-#### Step 2 — Get all files changed today (one git command)
-
-```bash
-git diff "$BASE" HEAD --name-only --diff-filter=ACMRD
-```
-
-Flags: A=added, C=copied, M=modified, R=renamed, D=deleted. This is the complete set of files touched since the day began.
-
-Split the output into two buckets:
-
-- **`src/*.cs` files** → source changes that may need doc updates
-- **`.md` files outside `docs/architecture/`** → doc changes that may reference source symbols
-
-If the `src/*.cs` bucket is empty:
-→ Print `✅ Check 9: skipped — no src/*.cs files changed today` and stop.
-
----
-
-#### Step 3 — Extract removed/renamed public symbols from source diff (one git command)
-
-```bash
-git diff "$BASE" HEAD -- "src/" \
-  | grep "^-[^-]" \
-  | grep -E "\bpublic\b" \
-  | grep -oE "[A-Z][A-Za-z][A-Za-z0-9]+"
-```
-
-This pipeline:
-
-1. Gets only the diff of `src/` files
-2. Keeps only removed lines (starting with `-`, excluding the `---` file header)
-3. Filters to lines declaring something `public` (methods, properties, fields, classes)
-4. Extracts PascalCase identifiers (the symbol names)
-
-The result is a deduplicated list of **symbols that existed before today but may no longer exist or have been renamed**. These are the only symbols that can cause stale references in docs. Newly added symbols cannot be stale.
-
-Also extract renamed/moved **folder paths** from the `src/` changed file list:
-
-```bash
-git diff "$BASE" HEAD --name-only --diff-filter=ACMRD \
-  | grep "^src/" \
-  | sed 's|src/lab-observability-api/||; s|/[^/]*$||' \
-  | sort -u
-```
-
-This gives the set of subfolders touched (e.g. `Services/AI`, `Models/AI`, `Telemetry`). If any folder was renamed, the old name may appear in doc paths.
-
----
-
-#### Step 4 — Search the entire repo's .md files for removed symbols (grep, file-list only)
-
-For each removed symbol extracted in Step 3, run one grep across ALL `.md` files in the repo (excluding `docs/architecture/`):
-
-```bash
-grep -rln "<SYMBOL>" \
-  --include="*.md" \
-  --exclude-dir="docs/architecture" \
-  --exclude-dir="node_modules" \
-  .
-```
-
-The `-l` flag returns **file names only** — not content. This is the cheapest possible search: it tells you which files reference the symbol without reading their content.
-
-For each **file returned**:
-
-```bash
-# Check if the NEW name (from + lines of the diff) is also present in that file
-grep -c "<NEW_SYMBOL>" "<file>"
-```
-
-- Count > 0 → file already has the new name → ✅ already updated
-- Count = 0 → file references the old name but not the new name → ❌ stale reference
-
-To get `NEW_SYMBOL` (what replaced the removed symbol):
-
-```bash
-git diff "$BASE" HEAD -- "src/" \
-  | grep "^+[^+]" \
-  | grep -E "\bpublic\b" \
-  | grep -oE "[A-Z][A-Za-z][A-Za-z0-9]+"
-```
-
-Same pipeline on `+` lines. Pair removed vs. added symbols by proximity in the diff (lines within 5 of each other are likely a rename).
-
----
-
-#### Step 5 — Check for stale folder paths in docs
-
-For each subfolder that appears in the diff (Step 3), check whether any `.md` file references a path that **no longer exists** in `src/`:
-
-```bash
-# Build list of current src/ subfolders
-find src/lab-observability-api -type d \
-  | sed 's|src/lab-observability-api/||' \
-  | sort > /tmp/current_folders.txt
-
-# For each folder referenced in docs, check it still exists
-grep -rohn "src/lab-observability-api/[A-Za-z/]*" \
-  --include="*.md" \
-  --exclude-dir="docs/architecture" \
-  . \
-  | grep -vF -f /tmp/current_folders.txt
-```
-
-Any line returned is a `.md` file referencing a `src/` path that no longer exists — flag as ❌.
-
----
-
-#### Step 6 — Targeted fix (only runs on confirmed drift)
-
-When Step 4 or Step 5 finds a stale reference:
-
-1. Run `grep -n "<OLD_SYMBOL>" "<file>"` to get the exact line number.
-2. Read only that line range (`Read` tool with `offset` and `limit: 3`).
-3. Make the targeted `Edit` — one line, not the whole file.
-4. Re-run `grep -c "<OLD_SYMBOL>" "<file>"` to confirm count is now 0.
-
-**No full-file reads. No full-file rewrites.**
-
----
-
-#### Step 7 — Also check changed .md files for broken src references
-
-For `.md` files that were themselves modified today (from the Step 2 `.md` bucket), verify that any `src/` path or C# symbol they mention still exists:
-
-```bash
-# Get only the added lines from changed .md files
-git diff "$BASE" HEAD -- "*.md" \
-  | grep "^+[^+]" \
-  | grep -oE "src/lab-observability-api/[A-Za-z0-9/_.-]+" \
-  | sort -u
-```
-
-For each path extracted, check it exists:
-
-```bash
-# Verify each referenced src path actually exists on disk
-# (run as a loop or pipe to xargs test -e)
-```
-
-Any path that doesn't exist on disk → ❌ broken reference introduced in today's doc edits.
-
----
-
-#### Cost summary
-
-| Scenario | Commands | Reads |
-|---|---|---|
-| No `src/*.cs` changed today | 2 git commands | 0 |
-| `src/*.cs` changed, no symbols removed | 3 git commands + 1 grep | 0 |
-| Symbols removed, no stale doc refs found | 3 git + N symbol greps (file-list only) | 0 |
-| Stale ref found in 1 file | Same + 1 targeted line grep + 1 Edit | 1 (3-line range) |
-| Stale refs in 3 files | Same + 3 targeted line greps + 3 Edits | 3 (3-line ranges each) |
-
-A clean day costs under 500 tokens for this entire check. A day with one rename costs under 1,000.
-
----
-
-#### Output format for Check 9
-
-```text
-### 9. Drift check
-  Scope: 4 src/*.cs files changed, 3 .md files changed
-  Removed symbols: StreamFirstTokenMs, TryExtractUsage (2-tuple)
-  Added symbols:   StreamTtftMs, TryExtractUsage (4-tuple)
-
-  StreamFirstTokenMs → .claude/skills/pillars-audit/SKILL.md line 186: stale ❌ → fixed ✅
-  TryExtractUsage    → .claude/skills/observability-net/SKILL.md line 181: stale ❌ → fixed ✅
-  Providers/         → docs/adr/ADR-010 line 253: stale path ❌ → fixed ✅
-
-  .md files modified today — src/ path refs: all valid ✅
-```
+Re-run after fixes to confirm the finding count dropped to only legitimate cases.
 
 ---
 
@@ -304,7 +158,7 @@ A clean day costs under 500 tokens for this entire check. A day with one rename 
 ### 1. Day folder completeness
   ✅ 01-summary.md
   ✅ 02-completion-checklist.md (all items checked)
-  ✅ 07-files-changed.md (N rows)
+  ✅ changelog.md — Day NNN section present (N rows)
   ⚠️  04-posture-check.md — missing (run STEP 11 if not done)
 
 ### 2. ADR structure
@@ -321,7 +175,7 @@ A clean day costs under 500 tokens for this entire check. A day with one rename 
   ✅ Day status current
   ⚠️  ADR-NNN not mentioned in Phase 1 section
 
-### 6. 07-files-changed.md coverage
+### 6. changelog.md coverage
   ✅ All logged files exist
   ⚠️  docs/notes/Day-NNN/03-architect-thinking.md not in log — row added
 
@@ -331,6 +185,9 @@ A clean day costs under 500 tokens for this entire check. A day with one rename 
 
 ### 8. Provider abstraction
   ✅ No Anthropic types in ChatRequest / ChatResponse / ChatChunk
+
+### 9. Drift check
+  ✅ symbol-drift-check.js: clean — 0 findings (or: N findings → M fixed, K legitimate-as-is)
 
 ---
 RESULT: ✅ N checks passed · ⚠️ N warnings · ❌ N blocking items

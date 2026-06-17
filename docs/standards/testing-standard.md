@@ -12,7 +12,7 @@ Every new feature or bug fix requires tests before the day closes. No exceptions
 | Layer | What to test | Test type |
 |---|---|---|
 | Controllers | Happy path, validation failures, cancellation | Integration (via `GatewayWebApplicationFactory`) |
-| Provider implementations | Request mapping, response mapping, error translation | Unit (mock `HttpClient`) |
+| Provider implementations | Request mapping, response mapping, error translation | Unit (mock `HttpClient`) — not yet built; today's coverage stops at the controller/provider-seam boundary (see below) |
 | Middleware | Correlation ID generation, propagation, header output | Integration |
 | Options binding | Required fields present, defaults applied | Unit |
 | Telemetry | Span tags set, counters incremented, histogram recorded | Unit (fake `ActivityListener`) |
@@ -33,11 +33,16 @@ Never mock the provider seam in controller tests — use `GatewayWebApplicationF
 
 ```text
 Unit test:     one class, all dependencies mocked/faked, no I/O
-Integration:   GatewayWebApplicationFactory + real DI + fake HTTP handler
+Integration:   GatewayWebApplicationFactory + real DI + fake provider at the IChatModelProvider/IBatchChatModelProvider seam
 E2E:           NOT in this repo — verified manually post-deploy
 ```
 
-`GatewayWebApplicationFactory` replaces the real `HttpClient` with a `FakeHttpMessageHandler`. It does NOT call Anthropic. It does NOT require Azure.
+`GatewayWebApplicationFactory` (`Tests/GatewayWebApplicationFactory.cs`) substitutes
+`IChatModelProvider`/`IBatchChatModelProvider` in the DI container with
+`FakeChatModelProvider`/`FakeBatchChatModelProvider` (`Tests/Fakes/`) — it does not
+replace `HttpClient` or fake at the HTTP layer. It does NOT call Anthropic. It does
+NOT require Azure. There is currently no unit-test coverage of `ClaudeApiClient`
+itself (the HTTP transport layer) — coverage today starts at the provider seam.
 
 ---
 
@@ -69,7 +74,7 @@ Run `dotnet test` before any commit. A red test is a build-blocker — do not co
 
 ## Adding tests for each new feature
 
-When a new file appears in `07-files-changed.md` under `src/`, the corresponding test must appear in the same row's `Change` column or in a separate row. If no test was written, the audit log must record it as a YELLOW debt item.
+When a new file appears in `docs/notes/changelog.md` under `src/`, the corresponding test must appear in the same row's `Change` column or in a separate row. If no test was written, the audit log must record it as a YELLOW debt item.
 
 Checklist per new source file:
 
@@ -98,7 +103,7 @@ public class FakeChatModelProvider : IChatModelProvider
 }
 ```
 
-**Use `Moq` sparingly** — only for verifying a method was called with specific arguments. Never mock `HttpClient` directly; use `FakeHttpMessageHandler`.
+**Use `Moq` sparingly** — only for verifying a method was called with specific arguments. Prefer faking at the `IChatModelProvider`/`IBatchChatModelProvider` seam over mocking `HttpClient` directly — that is the actual pattern used today (`FakeChatModelProvider`, `FakeBatchChatModelProvider`).
 
 ---
 

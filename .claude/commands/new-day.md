@@ -15,7 +15,6 @@ Given a day number and a kebab-case slug, create:
    - `02-completion-checklist.md` (concrete done criteria)
    - `03-architect-thinking.md` (tradeoffs & enterprise reasoning)
    - `04-posture-check.md` (the daily honesty audit)
-   - `07-files-changed.md` (running file-change registry — dedup key is file path)
    - `05-audit-log.md` (append-only log of every pillars audit run: all checks, RAG per pillar, RED/YELLOW fix trails)
    - `06-deployment-log.md` (append-only deployment record: pre-deploy gate, build/publish/zip/Kudu commands with outputs, every post-deploy test with full attempt trail — Attempt 1 result, fix applied if failed, Attempt 2, until PASSED; deployment-level issues & fixes table)
    - Note: KQL queries go directly to `docs/standards/kql-cookbook.md`, NOT a day-local kql.md
@@ -28,6 +27,10 @@ Given a day number and a kebab-case slug, create:
    file is the single source of truth `/deploy` reads before publishing.
 
 4. Append a "## Day NNN" entry to `docs/notes/_index.md`
+
+5. Append a new `## Day NNN` section (header + empty table, dedup key is file
+   path within the section) to `docs/notes/changelog.md` — this replaces what
+   used to be a separate `Day-NNN/07-files-changed.md` file per day.
 
 ## Required sections in 01-summary.md
 
@@ -157,13 +160,14 @@ the day introduces. `/deploy` reads this file at step 1b — it must exist.
 No new app settings this day.
 ```
 
-## Required initial content for 07-files-changed.md
+## Required initial content for the changelog.md Day NNN section
 
-Scaffold with the header and an empty table. Claude Code populates rows during
-every doc-update pass; dedup key is the file path.
+Append this section (header + empty table) to the end of `docs/notes/changelog.md`.
+Claude Code populates rows during every doc-update pass; dedup key is the file
+path within this section.
 
 ```markdown
-# Day NNN — Files Changed
+## Day NNN
 
 | File | Step | Change |
 |---|---|---|
@@ -220,6 +224,6 @@ fake providers, collection fixture, SSE headers, correlation ID round-trip).
 - Inside the day folder, use numeric reading-order prefix (01-summary.md, 02-completion-checklist.md, …); no day prefix
 - In shared folders (architecture/, etc.), KEEP the day prefix
 - Posture check is filled at the END of the day, before commit
-- `07-files-changed.md` is scaffolded empty and populated progressively — never pre-fill it
+- The `## Day NNN` section in `docs/notes/changelog.md` is scaffolded with an empty table and populated progressively — never pre-fill it
 - `05-audit-log.md` is append-only — never overwrite or delete prior run sections
 - `06-deployment-log.md` is append-only — each `/deploy` run appends one dated section

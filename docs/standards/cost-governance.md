@@ -19,7 +19,7 @@ Budgets are enforced via `MaxTokens` in `AnthropicOptions`. Never hard-code toke
 
 ## Prompt caching requirement
 
-Prompt caching (`EnablePromptCaching = true`) is the **default and required** production state. Disabling it must be documented in the day's `07-files-changed.md` with a reason.
+Prompt caching (`EnablePromptCaching = true`) is the **default and required** production state. Disabling it must be documented in the day's section of `docs/notes/changelog.md` with a reason.
 
 Expected cache economics for a stable system prompt:
 

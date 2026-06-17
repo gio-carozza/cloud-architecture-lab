@@ -128,7 +128,10 @@ so the correlation ID is enriched into every log line.
 
 ### Phase E — Exception handling middleware (15 min)
 
-Create `Middleware/ExceptionHandlingMiddleware.cs`. Returns:
+Plan: create `Middleware/ExceptionHandlingMiddleware.cs`. (Actual implementation:
+an inline `app.Use(...)` global exception pipeline in `Program.cs` — no separate
+middleware class was created; see `docs/standards/error-handling-standard.md`.)
+Returns:
 
 ```json
 { "error": "An unexpected error occurred.", "correlationId": "0HN..." }
@@ -218,15 +221,14 @@ the abstraction is wrong.
 
 ### Code
 
-- `src/lab-observability-api/Program.cs` (Serilog + App Insights + resilience)
+- `src/lab-observability-api/Program.cs` (Serilog + App Insights + resilience + inline global exception pipeline — no separate `ExceptionHandlingMiddleware.cs` was created)
 - `src/lab-observability-api/Middleware/CorrelationIdMiddleware.cs`
-- `src/lab-observability-api/Middleware/ExceptionHandlingMiddleware.cs`
-- `src/lab-observability-api/Providers/ClaudeChatModelProvider.cs` (telemetry tags)
+- `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` (telemetry tags)
 
 ### Docs
 
-- `docs/adr/ADR-006-adopt-serilog-with-application-insights-sink.md`
-- `docs/architecture/day-006-observability-and-resilience.md`
+- `docs/adr/ADR-006-harden-ai-gateway-with-resilience-and-observability.md`
+- `docs/architecture/day-006-ai-gateway-v2-hardening.md`
 - `docs/notes/Day-006/01-summary.md` (this file)
 - `docs/notes/Day-006/02-completion-checklist.md`
 - `docs/notes/Day-006/03-architect-thinking.md`
@@ -264,7 +266,7 @@ Concepts surfaced: Azure Monitor service family, Log Analytics, App Insights as
 a category of Azure monitoring. Worth a 10-min review of the "Manage and govern
 Azure resources" domain section on monitoring tools.
 
-### AZ-104 — **Primary** (good entry point as the parallel track begins ~Day 10–15)
+### AZ-104 — **Primary** (good entry point; parallel track restructured to begin ~Day 035)
 
 Concepts directly exercised:
 

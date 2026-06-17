@@ -22,7 +22,7 @@
 - [x] Serilog configured in `Program.cs` with Console + AppInsights sinks — Console sink confirmed; App Insights export via OTel per ADR-008, not a Serilog sink
 - [x] `UseSerilogRequestLogging` enabled with correlation ID enrichment — `Program.cs:135–160`
 - [x] `CorrelationIdMiddleware` created and registered (before request logging) — `Middleware/CorrelationIdMiddleware.cs`; registered at `Program.cs:130`
-- [x] `ExceptionHandlingMiddleware` created and registered (first in pipeline) — implemented inline as `app.Use()` lambda at `Program.cs:165–224`; catches `ClaudeProviderException` + `Exception`, returns safe JSON contract
+- [x] Global exception handling registered (first in pipeline) — implemented inline as `app.Use()` lambda at `Program.cs:165–224` (no separate `ExceptionHandlingMiddleware` class); catches `ClaudeProviderException` + `Exception`, returns safe JSON contract
 - [x] `IHttpClientFactory` typed client for `ClaudeChatModelProvider` — `AddHttpClient<ClaudeApiClient>`; provider depends on `ClaudeApiClient`
 - [x] `AddStandardResilienceHandler` configured with retry, timeout, circuit breaker — `SamplingDuration=120s`, `AttemptTimeout=45s`, `ShouldHandle=_=>false` (retry stage present but disabled per ADR-006)
 - [x] `Activity` instrumentation in provider with `llm.*` tags — outer span `ai.chat.complete` in `ClaudeChatModelProvider`; inner span `claude.chat.api` in `ClaudeApiClient` with `llm.tokens.input`, `llm.tokens.output`, `llm.latency_ms`, `llm.endpoint`

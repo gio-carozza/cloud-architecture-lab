@@ -42,8 +42,8 @@ Client → POST /api/ai/chat (sync, unchanged)
 | `ClaudeApiClient.StreamAsync` | `Services/Claude/ClaudeApiClient.cs` | POSTs with `stream:true`; parses SSE event stream |
 | `ClaudeChatModelProvider.StreamAsync` | `Services/AI/ClaudeChatModelProvider.cs` | Delegates to client; records first-token latency |
 | `/api/ai/chat/stream` | `Controllers/AiController.cs` | New endpoint; sets SSE headers; flushes each chunk |
-| `StreamFirstTokenMs` | `Telemetry/GatewayTelemetry.cs` | Histogram: ms to first token |
-| `StreamDurationMs` | `Telemetry/GatewayTelemetry.cs` | Histogram: total stream duration |
+| `StreamTtftMs` | `Telemetry/GatewayTelemetry.cs` | Histogram: ms to first token (`ai.provider.stream.ttft_ms`) |
+| `StreamDurationMs` | `Telemetry/GatewayTelemetry.cs` | Histogram: total stream duration — deferred (not in Day 9 scope) |
 
 ## Seam Decision
 

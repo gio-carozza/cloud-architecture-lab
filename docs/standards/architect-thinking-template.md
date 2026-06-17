@@ -76,7 +76,7 @@ If a section genuinely does not apply (e.g., a pure documentation day with no de
 ## What NOT to write
 
 - Do not summarize what the code does — that is in `01-summary.md`
-- Do not list the files changed — that is in `07-files-changed.md`
+- Do not list the files changed — that is in `docs/notes/changelog.md`
 - Do not restate the completion checklist — that is in `02-completion-checklist.md`
 - Do not write "everything went well" with no qualification — the posture check in STEP 11 will surface the real answer anyway
 

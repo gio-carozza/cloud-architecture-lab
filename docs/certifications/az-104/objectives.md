@@ -160,5 +160,5 @@
 ---
 
 > Weights above are approximate — verify against the current PDF before exam prep.
-> This repo activates AZ-104 track at ~Day 10–15. Domain 5 (Monitor) has the most
+> This repo activates AZ-104 track at ~Day 035 (target: Day 070). Domain 5 (Monitor) has the most
 > direct overlap with gateway build work — Days 6, 7, 9 are already mapped there.

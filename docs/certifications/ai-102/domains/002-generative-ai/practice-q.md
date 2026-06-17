@@ -67,7 +67,7 @@ D) Add a retry limit to the batch client so it stops after a quota error
 
 ## Q4: Provider abstraction for batch
 
-**Scenario:** A company currently uses the Anthropic Batch API for offline workloads. They want to migrate to Azure OpenAI Global Batch without rewriting the core processing pipeline. The gateway is built on a provider abstraction (`IBatchProvider`) with `SubmitAsync`, `GetStatusAsync`, and `GetResultsAsync` methods.
+**Scenario:** A company currently uses the Anthropic Batch API for offline workloads. They want to migrate to Azure OpenAI Global Batch without rewriting the core processing pipeline. The gateway is built on a provider abstraction (`IBatchChatModelProvider`) with `SubmitAsync`, `GetStatusAsync`, and `GetResultsAsync` methods.
 
 **Question:** What does the provider abstraction pattern enable in this migration?
 
@@ -78,7 +78,7 @@ D) It automatically translates Anthropic model parameter names to Azure OpenAI e
 
 **Answer:** B
 
-**Why:** The abstraction seam (`IBatchProvider`) maps the common three-phase semantic (submit/poll/retrieve) to each provider's specific API, keeping provider-specific details out of the pipeline. Registering a new implementation in DI is the only change required in the consuming code. A) JSONL formats differ between providers — the abstraction hides this, but the formats are not identical. C) quota is a deployment concern, not a code concern — the abstraction does not affect it. D) model parameter translation is a concern of the provider implementation, not a "automatic" runtime feature.
+**Why:** The abstraction seam (`IBatchChatModelProvider`) maps the common three-phase semantic (submit/poll/retrieve) to each provider's specific API, keeping provider-specific details out of the pipeline. Registering a new implementation in DI is the only change required in the consuming code. A) JSONL formats differ between providers — the abstraction hides this, but the formats are not identical. C) quota is a deployment concern, not a code concern — the abstraction does not affect it. D) model parameter translation is a concern of the provider implementation, not a "automatic" runtime feature.
 
 **Exam domain:** Implement generative AI solutions  
 **Cert:** AI-102  

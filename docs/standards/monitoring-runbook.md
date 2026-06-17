@@ -118,4 +118,4 @@ After a P1 or P2 incident is resolved:
 - [ ] The KQL query used to detect/confirm the issue added to `kql-cookbook.md` if it isn't already there
 - [ ] A test case added to cover the failure path (see `testing-standard.md`)
 - [ ] `CLAUDE.md` Gotchas section updated if the failure revealed a new environmental constraint
-- [ ] `07-files-changed.md` updated with any files touched during the fix
+- [ ] `docs/notes/changelog.md` updated with any files touched during the fix, under the current day's section

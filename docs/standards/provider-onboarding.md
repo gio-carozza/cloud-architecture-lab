@@ -48,8 +48,12 @@ src/lab-observability-api/
 
 ```text
 src/lab-observability-api.Tests/
-  Services/<Provider>/<Provider>ChatModelProviderTests.cs
-  Services/<Provider>/<Provider>ApiClientTests.cs   — uses FakeHttpMessageHandler
+  Controllers/AiControllerTests.cs / AiBatchControllerTests.cs — extend with a
+    new <Provider> case via GatewayWebApplicationFactory + a Fake<Provider>ChatModelProvider
+    at the IChatModelProvider/IBatchChatModelProvider seam (the actual pattern used
+    today — see FakeChatModelProvider.cs / FakeBatchChatModelProvider.cs).
+    No HttpClient-level fake exists in this repo yet — there is no <Provider>ApiClientTests.cs
+    precedent; the first one to add HTTP-transport-layer unit tests sets the pattern.
 ```
 
 ### Required: infrastructure
@@ -62,7 +66,7 @@ Infra/Day-NNN/appsettings-template.md  — document all new config keys
 
 ```text
 docs/adr/ADR-NNN-adopt-<provider>-provider.md
-docs/notes/Day-NNN/07-files-changed.md   — row for every file above
+docs/notes/changelog.md   — row for every file above, under the current ## Day NNN section
 ```
 
 ---
@@ -120,6 +124,6 @@ Do not hard-code a routing decision in the controller. Routing belongs in a futu
 - [ ] `POST /api/ai/chat` returns a valid `ChatResponse` using the new provider
 - [ ] `POST /api/ai/chat/stream` streams tokens correctly (or degrades gracefully)
 - [ ] Telemetry visible in App Insights `dependencies` table within 5 min
-- [ ] `07-files-changed.md` has a row for every new file
+- [ ] `docs/notes/changelog.md` has a row for every new file, under the current day's section
 - [ ] ADR status updated to `Accepted`
 - [ ] `CLAUDE.md` Provider Abstraction Contract section updated if interface changed

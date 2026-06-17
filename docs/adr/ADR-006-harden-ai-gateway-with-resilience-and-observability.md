@@ -107,7 +107,7 @@ Day 6 shifts the project from a “working demo” toward a supportable AI platf
 - More configuration to maintain
 - Greater need for version alignment across resilience and telemetry packages
 
-## Alternatives considered
+## Alternatives Considered
 
 ### 1. Keep all Claude logic inside the provider class
 

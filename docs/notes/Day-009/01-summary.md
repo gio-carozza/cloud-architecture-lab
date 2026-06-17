@@ -203,7 +203,7 @@ See 02-completion-checklist.md.
 
 - AZ-900: Secondary — Azure Monitor custom metrics/histograms; App Service as the
   compute host for a streaming workload.
-- AZ-104: None — no admin/ops surface today (AZ-104 parallel track starts ~Day 10-15).
+- AZ-104: None — no admin/ops surface today (AZ-104 parallel track restructured to start ~Day 035).
 - AZ-305: Secondary — designing for performance and latency SLOs; choosing the right
   response pattern (streaming vs buffered) for an interactive workload; monitoring design.
 - AI-102: Primary — implementing generative AI solutions with streaming completions;

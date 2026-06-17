@@ -44,7 +44,8 @@ Region: East US
 src/lab-observability-api/   .NET 8 AI Gateway (anchor workload)
 docs/adr/                    Architecture Decision Records (ADR-001 through ADR-011)
 docs/architecture/           System diagrams and sequence flows (per day)
-docs/notes/Day-NNN/          Daily roadmap artifacts (01-summary, 02-checklist, 07-files-changed)
+docs/notes/Day-NNN/          Daily roadmap artifacts (01-summary, 02-checklist, etc.)
+docs/notes/changelog.md      Running file-change log across all days
 docs/certifications/         Cert prep: AZ-900, AZ-104, AZ-305, AI-103 (Phase 2)
 docs/standards/              Principles, naming conventions, KQL cookbook, collaboration map
 Infra/Day-NNN/               Per-day IaC and appsettings templates

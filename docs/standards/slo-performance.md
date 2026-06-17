@@ -15,15 +15,15 @@ Phase 1 builds the instrumentation (TTFT histogram, latency spans, 5xx alert). P
 
 | Endpoint | p50 target | p95 target | p99 target | Measurement |
 |---|---|---|---|---|
-| `POST /api/ai/chat` (buffered) | < 2,000 ms | < 5,000 ms | < 10,000 ms | `ai.chat` span duration |
+| `POST /api/ai/chat` (buffered) | < 2,000 ms | < 5,000 ms | < 10,000 ms | `ai.chat.complete` span duration |
 | `POST /api/ai/chat/stream` (TTFT) | < 800 ms | < 2,000 ms | < 4,000 ms | `ai.provider.stream.ttft_ms` histogram |
-| `POST /api/ai/batch` (submit) | < 500 ms | < 1,000 ms | < 2,000 ms | `ai.batch` span duration |
+| `POST /api/ai/batch` (submit) | < 500 ms | < 1,000 ms | < 2,000 ms | No tracing span exists for batch submit latency today — only `ai.provider.batch.submitted`/`completed` counters (count, not duration). This SLO is currently unmeasurable; would need a span added to `ClaudeBatchApiClient`. |
 | `GET /api/ai/batch/{id}` (poll) | < 200 ms | < 500 ms | < 1,000 ms | `requests` table |
 | `GET /health` | < 50 ms | < 100 ms | < 200 ms | `requests` table |
 
 TTFT (time to first token) is the governing latency metric for the streaming path — total stream duration is secondary and not SLO-gated.
 
-Latency targets assume Anthropic API is healthy. Track `claude.chat.api` vs `ai.chat` span gap to separate gateway latency from provider latency.
+Latency targets assume Anthropic API is healthy. Track `claude.chat.api` vs `ai.chat.complete` span gap to separate gateway latency from provider latency.
 
 ---
 

@@ -12,7 +12,7 @@ These are non-negotiable from Day 1. `/repo-audit` will flag violations.
 | Rule | Enforcement |
 |---|---|
 | No secrets in source code | `dotnet user-secrets` locally; App Service env vars in Azure. Never `appsettings.json`. |
-| No stack traces in API responses | `ExceptionHandlingMiddleware` returns `ApiError` only. See `error-handling-standard.md`. |
+| No stack traces in API responses | The global exception pipeline in `Program.cs` returns `ApiError` only. See `error-handling-standard.md`. |
 | No raw prompt content in logs | See `responsible-ai.md`. |
 | HTTPS only | App Service enforces HTTPS redirect. Never disable. |
 | Correlation ID on every response | `CorrelationIdMiddleware` sets `X-Correlation-Id` header. Never remove. |
@@ -33,7 +33,11 @@ public class ChatRequest
 }
 ```
 
-Do not validate in controllers manually. Use `[ApiController]` automatic model state validation. Return `400 VALIDATION_FAILED` with `ApiError` — never expose raw `ModelStateDictionary` to callers.
+Actual implementation: manual guard clauses in the controller action (`AiController.Chat`,
+`AiBatchController.Submit`) — null/whitespace prompt, length over `AnthropicOptions.MaxPromptLength`,
+batch count over `MaxBatchSize` — each returning `BadRequest(new ApiError(Code: "invalid_request" | "prompt_too_long" | "batch_size_exceeded", ...))`.
+`ChatRequest` carries no data annotations today, so `[ApiController]` automatic
+model-state validation does not fire for prompt checks. Never expose raw `ModelStateDictionary` to callers regardless of which validation path is used.
 
 ### Prompt injection mitigation (Phase 2)
 
@@ -69,9 +73,9 @@ The deny list in `.claude/settings.json` enforces this for Claude Code sessions.
 | Run `dotnet list package --vulnerable` | Every 10 days (end of each Day NNN divisible by 10) |
 | Review output | Flag any HIGH or CRITICAL severity package |
 | Update vulnerable package | Within the same day if HIGH/CRITICAL; within 5 days if MEDIUM |
-| Log the check | One row in `07-files-changed.md` (step: `security-scan`, change: result) |
+| Log the check | One row under the current day's section in `docs/notes/changelog.md` (step: `security-scan`, change: result) |
 
-Do not add packages with known HIGH/CRITICAL vulnerabilities even if they are transitive. If a transitive dependency is vulnerable and cannot be updated, document the risk in `07-files-changed.md` and open a tracking ADR.
+Do not add packages with known HIGH/CRITICAL vulnerabilities even if they are transitive. If a transitive dependency is vulnerable and cannot be updated, document the risk in `docs/notes/changelog.md` and open a tracking ADR.
 
 ---
 
@@ -99,7 +103,9 @@ Add ASP.NET Core rate limiting middleware (`Microsoft.AspNetCore.RateLimiting`) 
 | `POST /api/ai/batch` | 5 submits | 60 seconds per client IP |
 | `GET /api/ai/batch/{id}` | 60 polls | 60 seconds per client IP |
 
-Return `429 PROVIDER_RATE_LIMITED` with `Retry-After` header when limit exceeded.
+Return `429` with `ApiError(Code: "rate_limited")` and a `Retry-After` header when
+limit exceeded — `rate_limited` to be added to the taxonomy in `error-handling-standard.md`
+when this ships; it does not exist today.
 
 ---
 

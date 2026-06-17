@@ -67,7 +67,7 @@ Each day page renders:
 - `02-completion-checklist.md` — what was verified
 - `03-architect-thinking.md` — the reasoning
 - Cert domains touched that day (from daily roadmap cert section)
-- Files changed (from `07-files-changed.md`)
+- Files changed (from the day's section in `docs/notes/changelog.md`)
 - ADRs written (auto-detected from `docs/adr/` by date)
 
 This makes the learning journey transparent and shows decision-making velocity, not just output.

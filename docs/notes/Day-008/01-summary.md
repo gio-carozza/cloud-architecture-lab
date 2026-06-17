@@ -42,12 +42,19 @@ Secondary: the **FinOps lead** who asks "what fraction of our AI spend could be 
 
 ## What I Will Build
 
-1. **`IBatchJobProvider` interface** — the new seam. Three methods: `SubmitAsync`, `GetStatusAsync`, `GetResultsAsync`. Separate from `IChatModelProvider`. Batch is a job, not a request.
-2. **`BatchJobRequest` / `BatchJobStatus` / `BatchJobResult`** — new provider-agnostic contracts. Batch ID is a first-class return value. Status is an enum: `InProgress`, `Ended`, `Canceling`, `Expired`.
+> Note (2026-06-16 drift fix): this plan originally used different names —
+> `IBatchJobProvider`/`SubmitAsync`/`BatchController`/`Models/Batch/...` — than what
+> ADR-010 and the actual build settled on. That divergence is the subject of a
+> `graveyard.md` Day 8 entry (two isolated planning passes produced inconsistent
+> contracts). Names below have been corrected to match what was actually built;
+> see `graveyard.md` for the original names and the procedural lesson.
+
+1. **`IBatchChatModelProvider` interface** — the new seam. Three methods: `SubmitBatchAsync`, `GetBatchStatusAsync`, `GetBatchResultsAsync`. Separate from `IChatModelProvider`. Batch is a job, not a request.
+2. **`BatchJob` / `BatchJobStatus` / `BatchResult` / `BatchProcessingStatus`** — new provider-agnostic contracts. Batch ID is a first-class return value (`BatchJob.Id`). Status is an enum: `InProgress`, `Canceling`, `Ended`.
 3. **`ClaudeBatchApiClient`** — Anthropic implementation. Calls `POST /v1/messages/batches` (submit), `GET /v1/messages/batches/{id}` (status), `GET /v1/messages/batches/{id}/results` (JSONL stream). Separate from `ClaudeApiClient` — different HTTP semantics, no resilience pipeline on submit (duplicate batch on retry = wrong).
-4. **`ClaudeBatchJobProvider`** — DI-registered implementation of `IBatchJobProvider`, wraps `ClaudeBatchApiClient`.
-5. **`BatchController`** — three endpoints: `POST /api/ai/batch` (submit), `GET /api/ai/batch/{id}` (status), `GET /api/ai/batch/{id}/results` (retrieve). Gateway is stateless — callers own the batch ID.
-6. **Telemetry** — `batch.job.submitted` counter, `batch.job.result_count` histogram, `batch.savings_vs_sync` tagged metric (50% per token on batch path). KQL Query 10: batch cost vs. sync equivalent.
+4. **`ClaudeBatchChatModelProvider`** — DI-registered implementation of `IBatchChatModelProvider`, wraps `ClaudeBatchApiClient`.
+5. **`AiBatchController`** — three endpoints: `POST /api/ai/batch` (submit), `GET /api/ai/batch/{id}` (status), `GET /api/ai/batch/{id}/results` (retrieve). Gateway is stateless — callers own the batch ID.
+6. **Telemetry** — `ai.provider.batch.submitted` counter (`BatchJobsSubmitted`), `ai.provider.batch.completed` counter (`BatchJobsCompleted`), `ai.provider.batch.result_count` histogram (`BatchResultCount`); estimated savings (50% per token on batch path) logged as a structured field, not a separate metric. KQL Query 10: batch cost vs. sync equivalent.
 7. **ADR-010** — documents why batch gets its own seam rather than extending `IChatModelProvider`. The inverse of ADR-009.
 
 ## Step-by-Step Execution
@@ -56,28 +63,28 @@ Secondary: the **FinOps lead** who asks "what fraction of our AI spend could be 
 
 Define the interface and contracts before any implementation:
 
-- Write ADR-010: *Implement batch API as a separate IBatchJobProvider seam*
-- Create `IBatchJobProvider.cs`, `BatchJobRequest.cs`, `BatchJobStatus.cs`, `BatchJobResult.cs`
+- Write ADR-010: *Implement batch API as a separate IBatchChatModelProvider seam*
+- Create `IBatchChatModelProvider.cs`, `BatchJob.cs`, `BatchJobStatus.cs`, `BatchResult.cs`, `BatchProcessingStatus.cs`
 - No implementation yet — interface-first so the boundary is clean before writing code
 
 ### Phase B — Anthropic implementation
 
 - `ClaudeBatchApiClient.cs`: submit, status, results methods
 - JSONL result parsing (`results` endpoint streams one result object per line)
-- `ClaudeBatchJobProvider.cs`: wires `ClaudeBatchApiClient` behind `IBatchJobProvider`
-- Register in DI with a named key `"claude-batch"`
+- `ClaudeBatchChatModelProvider.cs`: wires `ClaudeBatchApiClient` behind `IBatchChatModelProvider`
+- Register in DI as a plain scoped registration (no named key — single batch provider today)
 
 ### Phase C — API surface
 
-- `BatchController.cs`: three endpoints with proper error contracts (`ApiError`, correlation IDs)
+- `AiBatchController.cs`: three endpoints with proper error contracts (`ApiError`, correlation IDs)
 - No auth on Day 8 (gateway is internal); noted as Day 9–10 hardening item
-- Response shape: submit returns `{ batchId, submittedAt, requestCount }`, status returns `{ batchId, status, requestCount, completedCount }`, results returns JSONL or a structured list
+- Response shape: submit returns `BatchJob` (`id`, `status`, `requestCount`, `createdAt`, `expiresAt`), status returns `BatchJobStatus` (`id`, `status`, `requestCount`, `succeededCount`, `erroredCount`, `canceledCount`, `expiredCount`), results returns a structured list of `BatchResult` (`customId`, `isSuccess`, `response`, `errorMessage`)
 
 ### Phase D — Telemetry
 
-- `GatewayTelemetry` gains `BatchJobsSubmitted`, `BatchJobsCompleted` counters
-- `batch.job.result_count` histogram on completion
-- Log: savings calculation at retrieval time (`resultCount * avgInputTokens * 0.50 * pricePerToken`)
+- `GatewayTelemetry` gains `BatchJobsSubmitted` (`ai.provider.batch.submitted`), `BatchJobsCompleted` (`ai.provider.batch.completed`) counters
+- `BatchResultCount` (`ai.provider.batch.result_count`) histogram on completion
+- Log: savings calculation at retrieval time (`resultCount * avgInputTokens * 0.50 * pricePerToken`) — logged as a structured field, not a separate metric
 - KQL Query 10 in `kql-cookbook.md`
 
 ### Phase E — Local verification
@@ -95,7 +102,7 @@ The temptation is to extend `IChatModelProvider` with a `SubmitBatchAsync` overl
 
 An `IChatModelProvider` that does both synchronous and async-job semantics is no longer a coherent abstraction. Every future implementer (Azure OpenAI, Bedrock, Foundry) would need to implement both semantics even if they don't support batch. The abstraction becomes a tax on every provider for a capability that only some providers have.
 
-`IBatchJobProvider` keeps the batch concern separate and additive. The interactive path is unchanged. A provider that doesn't support batch simply doesn't register `IBatchJobProvider`. No mandatory interface methods that can't be implemented — no `NotImplementedException` hiding in production code.
+`IBatchChatModelProvider` keeps the batch concern separate and additive. The interactive path is unchanged. A provider that doesn't support batch simply doesn't register `IBatchChatModelProvider`. No mandatory interface methods that can't be implemented — no `NotImplementedException` hiding in production code.
 
 **The stateless gateway principle.**
 
@@ -123,11 +130,11 @@ They name the computation model explicitly before writing an interface. "Batch" 
 ## Artifacts
 
 - **Code:**
-  - `Models/Batch/BatchJobRequest.cs`, `BatchJobStatus.cs`, `BatchJobResult.cs`
-  - `Services/Batch/IBatchJobProvider.cs`
-  - `Services/Batch/ClaudeBatchApiClient.cs`
-  - `Services/Batch/ClaudeBatchJobProvider.cs`
-  - `Controllers/BatchController.cs`
+  - `Models/AI/BatchJob.cs`, `BatchJobStatus.cs`, `BatchResult.cs`, `BatchProcessingStatus.cs`
+  - `Services/AI/IBatchChatModelProvider.cs`
+  - `Services/Claude/ClaudeBatchApiClient.cs`
+  - `Services/AI/ClaudeBatchChatModelProvider.cs`
+  - `Controllers/AiBatchController.cs`
   - `Telemetry/GatewayTelemetry.cs` — two new counters, one histogram
 - **Docs:**
   - `docs/adr/ADR-010-introduce-parallel-batch-provider-abstraction.md`
@@ -139,7 +146,7 @@ They name the computation model explicitly before writing an interface. "Batch" 
 
 ## Portfolio Value
 
-"Extended an AI gateway with an async batch processing path, making a principled architectural decision to introduce a separate `IBatchJobProvider` seam rather than polluting the interactive contract. Reduced token cost by 50% on all offline workloads. Kept the gateway stateless by proxying Anthropic's job ID directly to callers. Made savings visible as telemetry from day one. Documented the decision in ADR-010 as the explicit inverse of ADR-009 — demonstrating that YAGNI is not a blanket rule but a judgment call made per-case with the tradeoffs named."
+"Extended an AI gateway with an async batch processing path, making a principled architectural decision to introduce a separate `IBatchChatModelProvider` seam rather than polluting the interactive contract. Reduced token cost by 50% on all offline workloads. Kept the gateway stateless by proxying Anthropic's job ID directly to callers. Made savings visible as telemetry from day one. Documented the decision in ADR-010 as the explicit inverse of ADR-009 — demonstrating that YAGNI is not a blanket rule but a judgment call made per-case with the tradeoffs named."
 
 This proves:
 

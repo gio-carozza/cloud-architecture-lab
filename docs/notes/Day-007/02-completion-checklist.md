@@ -14,9 +14,9 @@
 - [x] `Telemetry/GatewayTelemetry.cs` — `CacheHits` counter (`ai.provider.cache.hits`) added
 - [x] `Telemetry/GatewayTelemetry.cs` — `CacheMisses` counter (`ai.provider.cache.misses`) added
 - [x] `IChatModelProvider.cs` — NOT modified (provider-agnostic seam unchanged per ADR-009)
-- [x] `Models/ChatRequest.cs` — NOT modified
-- [x] `Models/ChatResponse.cs` — NOT modified
-- [x] `Providers/ClaudeChatModelProvider.cs` — NOT modified
+- [x] `Models/AI/ChatRequest.cs` — NOT modified
+- [x] `Models/AI/ChatResponse.cs` — NOT modified
+- [x] `Services/AI/ClaudeChatModelProvider.cs` — NOT modified
 
 ## Build & Local Verification
 

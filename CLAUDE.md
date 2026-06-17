@@ -56,6 +56,7 @@ Full details: `docs/standards/azure-environment.md` (in hot context — always l
 - `docs/adr/`                   → Architecture Decision Records (ADR-NNN-*)
 - `docs/architecture/`          → System diagrams & sequence flows
 - `docs/notes/Day-NNN/`         → Daily roadmap artifacts (per day)
+- `docs/notes/changelog.md`     → Running file-change log, all days, `## Day NNN` sections
 - `docs/certifications/`        → Cert prep: AZ-900, AZ-104, AZ-305, AI-102 (retired), AI-103 (Phase 2)
 - `docs/standards/`             → All standards (see index below)
 - `Infra/Day-NNN/`              → IaC, app settings templates
@@ -105,15 +106,22 @@ Full details: `docs/standards/azure-environment.md` (in hot context — always l
   - Local: `dotnet user-secrets`
   - Azure: App Service environment variables (double underscore: `Anthropic__ApiKey`)
   - NEVER commit secrets, NEVER put them in `appsettings.json`
-- **`07-files-changed.md` — per-day file change audit log:**
-  Every day folder contains `docs/notes/Day-NNN/07-files-changed.md`. Whenever docs are
+- **`docs/notes/changelog.md` — running file change audit log:**
+  One file for the whole project, with a `## Day NNN` section per day (replaced
+  the per-day `Day-NNN/07-files-changed.md` files — 2026-06-16; that convention
+  forced a "which day owns this file" lookup before logging any cross-cutting
+  fix, which scattered rows across closed historical folders). Whenever docs are
   updated in response to any step completion ("update all necessary docs", "update docs",
-  "update the checklist", or equivalent), upsert rows in this file. **Dedup key is the
-  file path** — if the file already has a row for that path, update it in place; never
-  add a duplicate row. Format is a single flat markdown table:
+  "update the checklist", or equivalent), upsert a row under the **current day's**
+  section — the day the edit actually happened, not necessarily the day that
+  originally created the file. **Dedup key is the file path within that day's
+  section** — if the file already has a row for that path under the same
+  heading, update it in place; never add a duplicate row for the same day. The
+  same file may legitimately appear under multiple different day headings (it
+  was touched on more than one day) — that's not a duplicate. Format:
 
   ```markdown
-  # Day NNN — Files Changed
+  ## Day NNN
 
   | File | Step | Change |
   |---|---|---|
@@ -233,9 +241,12 @@ subscription use by any business or industry.
   audit logging, provider failover
 - Build sequence:
   Streaming (Day 009), database (Day 012), OpenAI (Day 016),
-  RAG (Day 022), agents (Day 026), Bedrock (Day 030),
+  RAG (Day 022), tool use foundations (Day 025), case routing agent (Day 026),
+  multi-agent orchestration (Day 027), Bedrock (Day 030),
   Foundry (Day 031), multi-provider routing (Day 032),
-  multi-tenant governance (Day 036), SaaS hardening (Day 161+)
+  multi-tenant governance (Day 036), Generative AI governance (Day 051),
+  Agent governance / circuit breakers (Day 052),
+  Agentic AI workflow governance (Day 053), SaaS hardening (Day 161+)
 
 ### Layer 2: Platform Services — SHARED INFRASTRUCTURE
 
@@ -246,7 +257,12 @@ subscription use by any business or industry.
 - Any new application registers here and inherits auth/authz
 - RBAC with feature-level permission granularity per role per application
 - Multi-tenant: each subscribing company has isolated role definitions
-- AI-augmented: policy suggestions, access anomaly detection (via gateway)
+- AI features (all via gateway):
+  - Generative AI: natural language role configuration
+  - AI Agent: access anomaly detection — monitors login patterns, flags
+    unusual permission usage, recommends remediation actions
+  - Agentic AI: incident response workflow — detect anomaly → assess risk
+    → notify admin → apply temporary restriction → log decision
 - Designed to scale to N applications beyond the initial three
 - Build begins: Day 071
 
@@ -266,15 +282,27 @@ subscription use by any business or industry.
 - External customer-facing and internal user-facing case submission/tracking
 - Role-based with feature-level permissions (sourced from Security/Identity)
 - Industry-agnostic; fully configurable via Admin Site
-- AI features (all via gateway): routing, summarization, suggested responses,
-  related case retrieval (RAG), anomaly detection, auto-escalation (agents)
+- AI features (all via gateway):
+  - Generative AI: case summaries, suggested responses, draft communications,
+    streaming delivery to UI
+  - AI Agents: case intake agent (classify + route), resolution drafter agent,
+    SLA breach alerting agent
+  - Agentic AI: end-to-end case handling workflow — intake → classify → route
+    → research → draft → notify → close, with human approval checkpoints
+    at configurable stages per tenant
 - Schematics: provided by owner when database training is complete (~Day 012)
 - Build begins: Day 101
 
 #### Admin Site
 
 - Tenant onboarding: case categories, subcategories, types, workflows, SLAs
-- AI-assisted setup suggestions (via gateway)
+- AI features (all via gateway):
+  - Generative AI: suggest category structures, workflow descriptions,
+    SLA recommendations by industry
+  - AI Agent: tenant onboarding agent — asks setup questions, configures
+    categories and workflows, validates against existing tenant patterns
+  - Agentic AI: multi-step tenant configuration workflow — intake industry
+    type → suggest structure → validate → provision → confirm
 - Build begins: Day 131
 
 #### Future Applications (N+1, N+2, ...)

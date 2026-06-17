@@ -282,9 +282,9 @@ Learn to communicate at CEO level.
 | Day 022 | RAG pipeline: embed → search → augment → respond |
 | Day 023 | RAG in the gateway: `/api/ai/chat/rag` endpoint |
 | Day 024 | Multi-turn with memory (conversation context store) |
-| Day 025 | Agent foundations: tool use + function calling |
-| Day 026 | Agent: case routing agent (first real agent) |
-| Day 027 | Agent: research agent (multi-step reasoning) |
+| Day 025 | Generative AI to Agentic AI: tool use and function calling foundations — the bridge from completion to action |
+| Day 026 | AI Agent: case routing agent — single-agent, single-task, fully governed, cost-attributed per tenant |
+| Day 027 | Agentic AI: multi-agent research workflow — orchestrator + specialist pattern, one correlation ID spans the full workflow |
 | Day 028 | Evaluation framework: automated quality scoring |
 | Day 029 | Evaluation: regression detection pipeline |
 | Day 030 | Bedrock provider (third `IChatModelProvider`) — **UNLOCK: three providers, real routing decisions** |
@@ -318,9 +318,9 @@ Goal: Enterprise governance. Platform-scale design. Multi-tenant SaaS hardening.
 
 | Day | Focus |
 |---|---|
-| Day 051 | Cost governance dashboard |
-| Day 052 | Model evaluation pipeline |
-| Day 053 | Compliance framework (GDPR, HIPAA considerations) |
+| Day 051 | Cost governance for Generative AI — per tenant, per model, per request |
+| Day 052 | Cost governance for AI Agents — per tool call, per loop iteration, circuit breaker pattern |
+| Day 053 | Cost governance for Agentic AI — per workflow, cross-agent attribution, runaway loop prevention |
 | Day 054 | Circuit breaker + fallback provider patterns |
 | Day 055 | Incident response playbook for AI failures |
 | Day 056 | Canary deployments for model updates |
@@ -497,3 +497,97 @@ The following additions are required for the $250k–$500k tier:
 2. **Real user validation** — at least one non-engineer using something you built and finding it valuable (required for FDE)
 3. **Thought leadership** — three public technical posts demonstrating LLM Architect-level thinking to an audience beyond your network
 4. **Revenue signal** — at least one paying or committed enterprise client using the platform by Day 175
+
+---
+
+## AI Paradigm Map — Three Paradigms, Four Layers
+
+Every layer of the platform uses all three AI paradigms.
+The gateway governs all three. The distinction between paradigms
+drives three different governance models, three different cost
+attribution strategies, and three different audit requirements.
+
+### Definitions
+
+**Generative AI**
+Prompt in, completion out. The foundational capability.
+Gateway interface: `IChatModelProvider.SendAsync` / `StreamAsync`.
+Governance: which model generates what content, under what cost ceiling,
+with what safety guardrails, auditable per tenant per request.
+
+**AI Agents**
+Tool use + function calling. The model decides which tool to call,
+receives the result, and continues reasoning in a loop.
+Gateway interface: tool registration, function calling schemas,
+`tool_use` block handling.
+Governance: tool authorization per agent per tenant, loop termination,
+cost attribution per tool call, audit log of every action taken.
+
+**Agentic AI**
+Multi-agent orchestration. One orchestrator breaks a task into subtasks
+and delegates to specialist agents. Each specialist has its own tool set,
+system prompt, and authorization boundary.
+Gateway interface: orchestrator registration, structured handoff contracts,
+single correlation ID spanning the full workflow.
+Governance: agent identity boundaries (agent A cannot invoke tools scoped
+to agent B's tenant), handoff versioning, per-workflow cost attribution,
+failure mode handling (timeout, rollback, human escalation).
+
+### Layer Mapping
+
+**Gateway (cloud-architecture-lab)**
+
+| Paradigm | Interface | Day Introduced |
+|---|---|---|
+| Generative AI | `IChatModelProvider.SendAsync` / `StreamAsync` | Day 001 / Day 009 |
+| AI Agents | Tool registration, function calling, agent loop | Day 025 |
+| Agentic AI | Multi-agent orchestration, correlation tracking | Day 027 |
+| All three — governance | Cost per paradigm per tenant, audit log, loop limits | Day 051–053 |
+
+**Case Management Site**
+
+| Paradigm | Application |
+|---|---|
+| Generative AI | Case summaries, suggested responses, draft communications |
+| AI Agent | Case intake agent, routing agent, resolution drafter |
+| Agentic AI | End-to-end case handling: intake → classify → route → research → draft → notify → close (human checkpoints at configurable stages) |
+
+**Admin Site**
+
+| Paradigm | Application |
+|---|---|
+| Generative AI | Suggest category structures, workflow descriptions, SLA recommendations by industry |
+| AI Agent | Tenant onboarding agent: asks questions, configures categories and workflows, validates setup |
+| Agentic AI | Multi-step tenant configuration: intake industry type → suggest structure → validate against existing tenants → provision and confirm |
+
+**Security / Identity Site**
+
+| Paradigm | Application |
+|---|---|
+| Generative AI | Natural language role configuration ("give this user read access to cases in the legal category") |
+| AI Agent | Access anomaly detection agent: monitors login patterns, flags unusual permission usage, recommends remediation |
+| Agentic AI | Incident response workflow: detect anomaly → assess risk → notify admin → apply temporary restriction → log decision |
+
+### Governance Requirements by Paradigm
+
+**Generative AI governance (Day 051)**
+
+- Cost ceiling per tenant per model tier
+- Safety guardrails enforced at gateway (not at site level)
+- Every completion auditable: tenant, model, tokens, latency, cost
+
+**AI Agent governance (Day 052)**
+
+- Tool authorization matrix: which agent can call which tool for which tenant
+- Loop iteration limit per agent per request (prevent runaway execution)
+- Cost attribution: token spend per tool call, not just per request
+- Audit log: every tool the agent called, in order, with inputs and outputs
+
+**Agentic AI governance (Day 053)**
+
+- Agent identity boundaries: agent A cannot invoke tools or data scoped to agent B's tenant
+- Handoff contracts: structured and versioned, not ad hoc message passing
+- Observability: one correlation ID spans the entire multi-agent workflow
+- Cost attribution: orchestrator spend distinct from each specialist's spend
+- Failure modes defined per workflow: timeout → escalate to human review,
+  not timeout → stuck case

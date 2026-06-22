@@ -304,3 +304,7 @@ file. Git already has the authoritative timestamp; don't spend effort re-derivin
 | `docs/standards/cost-governance.md` | tooling | Reference updated |
 | `docs/standards/provider-onboarding.md` | tooling | Reference updated (×2) |
 | `scripts/symbol-drift-check.js` | tooling | Exclude-pattern updated from `07-files-changed\.md$` to `docs/notes/changelog\.md$` |
+| `docs/standards/claude-tooling-reference.html` | docs pass | TOC restructured — `docs/standards/` section split into a dedicated file-by-file breakdown plus a new "other key files" section |
+| `docs/standards/claude-tooling-reference.pdf` | docs pass | Regenerated from the updated HTML |
+| `docs/standards/csharp-codebase-reference.html` | docs pass | New — C# codebase reference doc, companion to the Claude Code tooling reference |
+| `docs/standards/csharp-codebase-reference.pdf` | docs pass | New — PDF render of the C# codebase reference |

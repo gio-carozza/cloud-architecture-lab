@@ -51,12 +51,13 @@ Generated 2026-06-16 · current state: Day 009 complete, Day 010 next</p>
   <li><a href="#hooks">2.3 Hooks &amp; settings</a></li>
   <li><a href="#instructions">2.4 Instructions (the master workflow)</a></li></ul>
 </li>
-<li><a href="#standards">3. `docs/standards/` — the knowledge library</a></li>
-<li><a href="#workflow">4. The daily workflow, step by step</a></li>
-<li><a href="#day-in-life">5. A day in the life — worked example</a></li>
-<li><a href="#scripts">6. `scripts/` — automated guards</a></li>
-<li><a href="#findings">7. Findings from this audit</a></li>
-<li><a href="#expected">8. Expected results</a></li>
+<li><a href="#standards">3. `docs/standards/` — every file, what's actually in it</a></li>
+<li><a href="#otherfiles">4. Other key files referenced throughout this document</a></li>
+<li><a href="#workflow">5. The daily workflow, step by step</a></li>
+<li><a href="#day-in-life">6. A day in the life — worked example</a></li>
+<li><a href="#scripts">7. `scripts/` — automated guards</a></li>
+<li><a href="#findings">8. Findings from this audit</a></li>
+<li><a href="#expected">9. Expected results</a></li>
 </ul>
 </div>
 
@@ -132,25 +133,96 @@ Stateless checkers (<code>md-backtick-wrap.js</code>, <code>symbol-drift-check.j
 <div class="finding"><strong>Finding:</strong> nothing in this repo currently reads <code>.claude/cert-tags-today.txt</code> — <code>/cert-update</code> derives touched domains purely from <code>01-summary.md</code>'s Certification Reinforcement section. The cert-tag hook's output is generated but unconsumed today.</div>
 
 <h3 id="instructions">2.4 Instructions — the master workflow</h3>
-<p><code>daily-workflow.md</code> is the one-page overview (the STEP 0–12 table, the four rules, the auto-print handoff mechanic). <code>daily-workflow-steps.md</code> is the long version — the literal prompt text for every step, including the <code>/devil</code>/<code>/pitch</code>/<code>/10x</code> gate scripts. You read the overview to orient; you paste from the steps file to actually run a step.</p>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>daily-workflow.md</code></td><td>The one-page overview: the STEP 0–12 table (surface/model/what happens per step), four governing rules (chat only for STEP 2/4/5/11; Sonnet everywhere except STEP 5/11; close each chat step the moment it ends; STEP 0 is never optional), the "auto-print handoff" mechanic (each Claude Code step prints the next step's pre-filled prompt so you never hunt for it), an "if you get stuck" troubleshooting list, the command reference table (all 7 real commands + the 3 prompt-based gates), and a token-discipline reminder.</td></tr>
+<tr><td><code>daily-workflow-steps.md</code></td><td>The long version — the literal copy-paste prompt text for every one of the 13 steps, including the full <code>/pitch</code> gate script (STEP 4, validates the CEO framing claim), the full <code>/devil</code> gate script (STEP 5, demands the strongest counterargument to the ADR before accepting it), and the full <code>/10x</code> gate script (STEP 11, scale-ceiling audit — optional Day 010–050, mandatory Day 051+). Also contains the exact STEP 8 pillars-audit prompt and the exact STEP 12 close-audit prompt referenced in §5 and §7 of this document.</td></tr>
+</table>
+<p>You read the overview to orient; you paste from the steps file to actually run a step.</p>
 
 <div class="pagebreak"></div>
-<h2 id="standards">3. <code>docs/standards/</code> — the knowledge library</h2>
-<p>26 files. Each is read on-demand (none are in permanent hot context except <code>_principles.md</code>, <code>naming-conventions.md</code>, <code>azure-environment.md</code> per <code>CLAUDE.md</code>'s context-discipline rules). Grouped by what they govern:</p>
+<h2 id="standards">3. <code>docs/standards/</code> — every file, what's actually in it</h2>
+<p>26 files. Each is read on-demand (none are in permanent hot context except <code>_principles.md</code>, <code>naming-conventions.md</code>, <code>azure-environment.md</code> per <code>CLAUDE.md</code>'s context-discipline rules). Grouped by what they govern, with a real content summary for each file — not just its name.</p>
 
+<h4>Posture &amp; career</h4>
 <table>
-<tr><th>Governs</th><th>Files</th></tr>
-<tr><td>Posture &amp; career</td><td><code>_principles.md</code>, <code>career-path.md</code>, <code>competitive-intelligence.md</code>, <code>architect-thinking-template.md</code>, <code>graveyard.md</code></td></tr>
-<tr><td>Naming &amp; environment</td><td><code>naming-conventions.md</code>, <code>azure-environment.md</code></td></tr>
-<tr><td>Build conventions</td><td><code>testing-standard.md</code>, <code>commit-convention.md</code>, <code>error-handling-standard.md</code>, <code>api-versioning.md</code>, <code>dependency-policy.md</code></td></tr>
-<tr><td>Cost &amp; performance</td><td><code>cost-governance.md</code>, <code>slo-performance.md</code>, <code>multi-turn-context.md</code></td></tr>
-<tr><td>Security &amp; compliance</td><td><code>security-standard.md</code>, <code>responsible-ai.md</code></td></tr>
-<tr><td>Operations</td><td><code>monitoring-runbook.md</code>, <code>kql-cookbook.md</code>, <code>provider-onboarding.md</code></td></tr>
-<tr><td>Evaluation &amp; future paradigms</td><td><code>eval-framework.md</code>, <code>agent-patterns.md</code>, <code>rag-patterns.md</code></td></tr>
-<tr><td>People &amp; communication</td><td><code>collaboration-map.md</code>, <code>public-documentation.md</code>, <code>portfolio-strategy.md</code></td></tr>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>_principles.md</code></td><td>"The North Star." The 5 traits of legendary architects (stay curious, understand people not just AI, do it right even when it's hard, explain at all 4 levels, build/build/build). The 5 daily posture-check questions answered at end of every day. The 3 phase-crossing signals (when you're really Phase 1 vs. 2 vs. 3, by behavior not by day number). The 3 working modes — Build/Study/Perform — with the posture and tooling proper to each.</td></tr>
+<tr><td><code>career-path.md</code></td><td>The full 3-phase, 175+ day roadmap table (AI Engineer Days 1–20, Forward-Deployed Days 21–50, LLM Architect Days 51–100+), the cert-to-phase mapping table, the Phase 2/3 exit criteria checklists, the $250k–$500k+ compensation requirements (CEO framing from Day 9, real user validation, 3 public posts, 1 paying client), and the AI Paradigm Map (Generative AI / AI Agents / Agentic AI definitions, governance model per paradigm, layer mapping across gateway + all 3 future sites).</td></tr>
+<tr><td><code>competitive-intelligence.md</code></td><td>A 2025–2026 snapshot of the AI engineering job market: the 6 things that separate $300k–$500k+ practitioners (eval-driven development, cost fluency, MCP/A2A protocol knowledge, owning failure modes, 90-second-CFO-pitch communication, security/compliance literacy), plus a 3-tier breakdown of what's now table-stakes vs. actively differentiating vs. emerging in the field.</td></tr>
+<tr><td><code>architect-thinking-template.md</code></td><td>The required structure for every day's <code>03-architect-thinking.md</code> — the CEO Framing section format (a dollar amount or named risk, not "this improves efficiency"), and an explicit "what NOT to write" list (don't restate the file list, don't restate the completion checklist — those live elsewhere).</td></tr>
+<tr><td><code>graveyard.md</code></td><td>A running, never-deleted table of every experiment that failed and what it taught — real entries from Day 5 through Day 9: the <code>az webapp deploy</code> TLS reset, the Azure naming collision that birthed the <code>-gio</code> suffix, the wrong Anthropic model ID that silently zeroed out prompt caching, the Day 8 incident where two separate chats authored <code>IBatchJobProvider</code> and <code>IBatchChatModelProvider</code> for the same feature.</td></tr>
 </table>
 
-<h2 id="workflow">4. The daily workflow, step by step</h2>
+<h4>Naming &amp; environment</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>naming-conventions.md</code></td><td>The <code>-gio</code> ownership-suffix rule (required for globally-unique Azure resources, optional for subscription-scoped ones), exact naming patterns with real examples for every resource type (App Service, Storage Account, Key Vault, Log Analytics, Action Groups, Budgets), and a changelog of when the convention itself changed and why.</td></tr>
+<tr><td><code>azure-environment.md</code></td><td>The actual live environment: subscription ID, resource group name, the $50/month budget and its 3 alert thresholds, every App Service application-setting key currently in use (<code>Anthropic__ApiKey</code>, <code>Anthropic__Model</code>, etc.), the real monitoring resource names and the live 5xx alert rule, and a "Platform Resource Roadmap" table mapping future Azure resources (SQL, Key Vault, AI Search, identity backend) to the specific future day each gets provisioned.</td></tr>
+</table>
+
+<h4>Build conventions</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>testing-standard.md</code></td><td>What must be tested (every public method, happy path + failure path, no hard line-count target). The real integration-test pattern used in this repo: <code>GatewayWebApplicationFactory</code> substitutes <code>IChatModelProvider</code>/<code>IBatchChatModelProvider</code> with fakes at the seam — not an HTTP-level mock — corrected this session after discovering it described a <code>FakeHttpMessageHandler</code> that was never built.</td></tr>
+<tr><td><code>commit-convention.md</code></td><td><code>type(scope): subject</code> commit message format rules, a library of real example commit messages from this repo's own history, and the day-close commit sequence (what gets committed, in what order, at STEP 10/12).</td></tr>
+<tr><td><code>error-handling-standard.md</code></td><td>The real <code>ApiError</code> 3-field contract (<code>code</code>/<code>message</code>/<code>correlationId</code>, camelCase, no <code>details</code> field). The actual error code taxonomy as emitted by the code today (<code>invalid_request</code>, <code>prompt_too_long</code>, <code>batch_size_exceeded</code>, <code>stream_error</code>, <code>claude_provider_error</code>, <code>internal_error</code>). The real <code>ClaudeProviderException</code> classification rules and the real retry policy per HTTP client. Rewritten this session — it previously described a fictional exception hierarchy and a middleware class that was never built.</td></tr>
+<tr><td><code>api-versioning.md</code></td><td>URL-path versioning strategy (<code>/api/v{N}/</code>, no prefix until a v2 actually exists), a breaking-vs-non-breaking change checklist, and the deprecation policy for retiring an old version.</td></tr>
+<tr><td><code>dependency-policy.md</code></td><td>A checklist for whether a new NuGet package should be added (maintained, used by Microsoft/major vendor, zero HIGH/CRITICAL vulnerabilities, MIT/Apache/BSD license), the update cadence table (security patches same day, minor versions every 2 weeks, major versions need an ADR), and how to document an exception when a vulnerable transitive dependency can't be updated.</td></tr>
+</table>
+
+<h4>Cost &amp; performance</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>cost-governance.md</code></td><td>Token budget rules, the requirement that prompt caching (<code>EnablePromptCaching = true</code>) is the default and required production state, and the batch-vs-real-time routing decision rules.</td></tr>
+<tr><td><code>slo-performance.md</code></td><td>Latency target tables (p50/p95/p99) per endpoint with the actual OpenTelemetry span name each target is measured against (<code>ai.chat.complete</code>, <code>ai.provider.stream.ttft_ms</code>) — corrected this session after it cited two span names that were never built. Also the availability SLO and alert-rule definitions.</td></tr>
+<tr><td><code>multi-turn-context.md</code></td><td>Explicitly forward-looking — labeled "Day 10 scope," not yet built. Covers the planned context-window token budget, the truncation strategy for long conversations, the conversation-history contract, and a <code>SessionOptions</code> design sketch (30-minute inactivity TTL).</td></tr>
+</table>
+
+<h4>Security &amp; compliance</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>security-standard.md</code></td><td>The real input-validation pattern (manual guard clauses in each controller action — not automatic <code>[ApiController]</code> model-state validation, corrected this session), the secrets-management rule (<code>dotnet user-secrets</code> locally, App Service env vars in Azure, never <code>appsettings.json</code>), an OWASP-style enforcement checklist, and the Phase 2 rate-limiting plan (not yet implemented).</td></tr>
+<tr><td><code>responsible-ai.md</code></td><td>The content-filtering roadmap: what's enforced today (only a max-length check) versus Phase 2 plans (PII detection/redaction, prompt-injection detection, blocked-content categories) via a future <code>IContentFilter</code> interface.</td></tr>
+</table>
+
+<h4>Operations</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>monitoring-runbook.md</code></td><td>The alert inventory (what's wired today), a daily monitoring checklist, and the P1–P4 incident-response procedure with severity definitions.</td></tr>
+<tr><td><code>kql-cookbook.md</code></td><td>12 ready-to-run Kusto queries against the live Application Insights workspace — latency percentiles, the 10 slowest requests with correlation IDs, hourly error rate, cache hit rate, batch cost vs. sync-equivalent cost, and TTFT p50/p95/p99 for the streaming path.</td></tr>
+<tr><td><code>provider-onboarding.md</code></td><td>The step-by-step playbook for adding a new LLM provider (Azure OpenAI, Bedrock, Foundry): which interfaces to implement, which files to create, the required documentation checklist, and the actual test pattern to follow (provider-seam fakes, not an HTTP-level fake — corrected this session).</td></tr>
+</table>
+
+<h4>Evaluation &amp; future paradigms</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>eval-framework.md</code></td><td>Why evaluation is an architectural concern (model/prompt/provider changes can silently change quality with no test catching it). The 6 evaluation dimensions — correctness, relevance, groundedness, safety, latency, cost — and which are measured today (latency + cost, via telemetry) versus Phase 2 (the other four, via LLM-as-judge). A Phase 2 architecture sketch: test dataset → gateway → response collector → judge.</td></tr>
+<tr><td><code>agent-patterns.md</code></td><td>The governing standard for AI Agent and Agentic AI work. 3 implementation patterns (single-turn generative, single-agent tool use, multi-agent orchestration) each with concrete rules. A tool-design principles table (idempotent, typed schemas, observable, bounded). A failure-modes-and-guardrails table (infinite loops, tool call explosion, context exhaustion, hallucinated tool calls). MCP and A2A protocol notes. A cost-attribution table reconciled this session to use the real <code>ai.provider.*</code>/<code>ai.agent.*</code> telemetry prefix. An anti-patterns list (recursive self-calls, ad hoc handoffs, silent failure, unbounded loops).</td></tr>
+<tr><td><code>rag-patterns.md</code></td><td>Phase 2 stub — explicitly designed, not built. RAG architecture sketch, chunking strategy notes, and the planned Azure AI Search integration.</td></tr>
+</table>
+
+<h4>People &amp; communication</h4>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>collaboration-map.md</code></td><td>~20 collaborator roles (Security/AppSec, Product Manager, Backend Engineers, DevOps/SRE, Frontend, Data Engineers, Eng Manager, Vendor Support, Account Executive, Customer Success, Customer Sponsor, Domain Experts, End Users, Customer IT/Security, the Champion, Compliance/Legal, FinOps, Peer Architects, Procurement, VP Eng/CTO, External Auditors) × all 3 career phases. Every cell names their problem, your posture toward them, the one crucial question to ask, and the failure mode if you get it wrong. <code>/collab-lens</code> reads one row of this file per day.</td></tr>
+<tr><td><code>public-documentation.md</code></td><td>The four-level writing rule (10-year-old / CEO / Engineer / Architect) required for anything that will appear on the public portfolio site, plus a 7-audience table (engineers, architects, hiring managers, security auditors, DevOps, junior developers, LinkedIn contacts) and each one's jargon tolerance.</td></tr>
+<tr><td><code>portfolio-strategy.md</code></td><td>What makes this repo portfolio-worthy (ADRs with real tradeoffs, cost-conscious engineering, provider abstraction, observability-first design), the public website tech stack recommendation (VitePress — reads <code>.md</code> directly, zero-config syntax highlighting), and a LinkedIn/go-public checklist.</td></tr>
+</table>
+
+<h2 id="otherfiles">4. Other key files referenced throughout this document</h2>
+<table>
+<tr><th>File</th><th>What's actually inside</th></tr>
+<tr><td><code>CLAUDE.md</code> (repo root)</td><td>The project's own instructions file, loaded into every Claude Code session automatically. Owner &amp; context, the full stack list, the naming-convention summary, the command list, the architecture top-level map, the full standards index (the table this document's §3 expands on), the repo conventions (day-folder naming, ADR rules, the backtick-formatting rule), the Provider Abstraction Contract (the exact methods <code>IChatModelProvider</code> must have), the Gotchas list (TLS resets, the Anthropic model-ID trap, the cache TTL trap), the full North Star/SaaS platform vision, and the context-discipline rules that decide what stays in hot context vs. what's read on demand.</td></tr>
+<tr><td><code>README.md</code> (repo root)</td><td>The public-facing entry point — a short project description and the same top-level folder map as <code>CLAUDE.md</code>, written for a human skimming GitHub rather than for Claude Code.</td></tr>
+<tr><td><code>docs/notes/_index.md</code></td><td>One table, one row per day: day number, slug, track (Build/Hybrid), and status (Complete/In Progress). The single source of truth for "what day are we actually on" — <code>CLAUDE.md</code> deliberately has no day counter of its own.</td></tr>
+<tr><td><code>docs/notes/changelog.md</code></td><td>The running file-change audit log — one <code>## Day NNN</code> section per day, each a flat table of every file touched that day with a Step label and a one-line Change description. Replaced the old one-file-per-day convention on 2026-06-16 specifically to stop cross-cutting fixes from being scattered across closed historical folders.</td></tr>
+<tr><td><code>docs/adr/ADR-NNN-*.md</code></td><td>One Architecture Decision Record per significant decision (11 exist as of Day 9). Each has a required shape: Status, Date, Context, Decision, Consequences, and Alternatives Considered (at least one real alternative with a stated rejection reason). Never edited once Accepted — only superseded by a new ADR, or factually corrected for things like a renamed file path.</td></tr>
+<tr><td><code>.markdownlint.json</code> (repo root)</td><td>The lint rule overrides for every <code>.md</code> file in the repo: everything on by default, with 6 rules explicitly disabled — <code>MD013</code> (line length), <code>MD024</code> (duplicate headings), <code>MD025</code> (single top-level heading), <code>MD036</code> (emphasis used instead of a heading), <code>MD041</code> (first line must be a top-level heading), and <code>MD060</code>.</td></tr>
+<tr><td><code>.gitignore</code> / <code>.gitattributes</code></td><td><code>.gitignore</code> excludes build output (<code>bin/</code>, <code>obj/</code>, <code>publish/</code>), machine-local hook output (<code>.claude/cert-tags-today.txt</code>), and stray test artifacts. <code>.gitattributes</code> forces consistent CRLF line endings on Windows so git stops reporting line-ending-only diffs on every edit.</td></tr>
+</table>
+
+<h2 id="workflow">5. The daily workflow, step by step</h2>
 <table>
 <tr><th>Step</th><th>Surface</th><th>Model</th><th>What happens</th></tr>
 <tr><td>0 CLOSE (prev)</td><td>Claude Code</td><td><span class="badge b-claude">Sonnet</span></td><td>Verify the previous day is fully frozen — audit, posture-check, changelog row all present — before starting anything new</td></tr>
@@ -170,7 +242,7 @@ Stateless checkers (<code>md-backtick-wrap.js</code>, <code>symbol-drift-check.j
 <p class="small">Rule of thumb: Sonnet does all the building; the latest Opus is reserved for the two steps where reasoning depth — not execution — is the actual deliverable (ADR reasoning, posture reflection).</p>
 
 <div class="pagebreak"></div>
-<h2 id="day-in-life">5. A day in the life — worked example</h2>
+<h2 id="day-in-life">6. A day in the life — worked example</h2>
 <p>Tracing one real artifact, <code>IBatchChatModelProvider</code>, through the whole stack on the day it was built (Day 008):</p>
 
 <div class="flow-step">STEP 2 (chat) — decide: "batch API for cost control" is the Day 008 workload</div>
@@ -183,20 +255,20 @@ Stateless checkers (<code>md-backtick-wrap.js</code>, <code>symbol-drift-check.j
 <div class="flow-step">STEP 10 — <code>/cert-update 008</code> writes AI-102 and AZ-305 domain content citing the batch pattern; <code>changelog.md</code>'s Day 008 section gets every file logged</div>
 <div class="flow-step">STEP 12 — <code>/repo-audit 8</code> confirms ADR-010 has all required headings, no drift, day folder complete</div>
 
-<h2 id="scripts">6. <code>scripts/</code> — automated guards</h2>
+<h2 id="scripts">7. <code>scripts/</code> — automated guards</h2>
 <table>
 <tr><th>Script</th><th>Triggered by</th><th>Checks</th></tr>
 <tr><td><code>md-backtick-wrap.js</code></td><td><code>settings.json</code> hook (every <code>.md</code> write/edit), <code>/repo-audit</code> Check 4</td><td>Wraps bare file paths, slash commands, and HTTP paths in backticks per the markdown convention. Idempotent — re-running on clean content changes nothing.</td></tr>
 <tr><td><code>symbol-drift-check.js</code></td><td>STEP 8, <code>/repo-audit</code> Check 9</td><td>Rebuilds the actual symbol/telemetry-name table from <code>src/</code> on every run; flags any backtick-wrapped doc reference that doesn't match current code — including symbols that were <em>documented but never built</em>. Also flags single-letter backtick spans as likely truncation/corruption (added 2026-06-16 after recovering 80 such occurrences).</td></tr>
 </table>
 
-<h2 id="findings">7. Findings from this audit</h2>
+<h2 id="findings">8. Findings from this audit</h2>
 <div class="finding fixed"><strong>Fixed — severe:</strong> a buggy <code>md-backtick-wrap.js</code> replace callback (before its fix in commit <code>1e33390</code>) had collapsed full paths/commands down to single letters inside backticks across 50 files, 80 occurrences — <code>/health</code> → <code>`h`</code>, <code>/cert-update</code> → <code>`c`</code>, etc. Recovered every instance from git history and added a permanent guard so this class of corruption can't recur silently.</div>
 <div class="finding fixed"><strong>Fixed:</strong> 6 source files (<code>ApiError.cs</code>, <code>TestController.cs</code>, <code>HttpContextExtensions.cs</code>, <code>CorrelationIdMiddleware.cs</code>, <code>ClaudeProviderException.cs</code>, the main <code>.csproj</code>) existed with zero changelog provenance — every <code>src/</code> file now traces to a Day NNN.</div>
 <div class="note"><strong>Open, not a bug:</strong> <code>.claude/hooks/cert-tag.json</code> generates tags nothing consumes (see §2.3). Worth deciding whether to wire it into <code>/cert-update</code> or remove it.</div>
 <div class="note"><strong>Open, accepted debt:</strong> ADR-001/002/003 predate the "Alternatives Considered" convention. Not fixed — adding that section retroactively to an Accepted ADR isn't a "factual correction" under this repo's own ADR-immutability rule.</div>
 
-<h2 id="expected">8. Expected results</h2>
+<h2 id="expected">9. Expected results</h2>
 <p>When every layer is working together correctly, a closed day means: the code builds and tests pass; the ADR (if any) has all required headings and no open placeholders; every touched file has a <code>changelog.md</code> row under that day's section; every cert domain marked Primary/Secondary in the day's summary has a corresponding day-mapping row; <code>symbol-drift-check.js</code> and markdownlint both report zero findings; the deploy succeeded and was verified against the live App Service; and the posture-check honestly names what's still YELLOW. <code>/repo-audit</code> is the single command that verifies all of this at once — a clean run is the actual definition of "Day N is done."</p>
 
 </body>

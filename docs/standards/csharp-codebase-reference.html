@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>lab-observability-api — How the C# Code Works</title>
+<style>
+  @page { size: Letter; margin: 0.65in; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; color: #1b1f24; font-size: 10.3pt; line-height: 1.45; }
+  h1 { color: #0b3d91; font-size: 22pt; margin-bottom: 2px; }
+  .subtitle { color: #5a6472; font-size: 11pt; margin-top: 0; margin-bottom: 24px; }
+  h2 { color: #0b3d91; font-size: 15.5pt; border-bottom: 2px solid #0b3d91; padding-bottom: 4px; margin-top: 36px; page-break-after: avoid; }
+  h3 { color: #1a4fa0; font-size: 12.5pt; margin-top: 20px; page-break-after: avoid; }
+  h4 { color: #333; font-size: 10.8pt; margin-top: 14px; page-break-after: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 18px 0; font-size: 9.2pt; page-break-inside: avoid; }
+  th { background: #0b3d91; color: white; text-align: left; padding: 6px 8px; }
+  td { border-bottom: 1px solid #d8dde3; padding: 6px 8px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f3f6fa; }
+  code { background: #eef1f5; color: #0b3d91; padding: 1px 4px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 9.2pt; }
+  pre { background: #1b1f24; color: #e8edf3; padding: 10px 14px; border-radius: 6px; font-size: 8.6pt; overflow-x: auto; line-height: 1.4; page-break-inside: avoid; font-family: 'Consolas', monospace; }
+  pre .c1 { color: #7fb3ff; } /* keywords */
+  pre .c2 { color: #9ee6a8; } /* strings */
+  pre .c3 { color: #7a8699; } /* comments */
+  .analogy { border-left: 4px solid #2e7d32; background: #eef7ee; padding: 8px 12px; margin: 10px 0; font-size: 9.8pt; }
+  .analogy strong { color: #2e7d32; }
+  .note { border-left: 4px solid #b8860b; background: #fdf8ec; padding: 8px 12px; margin: 10px 0; font-size: 9.5pt; }
+  .filebox { border: 1px solid #c7d0db; border-radius: 6px; padding: 10px 14px; margin: 12px 0; background: #fbfcfe; page-break-inside: avoid; }
+  .filebox .path { font-weight: 600; color: #0b3d91; }
+  .box-row { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+  .box { flex: 1; min-width: 110px; border: 2px solid #0b3d91; border-radius: 8px; padding: 8px 10px; background: #f7f9fc; text-align: center; font-size: 9pt; }
+  .box.alt { border-color: #8e44ad; background: #f8f3fb; }
+  .box.warn { border-color: #c0392b; background: #fdf1ef; }
+  .arrow-down { text-align: center; font-size: 16pt; color: #0b3d91; margin: 0; line-height: 1; }
+  .arrow-right { font-size: 14pt; color: #0b3d91; padding: 0 6px; }
+  .flow-step { background: #fff; border: 1px solid #c7d0db; border-left: 5px solid #0b3d91; border-radius: 4px; padding: 6px 10px; margin: 4px 0; font-size: 9.3pt; }
+  .toc { background: #f3f6fa; border: 1px solid #d8dde3; border-radius: 6px; padding: 14px 20px; }
+  .toc a { color: #0b3d91; text-decoration: none; }
+  .pagebreak { page-break-before: always; }
+  .small { font-size: 8.6pt; color: #5a6472; }
+  .glossary dt { font-weight: 600; color: #0b3d91; margin-top: 8px; }
+  .glossary dd { margin: 2px 0 6px 0; }
+</style>
+</head>
+<body>
+
+<h1>lab-observability-api</h1>
+<p class="subtitle">How the C# code works — structure, syntax, and the journey a request takes through the files<br>
+Generated 2026-06-16 · covers everything under <code>src/lab-observability-api/</code></p>
+
+<div class="analogy">
+<strong>The whole app in one sentence, for a 10-year-old:</strong> This program is a <strong>translator robot</strong>.
+A person asks it a question in plain English. The robot doesn't know the answer itself — it
+re-packages the question into a special format, hands it to a much smarter friend named
+<strong>Claude</strong> over the internet, waits for the answer, unpacks it, and hands it back
+in plain English. Every file in this project is either part of that translator robot's body,
+or a tool it uses to stay safe and keep notes about what it did.
+</div>
+
+<div class="toc">
+<strong>Contents</strong>
+<ul>
+<li><a href="#bigpicture">1. The big picture</a></li>
+<li><a href="#folders">2. The folder map</a></li>
+<li><a href="#syntax">3. C# syntax cheat sheet (using real code from this project)</a></li>
+<li><a href="#files">4. File-by-file walkthrough</a>
+  <ul>
+  <li><a href="#program">4.1 Program.cs — the ignition switch</a></li>
+  <li><a href="#shapes">4.2 The "shapes" — Models, Contracts, Options</a></li>
+  <li><a href="#seam">4.3 The seam — IChatModelProvider / IBatchChatModelProvider</a></li>
+  <li><a href="#controllers">4.4 Controllers — the front door</a></li>
+  <li><a href="#services-ai">4.5 Services/AI — the orchestrators</a></li>
+  <li><a href="#services-claude">4.6 Services/Claude — the actual phone call</a></li>
+  <li><a href="#helpers">4.7 Middleware, Extensions, Telemetry — the helpers</a></li>
+  </ul>
+</li>
+<li><a href="#flows">5. Three complete journeys, step by step</a></li>
+<li><a href="#di">6. How pieces find each other (Dependency Injection)</a></li>
+<li><a href="#glossary">7. Glossary — every C# word used in this project</a></li>
+</ul>
+</div>
+
+<h2 id="bigpicture">1. The big picture</h2>
+<p>Three things can happen to a question sent to this app, and each one is a different-shaped
+conversation with Claude:</p>
+
+<div class="box-row">
+<div class="box"><strong>Ask &amp; wait</strong><br>"What's 2+2?" → wait → get the full answer at once<br><span class="small">Sync chat</span></div>
+<div class="box alt"><strong>Ask &amp; watch it type</strong><br>Get the answer one word at a time, as it's written<br><span class="small">Streaming chat</span></div>
+<div class="box warn"><strong>Drop off a stack</strong><br>Submit 100 questions, come back hours later for all the answers, pay half price<br><span class="small">Batch</span></div>
+</div>
+
+<p>All three paths funnel through the same five layers:</p>
+<div class="box-row">
+<div class="box">1. Controller<br><span class="small">the front door</span></div>
+<div class="arrow-right">→</div>
+<div class="box">2. Provider interface<br><span class="small">the seam</span></div>
+<div class="arrow-right">→</div>
+<div class="box">3. Provider class<br><span class="small">the orchestrator</span></div>
+<div class="arrow-right">→</div>
+<div class="box">4. API client<br><span class="small">the phone call</span></div>
+<div class="arrow-right">→</div>
+<div class="box alt">5. Claude<br><span class="small">the smart friend</span></div>
+</div>
+<p>Layer 2 (the "seam") is the most important idea in the whole codebase. It's a <strong>promise</strong> —
+an interface — that says "whatever sits in layer 3 will be able to answer a chat request," without
+saying <em>how</em>. Today layer 3 is <code>ClaudeChatModelProvider</code>. If this company ever wants to
+talk to OpenAI or Amazon's Bedrock instead, only layer 3 and 4 change — the controller in layer 1
+never has to know or care.</p>
+
+<h2 id="folders">2. The folder map</h2>
+<table>
+<tr><th>Folder</th><th>What lives there, in plain words</th></tr>
+<tr><td><code>Controllers/</code></td><td>The front doors. Each public web address (like <code>/api/ai/chat</code>) is a method in here.</td></tr>
+<tr><td><code>Services/AI/</code></td><td>The promise (interfaces) and the orchestrator classes that fulfill the promise for Claude specifically.</td></tr>
+<tr><td><code>Services/Claude/</code></td><td>The part that actually opens an internet connection to Claude and speaks its exact language.</td></tr>
+<tr><td><code>Models/AI/</code></td><td>The "shapes" of data flowing in and out — what a chat request looks like, what a batch job looks like.</td></tr>
+<tr><td><code>Contracts/</code></td><td>The shape of an error message, used everywhere something goes wrong.</td></tr>
+<tr><td><code>Options/</code></td><td>The settings knobs — API key, which model, how long a prompt is allowed to be.</td></tr>
+<tr><td><code>Middleware/</code></td><td>Code that runs on <em>every single request</em> before it reaches a controller — like a security guard at the front door.</td></tr>
+<tr><td><code>Extensions/</code></td><td>Small helper methods bolted onto types ASP.NET already gives you.</td></tr>
+<tr><td><code>Telemetry/</code></td><td>The clipboard — every counter and stopwatch the app uses to track its own behavior.</td></tr>
+<tr><td><code>Program.cs</code></td><td>One file, sitting alone at the root. The ignition switch — wires every other piece together and starts the engine.</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2 id="syntax">3. C# syntax cheat sheet (using real code from this project)</h2>
+<p>Every concept below is explained with an actual line pulled from this codebase — not a made-up textbook example.</p>
+
+<h3>namespace and using</h3>
+<div class="analogy">Think of <code>namespace</code> as a street address for a piece of code, so two classes
+named the same thing (in different buildings) never collide. <code>using</code> is "I'm going to
+mention that street a lot, let me drop the full address and just use the building name."</div>
+<pre>namespace Lab.Observability.Api.Controllers;   <span class="c3">// "this file lives in this neighborhood"</span>
+
+using Lab.Observability.Api.Services.AI;        <span class="c3">// "I'm going to use things from that neighborhood"</span></pre>
+
+<h3>class vs. interface vs. record</h3>
+<div class="analogy"><strong>class</strong> = an actual robot you can build and use.
+<strong>interface</strong> = a job posting — a list of things any robot hired for this job
+must be able to do, with no robot inside it. <strong>record</strong> = a class built specifically
+to just <em>hold data</em>, like a labeled box, with free comparison ("are these two boxes the
+same?") built in.</div>
+<pre><span class="c1">public interface</span> IChatModelProvider                 <span class="c3">// the job posting</span>
+{
+    Task&lt;ChatResponse&gt; SendAsync(ChatRequest request, CancellationToken cancellationToken = <span class="c1">default</span>);
+}
+
+<span class="c1">public sealed class</span> ClaudeChatModelProvider : IChatModelProvider  <span class="c3">// the robot hired for the job</span>
+{ <span class="c3">/* ... */</span> }
+
+<span class="c1">public record</span> ChatChunk(string TextDelta, string? StopReason, ChatChunkUsage? Usage);  <span class="c3">// a labeled box</span></pre>
+
+<h3>Properties: <code>{ get; set; }</code></h3>
+<div class="analogy">A property is a labeled slot on a box that you can both read from and write to,
+written as a single line instead of two separate methods.</div>
+<pre><span class="c1">public class</span> ChatRequest
+{
+    <span class="c1">public string</span> Prompt { get; set; } = string.Empty;  <span class="c3">// readable AND writable, starts as ""</span>
+}</pre>
+
+<h3>Constructors and Dependency Injection</h3>
+<div class="analogy">A constructor is what runs the moment a robot is built — usually to hand it
+the tools it'll need. In this project, nobody calls <code>new ClaudeChatModelProvider(...)</code>
+by hand anywhere — ASP.NET's container builds it automatically and hands it whatever the
+constructor asks for. See §6 for exactly how that works.</div>
+<pre><span class="c1">public sealed class</span> ClaudeChatModelProvider : IChatModelProvider
+{
+    <span class="c1">private readonly</span> ClaudeApiClient _claudeApiClient;   <span class="c3">// a tool this robot keeps for itself</span>
+
+    <span class="c1">public</span> ClaudeChatModelProvider(ClaudeApiClient claudeApiClient, <span class="c3">/* ...more tools... */</span>)
+    {
+        _claudeApiClient = claudeApiClient;     <span class="c3">// "thanks, I'll keep this"</span>
+    }
+}</pre>
+
+<h3><code>async</code> / <code>await</code> / <code>Task&lt;T&gt;</code></h3>
+<div class="analogy">Some jobs take time — like calling Claude over the internet. <code>async</code>
+marks a method as "this might have to wait around." <code>await</code> means "pause right here,
+let other work happen, and come back the instant this is ready." <code>Task&lt;string&gt;</code>
+means "I promise to eventually hand you a string — not yet, but eventually."</div>
+<pre><span class="c1">public async</span> Task&lt;ChatResponse&gt; SendAsync(ChatRequest request, CancellationToken cancellationToken = <span class="c1">default</span>)
+{
+    <span class="c3">// ...</span>
+    <span class="c1">var</span> responseText = <span class="c1">await</span> _claudeApiClient.SendChatAsync(payload, cancellationToken);
+    <span class="c1">return new</span> ChatResponse { Provider = <span class="c2">"anthropic"</span>, Response = responseText };
+}</pre>
+
+<h3><code>IAsyncEnumerable&lt;T&gt;</code> and <code>yield return</code></h3>
+<div class="analogy">This is the syntax behind "ask &amp; watch it type." Instead of promising
+ONE thing eventually (<code>Task&lt;T&gt;</code>), this promises a whole <em>stream</em> of things,
+arriving one at a time. <code>yield return</code> means "here's the next piece — pause me here,
+and pick back up exactly where I left off when you ask for the next one."</div>
+<pre><span class="c1">public async</span> IAsyncEnumerable&lt;ChatChunk&gt; StreamAsync(ChatRequest request, CancellationToken ct)
+{
+    <span class="c1">await foreach</span> (<span class="c1">var</span> chunk <span class="c1">in</span> _claudeApiClient.StreamChatAsync(payload, ct))
+    {
+        <span class="c3">// do something with each chunk as it arrives...</span>
+        <span class="c1">yield return</span> chunk;   <span class="c3">// hand this one piece to whoever is listening, then keep going</span>
+    }
+}</pre>
+
+<h3>Nullable types: <code>string?</code> and the <code>?.</code> / <code>??</code> operators</h3>
+<div class="analogy"><code>string</code> promises "there will always be text here."
+<code>string?</code> admits "this might be empty — there might be nothing here at all,"
+and the compiler forces you to check before you use it. <code>?.</code> means "do this, but only
+if the thing on the left actually exists." <code>??</code> means "use this value, but if it's
+missing, use this fallback instead."</div>
+<pre><span class="c1">public</span> string? ProviderErrorCode { get; }      <span class="c3">// might be null — "we don't always know the error code"</span>
+
+activity?.SetTag(<span class="c2">"llm.tokens.input"</span>, inputTokens.Value);   <span class="c3">// only set the tag if "activity" isn't null</span>
+
+cacheReadTokens ?? 0   <span class="c3">// "use cacheReadTokens, or 0 if it's null"</span></pre>
+
+<h3>String interpolation: <code>$"..."</code></h3>
+<div class="analogy">A normal sentence with blanks to fill in, like a fill-in-the-blank worksheet.</div>
+<pre><span class="c1">throw new</span> ClaudeProviderException(message: $<span class="c2">"Claude provider returned {(int)response.StatusCode}."</span>);</pre>
+
+<h3>Pattern matching: <code>switch</code> expressions</h3>
+<div class="analogy">A lookup table written sideways: "if the value matches THIS, the answer is
+THAT" — for every case, ending in a catch-all.</div>
+<pre>context.Response.StatusCode = ex.ProviderStatusCode <span class="c1">switch</span>
+{
+    HttpStatusCode.TooManyRequests => StatusCodes.Status503ServiceUnavailable,
+    HttpStatusCode.RequestTimeout  => StatusCodes.Status504GatewayTimeout,
+    _ <span class="c1">when</span> ex.IsTransient        => StatusCodes.Status503ServiceUnavailable,  <span class="c3">// "_" = anything else, but only if...</span>
+    _                              => StatusCodes.Status502BadGateway          <span class="c3">// the true catch-all</span>
+};</pre>
+
+<h3>Exceptions: <code>try</code> / <code>catch</code> / <code>throw</code></h3>
+<div class="analogy">"Attempt this. If something specific goes wrong, here's what to do about it
+instead of crashing." <code>throw</code> is raising your hand and saying "something is wrong, stop
+what you're doing and let someone further up handle it."</div>
+<pre><span class="c1">try</span>
+{
+    <span class="c1">var</span> response = <span class="c1">await</span> _httpClient.PostAsJsonAsync(<span class="c2">"messages"</span>, anthropicRequest, cancellationToken);
+}
+<span class="c1">catch</span> (HttpRequestException ex)
+{
+    <span class="c1">throw new</span> ClaudeProviderException(message: <span class="c2">"Claude provider request failed at the network level."</span>, innerException: ex);
+}</pre>
+
+<h3>Attributes: <code>[ApiController]</code>, <code>[HttpPost]</code></h3>
+<div class="analogy">A sticky note attached to a class or method that tells ASP.NET "treat this
+specially" — without changing the code itself.</div>
+<pre>[ApiController]                          <span class="c3">// "this class handles web requests, validate automatically"</span>
+[Route(<span class="c2">"api/[controller]"</span>)]            <span class="c3">// "my web address starts with api/ai" (controller name minus "Controller")</span>
+<span class="c1">public class</span> AiController : ControllerBase
+{
+    [HttpPost(<span class="c2">"chat"</span>)]                    <span class="c3">// "this method answers POST /api/ai/chat"</span>
+    <span class="c1">public async</span> Task&lt;ActionResult&lt;ChatResponse&gt;&gt; Chat([FromBody] ChatRequest request, CancellationToken cancellationToken) { <span class="c3">/* ... */</span> }
+}</pre>
+
+<h3>Generics: <code>&lt;T&gt;</code></h3>
+<div class="analogy">A container shape that works for any type of thing you put inside it —
+like a labeled shoebox that works whether you put shoes, photos, or letters in it. You decide
+the contents when you use the box, not when you build it.</div>
+<pre>Task&lt;ChatResponse&gt;          <span class="c3">// "a promise of a ChatResponse, eventually"</span>
+IReadOnlyList&lt;ChatRequest&gt;  <span class="c3">// "a list of ChatRequests you're only allowed to read, not change"</span>
+Histogram&lt;<span class="c1">double</span>&gt;          <span class="c3">// "a measuring tool that records double-precision numbers"</span></pre>
+
+<h3>Reading JSON without a fixed shape: <code>JsonDocument</code></h3>
+<div class="analogy">Anthropic's reply doesn't always look exactly the same shape every time
+(error formats vary, usage formats changed between API versions). Instead of forcing it into
+a rigid C# class, the code opens it like a tree and asks "do you have a branch called X? Follow
+it if so, ignore it if not" — safe even when the shape shifts underneath it.</div>
+<pre><span class="c1">using var</span> document = JsonDocument.Parse(responseBody);
+<span class="c1">if</span> (document.RootElement.TryGetProperty(<span class="c2">"content"</span>, out <span class="c1">var</span> contentElement) &amp;&amp;
+    contentElement.ValueKind == JsonValueKind.Array)
+{
+    <span class="c3">// walk the array, pull out the "text" pieces...</span>
+}</pre>
+
+<div class="pagebreak"></div>
+<h2 id="files">4. File-by-file walkthrough</h2>
+
+<h3 id="program">4.1 <code>Program.cs</code> — the ignition switch</h3>
+<div class="filebox">
+<p class="path">src/lab-observability-api/Program.cs</p>
+<div class="analogy">This is the very first thing that runs. Imagine setting up a food truck before
+opening: plug in the generator (logging), put up the menu board (Swagger), hire your staff and
+tell each of them their job (dependency injection — "you handle Claude calls," "you handle
+batch calls"), put a bouncer at the door (correlation ID middleware, exception handling), and
+then flip the "OPEN" sign (<code>app.Run()</code>).</div>
+<p>It runs top to bottom, once, at startup — not per-request. Key moves, in order:</p>
+<table>
+<tr><th>Step</th><th>Real code</th><th>Why</th></tr>
+<tr><td>1</td><td><code>builder.Host.UseSerilog(...)</code></td><td>Replace the default logger with Serilog so every log line is structured (has named fields, not just a sentence)</td></tr>
+<tr><td>2</td><td><code>builder.Services.Configure&lt;AnthropicOptions&gt;(...)</code></td><td>Bind the <code>"Anthropic"</code> section of <code>appsettings.json</code> into a real C# object</td></tr>
+<tr><td>3</td><td><code>builder.Services.AddOpenTelemetry()</code> + <code>UseAzureMonitor()</code></td><td>Wire one single pipeline that exports traces/metrics/logs to Azure Application Insights</td></tr>
+<tr><td>4</td><td><code>AddHttpClient&lt;ClaudeApiClient&gt;(...).AddStandardResilienceHandler(...)</code></td><td>Create the HTTP client used for sync/streaming chat, with timeouts and a circuit breaker (retry deliberately disabled — see §4.6)</td></tr>
+<tr><td>5</td><td><code>builder.Services.AddScoped&lt;IChatModelProvider, ClaudeChatModelProvider&gt;()</code></td><td>"Whenever any code asks for the job-posting <code>IChatModelProvider</code>, hand it a <code>ClaudeChatModelProvider</code>" — this one line <em>is</em> the provider abstraction</td></tr>
+<tr><td>6</td><td>Repeat 4–5 for <code>ClaudeBatchApiClient</code> / <code>IBatchChatModelProvider</code></td><td>Same pattern, separate client, deliberately <strong>no</strong> resilience handler (retrying a batch submit could create a duplicate paid job)</td></tr>
+<tr><td>7</td><td><code>app.UseMiddleware&lt;CorrelationIdMiddleware&gt;()</code></td><td>Every request gets tagged with a tracking number before anything else happens</td></tr>
+<tr><td>8</td><td><code>app.Use(async (context, next) =&gt; { try { await next(); } catch (...) {...} })</code></td><td>The global safety net — if any controller throws an exception, this catches it here instead of letting raw error details leak to the caller</td></tr>
+<tr><td>9</td><td><code>app.MapGet("/health", ...)</code>, <code>/health/ready</code>, etc.</td><td>Simple endpoints written directly in <code>Program.cs</code> (not a controller) — "minimal API" style, fine for tiny endpoints with no real logic</td></tr>
+<tr><td>10</td><td><code>app.MapControllers()</code></td><td>"Now go find every class marked <code>[ApiController]</code> and wire up their <code>[HttpGet]</code>/<code>[HttpPost]</code> methods as real web addresses"</td></tr>
+<tr><td>11</td><td><code>app.Run()</code></td><td>Flip the open sign — start actually listening for requests</td></tr>
+</table>
+</div>
+
+<h3 id="shapes">4.2 The "shapes" — Models, Contracts, Options</h3>
+<div class="analogy">These files don't <em>do</em> anything — no logic, mostly just labeled boxes
+(properties) describing what data looks like as it moves between layers. C# calls this kind of
+class a "DTO" (data transfer object) when it's plain like this.</div>
+<table>
+<tr><th>File</th><th>Shape of</th><th>Notable fields</th></tr>
+<tr><td><code>Models/AI/ChatRequest.cs</code></td><td>What a caller sends in</td><td><code>string Prompt</code></td></tr>
+<tr><td><code>Models/AI/ChatResponse.cs</code></td><td>What a sync chat call returns</td><td><code>Provider</code>, <code>Model</code>, <code>Response</code></td></tr>
+<tr><td><code>Models/AI/ChatChunk.cs</code> (a <code>record</code>)</td><td>One piece of a streaming reply</td><td><code>TextDelta</code> (the new text), <code>StopReason?</code> (only set on the last chunk), <code>Usage?</code> (token counts, only on the last chunk)</td></tr>
+<tr><td><code>Models/AI/BatchJob.cs</code></td><td>What you get back right after submitting a batch</td><td><code>Id</code>, <code>Status</code>, <code>RequestCount</code>, <code>CreatedAt</code>, <code>ExpiresAt</code></td></tr>
+<tr><td><code>Models/AI/BatchJobStatus.cs</code></td><td>What polling a batch returns</td><td><code>SucceededCount</code>, <code>ErroredCount</code>, <code>CanceledCount</code>, <code>ExpiredCount</code></td></tr>
+<tr><td><code>Models/AI/BatchProcessingStatus.cs</code> (an <code>enum</code>)</td><td>The three states a batch can be in</td><td><code>InProgress</code>, <code>Canceling</code>, <code>Ended</code></td></tr>
+<tr><td><code>Models/AI/BatchResult.cs</code></td><td>One answer inside a finished batch</td><td><code>CustomId</code>, <code>IsSuccess</code>, <code>Response?</code>, <code>ErrorMessage?</code></td></tr>
+<tr><td><code>Contracts/ApiError.cs</code> (a <code>record</code>)</td><td>Every error this app ever returns to a caller, in any situation</td><td><code>Code</code>, <code>Message</code>, <code>CorrelationId?</code> — exactly 3 fields, on purpose, so no internal detail (like a stack trace) ever leaks out</td></tr>
+<tr><td><code>Options/AnthropicOptions.cs</code></td><td>Everything configurable about how this app talks to Claude</td><td><code>ApiKey</code>, <code>Model</code> (default <code>claude-sonnet-4-6</code>), <code>BaseUrl</code>, <code>MaxTokens</code>, <code>EnablePromptCaching</code>, <code>SystemPrompt</code>, <code>MaxBatchSize</code> (default 100), <code>MaxPromptLength</code> (default 32,000 characters)</td></tr>
+</table>
+<div class="note">An <code>enum</code> like <code>BatchProcessingStatus</code> is a fixed, named list of choices —
+like a multiple-choice question where only three answers are allowed and the compiler won't let
+you write a fourth one by accident.</div>
+
+<h3 id="seam">4.3 The seam — <code>IChatModelProvider</code> / <code>IBatchChatModelProvider</code></h3>
+<div class="filebox">
+<p class="path">Services/AI/IChatModelProvider.cs &nbsp;&nbsp;|&nbsp;&nbsp; Services/AI/IBatchChatModelProvider.cs</p>
+<div class="analogy">These two files are pure job postings — no actual robot inside. They exist so
+that <code>AiController</code> and <code>AiBatchController</code> never have to know the word "Claude" or
+"Anthropic" at all. They only know "give me something that can <code>SendAsync</code>" or "give me
+something that can <code>SubmitBatchAsync</code>." Today the hired robot is Claude-shaped; tomorrow it
+could be OpenAI-shaped, and the controllers wouldn't need a single line changed.</div>
+<pre><span class="c1">public interface</span> IChatModelProvider
+{
+    Task&lt;ChatResponse&gt; SendAsync(ChatRequest request, CancellationToken cancellationToken = <span class="c1">default</span>);
+
+    <span class="c3">// A *default* implementation — any provider gets this for free unless it overrides it.</span>
+    <span class="c3">// A provider that can't truly stream just calls SendAsync once and hands back one chunk.</span>
+    <span class="c1">async</span> IAsyncEnumerable&lt;ChatChunk&gt; StreamAsync(ChatRequest request, CancellationToken ct)
+    {
+        <span class="c1">var</span> response = <span class="c1">await</span> SendAsync(request, ct);
+        <span class="c1">yield return new</span> ChatChunk(response.Response, <span class="c2">"end_turn"</span>, <span class="c1">null</span>);
+    }
+}</pre>
+<p><code>IBatchChatModelProvider</code> is the same idea for the batch world — three jobs:
+<code>SubmitBatchAsync</code>, <code>GetBatchStatusAsync</code>, <code>GetBatchResultsAsync</code>, plus a
+<code>ProviderName</code> property. It's a <em>separate</em> interface rather than three more methods
+bolted onto <code>IChatModelProvider</code> — see ADR-010 — because batch isn't "chat, but slower," it's
+a fundamentally different shape of work (submit → wait → poll → retrieve, with its own ID and
+its own failure rules).</p>
+</div>
+
+<h3 id="controllers">4.4 Controllers — the front door</h3>
+<div class="filebox">
+<p class="path">Controllers/AiController.cs</p>
+<div class="analogy">A controller is the receptionist. It checks your ID (validates the request),
+walks your question back to the right department (<code>IChatModelProvider</code>), and brings the
+answer back to the front desk. It is deliberately "thin" — no real thinking happens here.</div>
+<p><code>POST /api/ai/chat</code> — <code>Chat(...)</code> method: check the prompt isn't empty,
+check it isn't longer than <code>MaxPromptLength</code>, call <code>_provider.SendAsync(...)</code>,
+return the result wrapped in <code>Ok(...)</code> (HTTP 200).</p>
+<p><code>POST /api/ai/chat/stream</code> — <code>StreamChat(...)</code> method: same two checks,
+then it does something a normal endpoint doesn't —</p>
+<pre>HttpContext.Features.Get&lt;IHttpResponseBodyFeature&gt;()?.DisableBuffering();   <span class="c3">// tell the server "don't hold my output, send it immediately"</span>
+Response.ContentType = <span class="c2">"text/event-stream; charset=utf-8"</span>;                    <span class="c3">// "I'm sending a live feed, not one document"</span>
+
+<span class="c1">await foreach</span> (<span class="c1">var</span> chunk <span class="c1">in</span> _provider.StreamAsync(request, HttpContext.RequestAborted))
+{
+    <span class="c1">await</span> Response.WriteAsync($<span class="c2">"data: {JsonSerializer.Serialize(chunk, _sseJsonOptions)}\n\n"</span>, ...);
+    <span class="c1">await</span> Response.Body.FlushAsync(...);   <span class="c3">// push it out the door right now, don't wait to bundle more</span>
+}</pre>
+<p>If something breaks mid-stream, the response code can't change anymore (the 200 already went
+out) — so instead it writes a special <code>event: error</code> line into the same stream, and the
+browser/caller is expected to watch for that.</p>
+</div>
+<div class="filebox">
+<p class="path">Controllers/AiBatchController.cs</p>
+<p>Three endpoints, all under <code>api/ai/batch</code>: <code>POST</code> (submit a list of
+<code>ChatRequest</code>), <code>GET /{id}</code> (poll status), <code>GET /{id}/results</code>
+(retrieve finished answers). <code>Submit</code> has four separate guard checks stacked in a row —
+empty list, any blank prompt, any prompt too long, too many requests at once — each returning a
+specific, named error code (<code>invalid_request</code>, <code>prompt_too_long</code>,
+<code>batch_size_exceeded</code>) before anything is sent to Claude.</p>
+</div>
+<div class="filebox">
+<p class="path">Controllers/TestController.cs</p>
+<p>The simplest file in the project — two endpoints, <code>GET /api/test/ping</code> (says
+"pong" back) and <code>GET /api/test/error</code> (deliberately throws an exception). Built on
+Day 4 to prove the very first Azure deployment actually worked and that errors show up in
+Application Insights. Superseded in spirit by the real <code>/health</code> endpoints added later,
+but still present and working.</p>
+</div>
+
+<div class="pagebreak"></div>
+<h3 id="services-ai">4.5 Services/AI — the orchestrators</h3>
+<div class="filebox">
+<p class="path">Services/AI/ClaudeChatModelProvider.cs</p>
+<div class="analogy">This is the robot hired for the <code>IChatModelProvider</code> job. Its job is
+the "business logic" of a chat turn: start a stopwatch, build the exact JSON shape Claude expects,
+ask the API client to actually send it, write down what happened, hand back the result. It never
+opens an internet connection itself — it delegates that to <code>ClaudeApiClient</code>.</p>
+<p><code>SendAsync</code>: validate the request isn't null/empty → start an OpenTelemetry "activity"
+(a labeled timer/trace span named <code>ai.chat.complete</code>) → build a small anonymous object
+shaped like <code>{ model, max_tokens, messages: [{ role: "user", content: prompt }] }</code> →
+await <code>_claudeApiClient.SendChatAsync(...)</code> → wrap the text that comes back into a
+<code>ChatResponse</code>.</p>
+<p><code>StreamAsync</code>: same idea, but <code>stream = true</code> in the payload, and instead of
+waiting for one full answer, it loops with <code>await foreach</code> over chunks coming from
+<code>_claudeApiClient.StreamChatAsync(...)</code>. The very first chunk gets a stopwatch reading
+recorded into <code>GatewayTelemetry.StreamTtftMs</code> — "time to first token," the metric this
+whole streaming feature exists to make small. A <code>try/finally</code> around the loop makes sure
+that even if the connection drops mid-stream, a log line still gets written saying so — so nothing
+fails silently.</p>
+</div>
+<div class="filebox">
+<p class="path">Services/AI/ClaudeBatchChatModelProvider.cs</p>
+<p>The shortest "real" class in the project — 17 lines. It's hired for the
+<code>IBatchChatModelProvider</code> job, but it does no actual work itself; every method is a single
+line that just forwards the call straight to <code>ClaudeBatchApiClient</code>. This exists purely
+so the seam (§4.3) stays satisfied — the controller depends on the interface, not on
+<code>ClaudeBatchApiClient</code> directly.</p>
+</div>
+
+<h3 id="services-claude">4.6 Services/Claude — the actual phone call</h3>
+<div class="filebox">
+<p class="path">Services/Claude/ClaudeApiClient.cs &nbsp;<span class="small">(the biggest, busiest file in the project)</span></p>
+<div class="analogy">If <code>ClaudeChatModelProvider</code> is the person deciding what to say,
+<code>ClaudeApiClient</code> is the actual telephone — it's the only piece of code that ever opens a
+real network connection to <code>api.anthropic.com</code>.</div>
+<p><strong><code>SendChatAsync</code></strong> — the synchronous path:</p>
+<ol>
+<li>Start a trace span named <code>claude.chat.api</code>, tag it with the provider/model name</li>
+<li>Call <code>BuildAnthropicRequest(payload)</code> — adds the <code>system</code> prompt to the JSON, and if prompt caching is on, wraps it with <code>cache_control: { type: "ephemeral", ttl: "1h" }</code> so Claude doesn't re-process the same long instructions every time</li>
+<li><code>await _httpClient.PostAsJsonAsync("messages", anthropicRequest, ...)</code> — the actual HTTP call</li>
+<li>If the response wasn't successful, dig the real error message and code out of the JSON body, decide whether the failure is <em>transient</em> (worth retrying later — 429, 408, 502, 503, 504) and throw a <code>ClaudeProviderException</code> carrying all of that</li>
+<li>If it succeeded, pull the answer text and the token-usage numbers out of the JSON, record them as metrics (<code>CacheHits</code>/<code>CacheMisses</code>/<code>ProviderLatencyMs</code>), and return the plain text</li>
+</ol>
+<p><strong><code>StreamChatAsync</code></strong> — the streaming path. Same idea but instead of reading
+one JSON blob, it reads the HTTP response <em>line by line</em> as it arrives:</p>
+<pre><span class="c1">using var</span> stream = <span class="c1">await</span> response.Content.ReadAsStreamAsync(ct);
+<span class="c1">using var</span> reader = <span class="c1">new</span> StreamReader(stream);
+
+<span class="c1">while</span> (<span class="c1">true</span>)
+{
+    <span class="c1">var</span> line = <span class="c1">await</span> reader.ReadLineAsync(ct);
+    <span class="c1">if</span> (line <span class="c1">is null</span>) <span class="c1">break</span>;
+    <span class="c1">if</span> (!line.StartsWith(<span class="c2">"data: "</span>)) <span class="c1">continue</span>;       <span class="c3">// SSE format — only lines starting "data: " matter</span>
+    <span class="c3">// ...parse the JSON after "data: ", figure out which of 4 event types it is, yield a ChatChunk...</span>
+}</pre>
+<p>Claude's streaming protocol (called Server-Sent Events, or SSE) sends four kinds of events in
+order, and the code has a <code>switch</code> on each: <code>message_start</code> (carries the input
+token count), <code>content_block_delta</code> (one new word/piece of text), <code>message_delta</code>
+(carries the stop reason and output token count), <code>message_stop</code> (the end — <code>yield break</code>).</p>
+<p><strong><code>TryExtractText</code>, <code>TryExtractErrorMessage</code>, <code>TryExtractErrorCode</code>,
+<code>TryExtractUsage</code></strong> — four small private helper methods, all following the same
+"open the JSON like a tree, ask politely if a branch exists, never throw if it doesn't" pattern
+described in §3's <code>JsonDocument</code> section. <code>TryExtractUsage</code> in particular has to
+handle <em>two different shapes</em> Anthropic has used for cache token counts over time — a flat
+field and a newer nested <code>cache_creation</code> object — and checks both.</p>
+</div>
+<div class="filebox">
+<p class="path">Services/Claude/ClaudeBatchApiClient.cs</p>
+<p>The batch world's version of the phone — three methods matching the three batch endpoints
+(<code>SubmitAsync</code>, <code>GetStatusAsync</code>, <code>GetResultsAsync</code>). The submit
+method builds one request per prompt with a <code>custom_id</code> like <code>"request-0"</code>,
+<code>"request-1"</code> so results can be matched back up later. <code>GetResultsAsync</code> reads
+the response as <strong>JSONL</strong> — one independent JSON object per line, not one big array —
+because that's the format batch results come back in, and parses each line into a
+<code>BatchResult</code>. It also estimates the dollar savings from using batch (half price) and logs
+that number.</p>
+</div>
+<div class="filebox">
+<p class="path">Services/Claude/ClaudeProviderException.cs</p>
+<div class="analogy">A custom-built error envelope. A normal .NET exception just carries a message.
+This one is shaped specifically for "something went wrong talking to Claude" and carries four
+extra labeled pieces of information so whoever catches it (the global handler in
+<code>Program.cs</code>) can decide exactly what to tell the caller.</div>
+<pre><span class="c1">public sealed class</span> ClaudeProviderException : Exception
+{
+    <span class="c1">public string</span> Provider { get; }                       <span class="c3">// always "anthropic" today</span>
+    <span class="c1">public</span> HttpStatusCode? ProviderStatusCode { get; }      <span class="c3">// what Claude actually returned, if known</span>
+    <span class="c1">public string</span>? ProviderErrorCode { get; }              <span class="c3">// Claude's own error type string</span>
+    <span class="c1">public bool</span> IsTransient { get; }                       <span class="c3">// "worth retrying later?"</span>
+}</pre>
+</div>
+
+<h3 id="helpers">4.7 Middleware, Extensions, Telemetry — the helpers</h3>
+<div class="filebox">
+<p class="path">Middleware/CorrelationIdMiddleware.cs</p>
+<div class="analogy">Imagine every request gets handed a numbered ticket the moment it walks in
+the door, like at a deli counter. If the caller already brought a ticket number (an
+<code>x-correlation-id</code> header), keep it. If not, print a new one
+(<code>Guid.NewGuid().ToString("N")</code>). Stamp that number onto the response too, and onto
+every single log line written while handling this request — so later, if something goes wrong,
+you can search the logs for one ticket number and see the entire story of that one request.</div>
+</div>
+<div class="filebox">
+<p class="path">Extensions/HttpContextExtensions.cs</p>
+<div class="analogy">A tiny convenience. Without it, getting the ticket number back out would
+need a clunky lookup every time. This file bolts a brand-new method,
+<code>.GetCorrelationId()</code>, directly onto ASP.NET's built-in <code>HttpContext</code> type — even
+though Microsoft wrote that type, not this project. That's what <code>static class</code> +
+<code>this HttpContext context</code> as the first parameter does in C#: it's called an
+<strong>extension method</strong>.</div>
+<pre><span class="c1">public static</span> string? GetCorrelationId(<span class="c1">this</span> HttpContext context)   <span class="c3">// "this" makes it callable as context.GetCorrelationId()</span></pre>
+</div>
+<div class="filebox">
+<p class="path">Telemetry/GatewayTelemetry.cs</p>
+<p>One static class holding every metric the whole app records, defined exactly once so nobody
+accidentally creates the same counter twice under a slightly different name. Two kinds of
+instrument: a <code>Counter&lt;long&gt;</code> only ever goes up by whole numbers (good for "how many
+requests"), a <code>Histogram&lt;double&gt;</code> records a spread of measurements you'll want
+percentiles of later (good for "how many milliseconds did this take").</p>
+</div>
+
+<div class="pagebreak"></div>
+<h2 id="flows">5. Three complete journeys, step by step</h2>
+
+<h3>Journey A — a normal chat question (<code>POST /api/ai/chat</code>)</h3>
+<div class="flow-step">1. Browser/Postman sends <code>{"prompt": "What's the capital of France?"}</code></div>
+<div class="flow-step">2. <code>CorrelationIdMiddleware</code> stamps a tracking number on the request</div>
+<div class="flow-step">3. <code>AiController.Chat(...)</code> checks the prompt isn't empty/too long</div>
+<div class="flow-step">4. Calls <code>_provider.SendAsync(request, ct)</code> — <code>_provider</code> is actually a <code>ClaudeChatModelProvider</code></div>
+<div class="flow-step">5. <code>ClaudeChatModelProvider.SendAsync</code> builds the Claude-shaped JSON, calls <code>_claudeApiClient.SendChatAsync(payload, ct)</code></div>
+<div class="flow-step">6. <code>ClaudeApiClient.SendChatAsync</code> adds the system prompt + cache settings, <code>POST</code>s to <code>api.anthropic.com/v1/messages</code></div>
+<div class="flow-step">7. Claude replies with a JSON blob; <code>TryExtractText</code> pulls the answer out, <code>TryExtractUsage</code> pulls the token counts out</div>
+<div class="flow-step">8. Back up through every layer: API client → provider → controller → <code>Ok(response)</code> → browser sees <code>{"provider":"anthropic","model":"claude-sonnet-4-6","response":"Paris."}</code></div>
+
+<h3>Journey B — a streaming question (<code>POST /api/ai/chat/stream</code>)</h3>
+<div class="flow-step">1–4. Same as Journey A, but the controller method is <code>StreamChat</code> and it disables response buffering and sets <code>Content-Type: text/event-stream</code> before writing anything</div>
+<div class="flow-step">5. <code>_provider.StreamAsync(...)</code> calls <code>_claudeApiClient.StreamChatAsync(...)</code>, which opens the connection with <code>HttpCompletionOption.ResponseHeadersRead</code> (don't wait for the body, just the headers, so reading can start immediately)</div>
+<div class="flow-step">6. Claude sends back text one Server-Sent-Event line at a time; <code>ClaudeApiClient</code> turns each useful line into a <code>ChatChunk</code> and <code>yield return</code>s it instantly</div>
+<div class="flow-step">7. <code>ClaudeChatModelProvider.StreamAsync</code> records the time-to-first-token the moment chunk #1 arrives, then just passes every chunk through</div>
+<div class="flow-step">8. <code>AiController.StreamChat</code> writes each chunk to the browser as <code>data: {...}\n\n</code> and flushes immediately — the browser sees words appear as they're generated, not all at once at the end</div>
+
+<h3>Journey C — a batch job (submit → poll → retrieve)</h3>
+<div class="flow-step">1. <code>POST /api/ai/batch</code> with a list of prompts → <code>AiBatchController.Submit</code> → <code>ClaudeBatchChatModelProvider.SubmitBatchAsync</code> → <code>ClaudeBatchApiClient.SubmitAsync</code> → Claude hands back a batch ID immediately (work hasn't started yet)</div>
+<div class="flow-step">2. Sometime later: <code>GET /api/ai/batch/&lcub;id&rcub;</code> → <code>GetStatus</code> → <code>GetBatchStatusAsync</code> → <code>GetStatusAsync</code> → Claude reports how many succeeded/errored/canceled/expired so far</div>
+<div class="flow-step">3. Once finished: <code>GET /api/ai/batch/&lcub;id&rcub;/results</code> → <code>GetResults</code> → <code>GetBatchResultsAsync</code> → <code>GetResultsAsync</code> reads the JSONL line by line and returns every answer, matched back to its original prompt by <code>custom_id</code></div>
+<div class="note">Notice there's no retry anywhere in this path — on purpose. If the network blips while
+submitting, the submit might have actually gone through on Claude's side already; retrying could
+create and pay for a duplicate batch. ADR-010 explains this reasoning in full.</div>
+
+<h2 id="di">6. How pieces find each other (Dependency Injection)</h2>
+<div class="analogy">Nobody in this codebase ever writes <code>new ClaudeChatModelProvider(...)</code>
+by hand (except in test code, deliberately). Instead, <code>Program.cs</code> registers a
+master phonebook once at startup — "if anyone asks for an <code>IChatModelProvider</code>, hand them
+a freshly built <code>ClaudeChatModelProvider</code>" — and ASP.NET's built-in container looks up
+that phonebook every time a controller is created, automatically building the whole chain of
+constructor arguments underneath it.</div>
+<pre>builder.Services.AddScoped&lt;IChatModelProvider, ClaudeChatModelProvider&gt;();</pre>
+<table>
+<tr><th>When code asks for...</th><th>The container hands back...</th><th>Which itself needed...</th></tr>
+<tr><td><code>IChatModelProvider</code></td><td><code>ClaudeChatModelProvider</code></td><td><code>ClaudeApiClient</code>, <code>IOptions&lt;AnthropicOptions&gt;</code>, <code>ILogger&lt;ClaudeChatModelProvider&gt;</code></td></tr>
+<tr><td><code>ClaudeApiClient</code></td><td>itself (registered via <code>AddHttpClient&lt;ClaudeApiClient&gt;</code>)</td><td>a pre-configured <code>HttpClient</code> with the API key already in its headers</td></tr>
+<tr><td><code>IBatchChatModelProvider</code></td><td><code>ClaudeBatchChatModelProvider</code></td><td><code>ClaudeBatchApiClient</code></td></tr>
+<tr><td><code>IOptions&lt;AnthropicOptions&gt;</code></td><td>the bound <code>"Anthropic"</code> section of <code>appsettings.json</code></td><td>(read once at startup)</td></tr>
+</table>
+<p><code>AiController</code>'s constructor asks for <code>IChatModelProvider</code>, <code>ILogger&lt;AiController&gt;</code>,
+and <code>IOptions&lt;AnthropicOptions&gt;</code> — the container builds all three (and everything
+<em>they</em> need) without the controller ever knowing a concrete class name like
+<code>ClaudeChatModelProvider</code> exists. This is what makes swapping providers later a
+one-line change in <code>Program.cs</code>, nowhere else.</p>
+
+<div class="pagebreak"></div>
+<h2 id="glossary">7. Glossary — every C# word used in this project</h2>
+<dl class="glossary">
+<dt>namespace</dt><dd>A folder-like label that groups related code and prevents naming collisions.</dd>
+<dt>using</dt><dd>"I'm borrowing code from that namespace" — lets you write short names instead of full paths.</dd>
+<dt>class</dt><dd>A blueprint for an object that can hold data and do things.</dd>
+<dt>interface</dt><dd>A list of promises a class can agree to keep, with no implementation of its own.</dd>
+<dt>record</dt><dd>A class built for holding immutable data, with free equality comparison.</dd>
+<dt>enum</dt><dd>A fixed list of named choices (e.g. <code>InProgress</code>, <code>Ended</code>).</dd>
+<dt>sealed</dt><dd>"No one is allowed to build a further specialized version of this class."</dd>
+<dt>static</dt><dd>Belongs to the type itself, not to any one instance of it — there's only ever one copy.</dd>
+<dt>readonly</dt><dd>Can be set once (usually in the constructor) and never changed again.</dd>
+<dt>public / private</dt><dd>Who's allowed to see/use this: everyone, or only code inside the same class.</dd>
+<dt>property (<code>{ get; set; }</code>)</dt><dd>A labeled, readable/writable slot on an object.</dd>
+<dt>constructor</dt><dd>The special method that runs the moment an object is created, usually to receive its tools.</dd>
+<dt>async / await</dt><dd>Marks a method that might have to wait, and the point where it actually pauses to wait.</dd>
+<dt>Task&lt;T&gt;</dt><dd>A promise of a value of type T, to be delivered later.</dd>
+<dt>IAsyncEnumerable&lt;T&gt;</dt><dd>A promise of a whole stream of T values, arriving one at a time over time.</dd>
+<dt>yield return</dt><dd>"Here's the next item in the stream — pause here until someone asks for the next one."</dd>
+<dt>CancellationToken</dt><dd>A signal passed down through every layer meaning "stop what you're doing if I tell you to" — used when a caller disconnects mid-stream.</dd>
+<dt>nullable (<code>?</code>)</dt><dd>Admits this value might be missing/empty; the compiler forces you to check.</dd>
+<dt>null-conditional (<code>?.</code>)</dt><dd>"Do this, but only if the thing on the left isn't missing."</dd>
+<dt>null-coalescing (<code>??</code>)</dt><dd>"Use this value, or this fallback if it's missing."</dd>
+<dt>string interpolation (<code>$"..."</code>)</dt><dd>A sentence with blanks filled in by code, like <code>$"got {count} results"</code>.</dd>
+<dt>switch expression</dt><dd>A sideways lookup table: match a value, get back a result, with <code>_</code> as the catch-all.</dd>
+<dt>try / catch / throw / finally</dt><dd>Attempt something; handle specific failures; raise a new failure; always run cleanup code regardless of success or failure.</dd>
+<dt>exception</dt><dd>An object representing "something went wrong," thrown up through the call stack until something catches it.</dd>
+<dt>attribute (<code>[ApiController]</code>)</dt><dd>A sticky note on code that tells the framework to treat it specially.</dd>
+<dt>generics (<code>&lt;T&gt;</code>)</dt><dd>A container shape that works for any type, decided when you use it.</dd>
+<dt>LINQ (<code>.Select(...)</code>, <code>.Any(...)</code>)</dt><dd>Built-in shorthand for transforming or checking a whole collection in one line instead of writing a loop.</dd>
+<dt>Dependency Injection (DI)</dt><dd>Letting a container build and hand objects their required tools automatically, instead of constructing everything by hand.</dd>
+<dt>middleware</dt><dd>Code that runs on every request, in a chain, before/after the actual controller — like checkpoints in a hallway.</dd>
+<dt>extension method</dt><dd>A method that appears to be bolted onto a type you don't own, via a special <code>this</code> first parameter.</dd>
+<dt>JsonDocument</dt><dd>A way to read JSON as a flexible tree and ask "does this branch exist?" instead of forcing a fixed shape.</dd>
+<dt>ActivitySource / Histogram / Counter</dt><dd>OpenTelemetry building blocks for tracing (a labeled timeline of work) and metrics (counted/measured numbers over time).</dd>
+</dl>
+
+</body>
+</html>

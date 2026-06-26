@@ -48,6 +48,8 @@ Full details: `docs/standards/azure-environment.md` (in hot context — always l
 - Cert scaffold: `/cert-scaffold <EXAM>` (one-time per exam)
 - Cert update:   `/cert-update <N>` (end of each day)
 - Collab lens:   `/collab-lens <N>` (daily collaborator focus — run after STEP 6 populates 01-summary.md)
+- Sync check:    `/sync-check` (reference integrity + naming — replaces inline `node scripts/symbol-drift-check.js` in STEP 8)
+- Name audit:    `/name-audit` (periodic AI-driven cross-doc naming consistency — STEP 12 optional)
 - Full daily loop: `.claude/instructions/daily-workflow.md`
 
 ## Architecture (top-level map)

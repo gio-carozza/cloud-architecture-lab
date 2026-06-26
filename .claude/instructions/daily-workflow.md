@@ -17,7 +17,7 @@ STEP 4  DRAFT          chat (new) · Sonnet     full Day N summary in 13-section
 STEP 5  ADR            chat (new) · latest Opus  reason out the decision (skip if none)
 STEP 6  POPULATE       Claude Code · Sonnet    fill summary + checklist + /adr
 STEP 7  BUILD          Claude Code · Sonnet    implement each phase
-STEP 8  TEST + AUDIT   Claude Code · Sonnet    local tests + 6-pillar gate + symbol-drift-check before deploy
+STEP 8  TEST + AUDIT   Claude Code · Sonnet    local tests + 6-pillar gate + /sync-check before deploy
 STEP 9  DEPLOY         Claude Code · Sonnet    /deploy + verify
 STEP 10 DOCUMENT       Claude Code · Sonnet    update docs + commit + /cert-update
 STEP 11 REFLECT        chat (new) · latest Opus  posture check
@@ -83,6 +83,8 @@ To activate it, the last line of each Claude Code prompt already says:
 | `/cert-scaffold EXAM` | one-time | Builds cert domain structure from MS skills outline |
 | `/collab-lens N` | 6 | Inserts collaborator lens block into `01-summary.md` |
 | `/repo-audit N` | 12 | End-of-day repo health check + auto-fix |
+| `/sync-check` | 8 | Reference integrity + naming check — replaces inline `node scripts/symbol-drift-check.js` |
+| `/name-audit` | 12 (periodic) | AI-driven cross-doc naming consistency — run after significant doc changes or renames |
 | /devil gate | STEP 5 | Strongest counterargument to the ADR before accepting — active Day 010+ |
 | /pitch gate | STEP 4 | 30-second CFO pitch validating CEO Framing — active Day 010+ |
 | /10x gate | STEP 11 | Scale ceiling audit — optional Day 010–050, mandatory Day 051+ |

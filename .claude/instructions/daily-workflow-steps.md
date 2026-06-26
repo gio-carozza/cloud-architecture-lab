@@ -293,22 +293,20 @@ When the audit is complete with no open RED items, print the STEP 9 DEPLOY promp
 with the day number filled in.
 ```
 
-Then run the symbol-drift check — catches today's docs (skill, standard, or note
-edits made during STEP 7/STEP 10) referencing a C# symbol, `ai.*` telemetry name,
-or `src/` path that was renamed or never actually built:
+Then run the reference integrity and naming check:
 
-```bash
-node scripts/symbol-drift-check.js
+```text
+/sync-check
 ```
 
-Fix every real finding with a targeted `Edit`. Leave alone any finding that's a
-legitimate "renamed `OLD` → `NEW`" narration or a rejected-ADR-alternative mention —
-re-run to confirm only those remain. This is the prevention mechanism: catching
-drift the same day it's introduced is cheaper than finding it at the next full
-`/repo-audit`. See `.claude/commands/repo-audit.md` Check 9 for the full rationale.
+This runs `symbol-drift-check.js` (C# symbols, telemetry strings, `src/` paths) and
+`name-check.js` (broader type suffixes, Azure resource names, command refs, `ADR-NNN` refs),
+then verifies markdown link targets, standards-index paths, ADR sequence, cert day-mapping
+existence, changelog path integrity, and command index. Fix every ❌ finding with a targeted
+`Edit`. Legitimate "renamed `OLD` → `NEW`" narrations and rejected-ADR alternatives are not
+violations — re-run to confirm only those remain.
 
-→ STOP when local tests pass AND audit returns no RED items AND the drift check
-has no unaddressed findings.
+→ STOP when local tests pass AND audit returns no RED items AND `/sync-check` has no unaddressed findings.
 
 ---
 
@@ -449,6 +447,21 @@ If `repo-audit` made changes, commit them:
 
 ```text
 git add -A && git commit -m "chore(day-___): repo-audit fixes"
+```
+
+Optionally, run the cross-doc naming audit (not required every day — run after significant
+documentation work, class renames, or at phase transitions):
+
+```text
+/name-audit
+```
+
+This uses AI reasoning to catch naming inconsistencies that scripts cannot detect: variant
+spellings, missing `I`-prefixes on interfaces, cross-file disagreements on the same entity's
+name, and stale Azure resource names. If it makes edits, commit them:
+
+```text
+git add -A && git commit -m "chore(day-___): name-audit fixes"
 ```
 
 Then run a final pillars audit pass to catch anything introduced since STEP 8:

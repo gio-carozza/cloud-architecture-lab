@@ -32,6 +32,13 @@ Single-environment lab hosting the AI Gateway (`app-ai-lab-api-dev-eastus-gio`) 
   - Email alerts
   - SMS alerts
 
+## Compute
+
+| Resource | Name |
+|---|---|
+| App Service Plan | `asp-ai-lab-dev-eastus-gio` |
+| App Service (AI Gateway) | `app-ai-lab-api-dev-eastus-gio` |
+
 ## App Service Application Settings
 
 The deployed App Service `app-ai-lab-api-dev-eastus-gio` uses the following

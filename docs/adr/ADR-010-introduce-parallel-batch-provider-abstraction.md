@@ -253,10 +253,10 @@ completion). At that point orchestration is designed against real requirements.
 - `src/lab-observability-api/Services/AI/IBatchChatModelProvider.cs` — the sibling seam.
 - `src/lab-observability-api/Services/AI/ClaudeBatchChatModelProvider.cs` — implementation;
   shares payload construction with `ClaudeChatModelProvider`.
-- `src/lab-observability-api/Models/BatchJob.cs` — job id, status, created/expires timestamps.
-- `src/lab-observability-api/Models/BatchJobStatus.cs` — enum (validating / in_progress /
-  completed / canceled / expired / failed) plus per-status request counts.
-- `src/lab-observability-api/Models/BatchResult.cs` — `custom_id` + `ChatResponse`-or-error.
+- `src/lab-observability-api/Models/AI/BatchJob.cs` — submit return type (job id, status, timestamps).
+- `src/lab-observability-api/Models/AI/BatchJobStatus.cs` — poll return type with per-status request counts.
+- `src/lab-observability-api/Models/AI/BatchProcessingStatus.cs` — enum: InProgress, Canceling, Ended.
+- `src/lab-observability-api/Models/AI/BatchResult.cs` — `custom_id` + `ChatResponse`-or-error.
 - `src/lab-observability-api/Services/Claude/ClaudeBatchApiClient.cs` — *or* extend
   `ClaudeApiClient` with batch methods; prefer a sibling client that shares the payload
   builder, to keep transport concerns separable. Endpoint base is `/v1/messages/batches`
@@ -290,10 +290,10 @@ completion). At that point orchestration is designed against real requirements.
 
 ### Files explicitly NOT affected
 
-- `src/lab-observability-api/Providers/IChatModelProvider.cs` — interactive seam unchanged.
-- `src/lab-observability-api/Models/ChatRequest.cs` — reused as batch element, **not modified**.
-- `src/lab-observability-api/Models/ChatResponse.cs` — unchanged.
-- `src/lab-observability-api/Providers/ClaudeChatModelProvider.cs` — interactive
+- `src/lab-observability-api/Services/AI/IChatModelProvider.cs` — interactive seam unchanged.
+- `src/lab-observability-api/Models/AI/ChatRequest.cs` — reused as batch element, **not modified**.
+- `src/lab-observability-api/Models/AI/ChatResponse.cs` — unchanged.
+- `src/lab-observability-api/Services/AI/ClaudeChatModelProvider.cs` — interactive
   orchestration does not learn about batch.
 
 ### Resilience / alerting note

@@ -308,3 +308,16 @@ file. Git already has the authoritative timestamp; don't spend effort re-derivin
 | `docs/standards/claude-tooling-reference.pdf` | docs pass | Regenerated from the updated HTML |
 | `docs/standards/csharp-codebase-reference.html` | docs pass | New — C# codebase reference doc, companion to the Claude Code tooling reference |
 | `docs/standards/csharp-codebase-reference.pdf` | docs pass | New — PDF render of the C# codebase reference |
+
+## Day 010 (2026-06-26)
+
+| File | Step | Change |
+|---|---|---|
+| `docs/certifications/ai-102/objectives.md` | name-audit | Retirement notice replaces TODO stub — exam retired June 30, 2026 |
+| `docs/standards/azure-environment.md` | sync-check | Added Compute table with App Service Plan (`asp-ai-lab-dev-eastus-gio`) — gap surfaced by name-check.js first run |
+| `scripts/name-check.js` | tooling | New — naming consistency companion to symbol-drift-check.js; checks broader C# suffixes, Azure resource names, slash command refs, ADR-NNN refs |
+| `.claude/commands/sync-check.md` | tooling | New — day-agnostic reference integrity + naming check; replaces inline symbol-drift-check.js call in STEP 8 |
+| `.claude/commands/name-audit.md` | tooling | New — periodic AI-driven cross-doc naming consistency audit; STEP 12 optional |
+| `.claude/instructions/daily-workflow.md` | tooling | STEP 8 updated to /sync-check; /sync-check and /name-audit added to Command Reference table |
+| `.claude/instructions/daily-workflow-steps.md` | tooling | STEP 8 replaced inline script call with /sync-check; STEP 12 added optional /name-audit pass |
+| `docs/adr/ADR-010-introduce-parallel-batch-provider-abstraction.md` | name-audit | Implementation Notes: 7 stale file paths corrected — Models/ → Models/AI/, Providers/ → Services/AI/; BatchJobStatus description corrected (not an enum); BatchProcessingStatus added to new-files list |

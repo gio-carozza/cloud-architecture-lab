@@ -89,7 +89,7 @@ test (no test project yet — deferred).
 
 ## 5. Which pillar took the most damage today, and what's the minimum fix?
 
-The metric naming question is RESOLVED: renamed `ai.chat.stream.ttft_ms` →
+The metric naming question is RESOLVED: renamed ai.chat.stream.ttft_ms →
 `ai.provider.stream.ttft_ms` to align with the `ai.provider.*` namespace used by
 every other metric. Zero dashboards or alerts depended on the old name. GREEN.
 The KQL cookbook (Queries 11 and 12) and the GatewayTelemetry.cs already reflect

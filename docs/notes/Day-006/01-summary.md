@@ -128,7 +128,7 @@ so the correlation ID is enriched into every log line.
 
 ### Phase E — Exception handling middleware (15 min)
 
-Plan: create `Middleware/ExceptionHandlingMiddleware.cs`. (Actual implementation:
+Plan: create Middleware/ExceptionHandlingMiddleware.cs. (Actual implementation:
 an inline `app.Use(...)` global exception pipeline in `Program.cs` — no separate
 middleware class was created; see `docs/standards/error-handling-standard.md`.)
 Returns:

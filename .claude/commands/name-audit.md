@@ -41,7 +41,7 @@ Grep for `public (abstract |sealed |partial |static )*(class|interface|record|en
 
 **C# method contracts on key seams** — read these files in full and extract all `public` method names:
 
-- `src/lab-observability-api/Contracts/AI/IChatModelProvider.cs` (or wherever `IChatModelProvider` is defined)
+- `src/lab-observability-api/Services/AI/IChatModelProvider.cs` (or wherever `IChatModelProvider` is defined)
 - The `ChatRequest`, `ChatResponse`, `ChatChunk`, `ChatChunkUsage` model files
 
 **Azure resources** — read `docs/standards/azure-environment.md` in full. Extract every named resource (App Service, App Insights workspace, Log Analytics workspace, Action Group, alert rules, resource group, subscription alias, budget name).
@@ -84,7 +84,7 @@ For each canonical name in the registry, scan the curated file set for:
 - `` `/repo_audit` `` when canonical is `/repo-audit` (underscore instead of hyphen)
 - `` `ADR-11` `` when canonical is `ADR-011` (missing zero-padding)
 
-**Missing `I`-prefix on interfaces** — any backtick span ending in a known abstract-seam suffix (Provider, Service, Manager, Repository, Factory, Client) that matches a known interface name WITHOUT the `I` prefix. Example: `` `ChatModelProvider` `` when the interface is `IChatModelProvider`.
+**Missing I-prefix on interfaces** — any backtick span ending in a known abstract-seam suffix (Provider, Service, Manager, Repository, Factory, Client) that matches a known interface name WITHOUT the I prefix. Example: `` `ChatModelProvider` `` when the interface is `IChatModelProvider`.
 
 **Cross-file inconsistency** — the same entity is referred to by two different names across different files, where both names look plausible. This is the case the scripts cannot detect because neither name is "wrong" by suffix-matching alone — they just disagree across files. Surface these explicitly.
 

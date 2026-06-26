@@ -43,7 +43,7 @@ Secondary: the **FinOps lead** who asks "what fraction of our AI spend could be 
 ## What I Will Build
 
 > Note (2026-06-16 drift fix): this plan originally used different names —
-> `IBatchJobProvider`/`SubmitAsync`/`BatchController`/`Models/Batch/...` — than what
+> IBatchJobProvider/SubmitAsync/BatchController/Models/Batch/... — than what
 > ADR-010 and the actual build settled on. That divergence is the subject of a
 > `graveyard.md` Day 8 entry (two isolated planning passes produced inconsistent
 > contracts). Names below have been corrected to match what was actually built;

@@ -457,7 +457,7 @@ documentation work, class renames, or at phase transitions):
 ```
 
 This uses AI reasoning to catch naming inconsistencies that scripts cannot detect: variant
-spellings, missing `I`-prefixes on interfaces, cross-file disagreements on the same entity's
+spellings, missing I-prefixes on interfaces, cross-file disagreements on the same entity's
 name, and stale Azure resource names. If it makes edits, commit them:
 
 ```text

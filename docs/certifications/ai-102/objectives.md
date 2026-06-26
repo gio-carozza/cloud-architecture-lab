@@ -1,8 +1,6 @@
 # AI-102 — Skills Measured (Objectives)
 
-> **TODO:** Download the current skills-measured PDF from learn.microsoft.com
-> and replace the skeleton below with the exact objectives. Microsoft revises
-> AI-102 periodically; always study from the current PDF.
+> ⚠️ **Retired June 30, 2026 — historical record only.** Do not schedule this exam. Successor: **AI-103** (Azure AI Apps and Agents Developer Associate) — scaffold at Phase 2 (~Day 21).
 
 ## How to use this file
 

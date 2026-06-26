@@ -42,7 +42,7 @@ Region: East US
 
 ```text
 src/lab-observability-api/   .NET 8 AI Gateway (anchor workload)
-docs/adr/                    Architecture Decision Records (ADR-001 through ADR-011)
+docs/adr/                    Architecture Decision Records (ADR-001 through ADR-NNN)
 docs/architecture/           System diagrams and sequence flows (per day)
 docs/notes/Day-NNN/          Daily roadmap artifacts (01-summary, 02-checklist, etc.)
 docs/notes/changelog.md      Running file-change log across all days
